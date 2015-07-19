@@ -20,10 +20,9 @@ if (mongoose.connection.readyState != mongoose.STATES.connected
   db.on('error', console.error.bind(console, 'connection error:'));
   db.once('open', function (callback) {
     debug('Connected to MongoDB success.');
-    registerModels();
-    registerRoutes();
-    startServer();
   });
+} else {
+  debug('Mongoose connection state: ', mongoose.connection.readyState);
 }
 
 /**
@@ -32,11 +31,13 @@ if (mongoose.connection.readyState != mongoose.STATES.connected
  */
 var registerModels = function () {
   if (!app.models) {
+    debug('Resister models...');
     app.models = require('./models');
   }
 };
 
 var registerRoutes = function () {
+  debug('Register routes...');
   var wechatPublic = require('./middleware/wechat-public-doctor')(app);
   var doctorCtrl = require('./controller/doctor-controller')(app);
   var wechatCtrl = require('./controller/wechat-controller')(app);
@@ -61,4 +62,7 @@ var startServer = function () {
   }
 };
 
+registerModels();
+registerRoutes();
+startServer();
 module.exports = app;

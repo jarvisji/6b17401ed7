@@ -10,12 +10,13 @@ module.exports = {
     json: function (verb, url) {
       return request(conf.serverUrl)[verb](url)
         .set('Accept', 'application/json');
-        //.expect('Content-Type', /json/);
+      //.expect('Content-Type', /json/);
     },
-    xml: function(verb, url){
+    xml: function (verb, url) {
       return request(conf.serverUrl)[verb](url)
         .set('Content-Type', 'text/plain;charset=UTF-8');
     }
-  }
+  },
+  app: app
 };
 
