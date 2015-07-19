@@ -17,6 +17,7 @@ module.exports = {
         .set('Content-Type', 'text/plain;charset=UTF-8');
     }
   },
-  app: app
+  app: app,
+  conf: conf
 };
 
