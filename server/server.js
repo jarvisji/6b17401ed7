@@ -38,14 +38,14 @@ var registerModels = function () {
 
 var registerRoutes = function () {
   debug('Register routes...');
-  var wechatPublic = require('./middleware/wechat-public-doctor')(app);
+  var wxproxyDoctor = require('./middleware/wxproxy-doctor')(app);
   var doctorCtrl = require('./controller/doctor-controller')(app);
   var wechatCtrl = require('./controller/wechat-controller')(app);
   //app.use('/wxproxy', function(req, res, next){
   //  debug('Got request data: ', req.body);
   //  next();
   //});
-  app.use('/wxproxy', wechatPublic); // rename to /wxproxy-doctor
+  app.use('/wxproxy', wxproxyDoctor); // rename to /wxproxy-doctor
   app.post('/wechat/menu', wechatCtrl.createMenu);
   //app.post('/doctors', doctorCtrl.createDoctor);
   app.get('/doctors', doctorCtrl.getDoctors);
