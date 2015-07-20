@@ -2,7 +2,7 @@
  * Created by Ting on 2015/7/11.
  */
 angular.module('ylbWxApp')
-  .controller('wxActivateCtrl', ['$scope', '$stateParams', '$http', '$alert', 'ylb.resources', function ($scope, $stateParams, $http, $alert, resources) {
+  .controller('wxActivateCtrl', ['$scope', '$rootScope', '$stateParams', '$http', '$alert', 'ylb.resources', function ($scope, $rootScope, $stateParams, $http, $alert, resources) {
 
     var openid = $stateParams.openid;
     if (openid) {
@@ -90,6 +90,7 @@ angular.module('ylbWxApp')
     $scope.onDaySelected = function (day) {
       $scope.doctor.birthdayDay = day;
       $scope.doctor.birthday = new Date(Date.UTC($scope.doctor.birthdayYear, $scope.doctor.birthdayMonth - 1, $scope.doctor.birthdayDay));
+      $scope.birthdayInvalid = false;
     };
 
     $scope.onSexSelected = function (sex) {
@@ -112,7 +113,13 @@ angular.module('ylbWxApp')
       $scope.doctor.city = $scope.city[cityKey];
     };
 
-    $scope.save = function () {
+    $scope.save = function (form) {
+      if (!$rootScope.validateForm(form))
+        return;
+      if (!$scope.doctor.birthday) {
+        $scope.birthdayInvalid = true;
+        return;
+      }
       console.log($scope.doctor);
     };
   }]);

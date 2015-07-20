@@ -11,5 +11,16 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
     //$urlRouterProvider.otherwise('wx_activate');
   }])
   .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$log', function ($scope, $rootScope, $state, $log) {
-    // init sessionInfo object at the beginning, other pages can call its properties directly needn't worry about undefined error.
+    // Common method for each controller.
+    $rootScope.validateForm = function (form) {
+      var formValid = form.$valid;
+      angular.forEach(form, function (ele) {
+        if (ele && ele.$invalid) {
+          ele.$dirty = true;
+          formValid = false;
+          //$log.debug("invalid element:", ele);
+        }
+      });
+      return formValid;
+    };
   }]);
