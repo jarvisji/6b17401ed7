@@ -2,7 +2,7 @@
  * Created by Ting on 2015/7/11.
  */
 angular.module('ylbWxApp')
-  .controller('wxActivateCtrl', ['$scope', '$rootScope', '$stateParams', '$http', '$alert', 'ylb.resources', function ($scope, $rootScope, $stateParams, $http, $alert, resources) {
+  .controller('wxProfileCtrl', ['$scope', '$rootScope', '$stateParams', '$http', '$alert', 'ylb.resources', function ($scope, $rootScope, $stateParams, $http, $alert, resources) {
 
     var openid = $stateParams.openid;
     if (openid) {
@@ -43,6 +43,16 @@ angular.module('ylbWxApp')
       $alert({title: '页面加载错误：', content: '请从微信访问此页面。', placement: 'top', type: 'danger', container: '#alert'});
       return;
     }
+
+    var initTabs = function () {
+      $scope.tabs = [
+        {"title": "基本信息", "content": ""},
+        {"title": "加号设置", "content": ""},
+        {"title": "会诊设置", "content": ""},
+        {"title": "随诊设置", "content": ""}];
+      $scope.tabs.activeTab = "基本信息";
+    };
+    initTabs();
 
     var prepareDropDownData = function () {
       $scope.ddSex = [];

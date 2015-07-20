@@ -3,10 +3,10 @@
  */
 angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStrap'])
   .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
-    $stateProvider.state('wx_activate', {
-      url: '/activate/:openid',
-      templateUrl: 'wxappd/activate/activate.tpl.html',
-      controller: 'wxActivateCtrl'
+    $stateProvider.state('profile', {
+      url: '/profile/:openid',
+      templateUrl: 'wxappd/profile/profile.tpl.html',
+      controller: 'wxProfileCtrl'
     });
     //$urlRouterProvider.otherwise('wx_activate');
   }])
