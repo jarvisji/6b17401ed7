@@ -25,6 +25,16 @@
     </div>
   </div>
   <div class="row">
+    <div class="col-xs-12">
+      <div class="profile-desc-title">年龄：{{doctor.age}}</div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="profile-desc-title">性别：{{doctor.displaySex}}</div>
+    </div>
+  </div>
+  <div class="row">
     <div class="col-xs-12 profile-desc-text">
       {{doctor.introduction}}
     </div>
@@ -40,35 +50,76 @@
   <!--<tr><td>{{doctor.hospital}}</td></tr>-->
   <!--<tr><td>{{doctor.introduction}}</td></tr>-->
   <!--</table>-->
-  <div class="profile-section-action-button">
+  <div class="profile-section-action-button profile-action-button">
     <a ui-sref="profile-edit({ openid: doctor.wechat.openid })"><i class="fa fa-pencil-square-o"></i></a>
   </div>
 </section>
 
-
-<div id="jiahao" ng-show="tabs.activeTab == '加号设置'">
-  <div class="page-header">
-    <h1>设置加号信息</h1>
+<section class="profile-section" ng-show="doctor">
+  <div class="input-group input-group-lg">
+    <span class="input-group-addon">加号</span>
+    <input type='number' class="form-control text-right" placeholder="0">
+    <span class="input-group-addon">元/次</span>
+    <span class="input-group-btn">
+      <button class="btn btn-default" type="button">
+        <i class="fa fa-pencil-square-o profile-action-button"></i>
+      </button>
+    </span>
   </div>
-  <form name="jihao" role="form" novalidate>
+  <p></p>
 
-  </form>
-</div>
-
-<div id="huizhen" ng-show="tabs.activeTab == '会诊设置'">
-  <div class="page-header">
-    <h1>设置会诊信息</h1>
+  <div class="input-group input-group-lg">
+    <span class="input-group-addon">随诊</span>
+    <input type='number' class="form-control text-right" placeholder="0" ng-model="suizhen.price"
+           ng-disabled="!editingSuizhen">
+    <span class="input-group-addon">元/月</span>
+    <span class="input-group-btn">
+      <button class="btn btn-default" type="button" ng-click="editSuizhen()">
+        <i class="fa fa-pencil-square-o profile-action-button" ng-hide="editingSuizhen"></i>
+        <i class="fa fa-check profile-action-button" ng-show="editingSuizhen"></i>
+      </button>
+    </span>
   </div>
-  <form name="huizhen" role="form" novalidate>
+  <p></p>
 
-  </form>
-</div>
-
-<div id="suizhen" ng-show="tabs.activeTab == '随诊设置'">
-  <div class="page-header">
-    <h1>设置随诊信息</h1>
+  <div class="input-group input-group-lg">
+    <span class="input-group-addon bg-danger">会诊</span>
+    <input type='number' class="form-control text-right" placeholder="0" ng-model="huizhen.price"
+           ng-disabled="!editingHuizhen">
+    <span class="input-group-addon">元/次</span>
+    <span class="input-group-btn">
+      <button class="btn btn-default" type="button" ng-click="editHuizhen()">
+        <i class="fa fa-pencil-square-o profile-action-button" ng-hide="editingHuizhen"></i>
+        <i class="fa fa-check profile-action-button" ng-show="editingHuizhen"></i>
+      </button>
+    </span>
   </div>
-  <form name="suizhen" role="form" novalidate>
+</section>
 
-  </form>
-</div>
+
+<!--<div id="jiahao" ng-show="tabs.activeTab == '加号设置'">-->
+<!--<div class="page-header">-->
+<!--<h1>设置加号信息</h1>-->
+<!--</div>-->
+<!--<form name="jihao" role="form" novalidate>-->
+
+<!--</form>-->
+<!--</div>-->
+
+<!--<div id="huizhen" ng-show="tabs.activeTab == '会诊设置'">-->
+<!--<div class="page-header">-->
+<!--<h1>设置会诊信息</h1>-->
+<!--</div>-->
+<!--<form name="huizhen" role="form" novalidate>-->
+
+<!--</form>-->
+<!--</div>-->
+
+<!--<div id="suizhen" ng-show="tabs.activeTab == '随诊设置'">-->
+<!--<div class="page-header">-->
+<!--<h1>设置随诊信息</h1>-->
+<!--</div>-->
+<!--<form name="suizhen" role="form" novalidate>-->
+
+<!--</form>-->
+<!--</div>-->

@@ -23,12 +23,15 @@ section {
   position: absolute;
   bottom: 5px;
   right: 5px;
-  font-size: 1.5em;
-  color: orange;
 }
 
 .profile-section-action-button a, a:visited {
   color: orange;
+}
+
+.profile-action-button {
+  font-size: 24px !important;
+  color: orange !important;
 }
 
 .profile-usertitle-name {
