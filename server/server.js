@@ -48,13 +48,13 @@ var registerRoutes = function () {
   app.use('/wxproxy', wxproxyDoctor); // rename to /wxproxy-doctor
   app.post('/wechat/menu', wechatCtrl.createMenu);
   //app.post('/doctors', doctorCtrl.createDoctor);
-  app.get('/doctors', doctorCtrl.getDoctors);
+  app.get('/api/doctors', doctorCtrl.getDoctors);
 };
 
 var startServer = function () {
 // start the server if `$ node server.js`
   if (require.main === module) {
-    var server = app.listen('3001', '10.34.64.100', function () {
+    var server = app.listen('3001', '0.0.0.0', function () {
       var host = server.address().address;
       var port = server.address().port;
       debug('Server listening at: http://%s:%s', host, port);

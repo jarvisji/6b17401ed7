@@ -2,27 +2,61 @@
  * Created by Ting on 2015/7/11.
  */
 angular.module('ylbWxApp')
-  .controller('wxActivateCtrl', ['$scope', 'ylb.resources', function ($scope, resources) {
+  .controller('wxActivateCtrl', ['$scope', '$stateParams', '$http', '$alert', 'ylb.resources', function ($scope, $stateParams, $http, $alert, resources) {
+
+    var openid = $stateParams.openid;
+    if (openid) {
+      // load doctor data.
+      $http.get('/api/doctors', {params: {filter: {'wechat.openid': openid}}})
+        .success(function (res) {
+          if (res.count > 0) {
+            var doctor = res.data[0];
+            $scope.doctor = angular.copy(doctor);
+            delete $scope.doctor.wechat; // won't change wechat data.
+            if (!$scope.doctor.name) {
+              $scope.doctor.name = doctor.wechat.nickname;
+            }
+            if ($scope.doctor.mobile.indexOf('openid_') == 0) {
+              $scope.doctor.mobile = '';
+            }
+            if (!$scope.doctor.province) {
+              angular.forEach(resources.province, function (value, key) {
+                if (value == doctor.wechat.province) {
+                  $scope.onProvinceSelected(key);
+                }
+              });
+              $scope.doctor.city = doctor.wechat.city;
+            }
+            if (!$scope.doctor.sex) {
+              $scope.doctor.displaySex = resources.sex[doctor.wechat.sex];
+              $scope.doctor.sex = doctor.wechat.sex;
+            }
+          }
+          prepareDropDownData();
+        }).error(function (err) {
+
+        });
+    } else {
+      $alert({title: '页面加载错误：', content: '请从微信访问此页面。', placement: 'top', type: 'danger', container: '#alert'});
+      return;
+    }
 
     var prepareDropDownData = function () {
-      $scope.ddSex = [
-        {'text': resources.sex.male, 'click': 'onSexSelected("male")'},
-        {'text': resources.sex.female, 'click': 'onSexSelected("female")'}
-      ];
+      $scope.ddSex = [];
+      angular.forEach(resources.sex, function (value, key) {
+        $scope.ddSex.push({'text': value, 'click': 'onSexSelected("' + key + '")'});
+      });
+
       $scope.ddProvince = [];
       angular.forEach(resources.province, function (value, key) {
         $scope.ddProvince.push({'text': value, 'click': 'onProvinceSelected("' + key + '")'});
       });
+
       $scope.ddYear = [];
       var currentYear = new Date().getFullYear();
       for (var year = currentYear - 100; year <= currentYear - 15; year++) {
         $scope.ddYear.push({'text': year, 'click': 'onYearSelected("' + year + '")'});
       }
-    };
-    prepareDropDownData();
-
-    $scope.doctor = {
-      displaySex: resources.sex.male
     };
 
     $scope.onYearSelected = function (year) {
@@ -60,6 +94,7 @@ angular.module('ylbWxApp')
 
     $scope.onSexSelected = function (sex) {
       $scope.doctor.displaySex = resources.sex[sex];
+      $scope.doctor.sex = sex;
     };
 
     $scope.onProvinceSelected = function (provinceKey) {
@@ -70,11 +105,14 @@ angular.module('ylbWxApp')
       angular.forEach($scope.city, function (value, key) {
         $scope.ddCity.push({'text': value, 'click': 'onCitySelected("' + key + '")'})
       });
+      $scope.doctor.city = $scope.ddCity[0].text;
     };
 
     $scope.onCitySelected = function (cityKey) {
       $scope.doctor.city = $scope.city[cityKey];
     };
 
-
+    $scope.save = function () {
+      console.log($scope.doctor);
+    };
   }]);

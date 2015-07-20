@@ -37,7 +37,11 @@ module.exports = function (app) {
   };
 
   var getDoctors = function (req, res) {
-    Doctor.find(function (err, doctors) {
+    var filter = {};
+    if (req.query.filter) {
+      filter = JSON.parse(req.query.filter);
+    }
+    Doctor.find(filter, function (err, doctors) {
       if (err) {
         debug('Find doctor error: ', err);
         return res.status(500).json(utils.jsonResult(err));
