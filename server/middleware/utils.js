@@ -17,7 +17,7 @@ module.exports = {
   jsonResult: function (result, mix) {
     var jsonRet = {data: []};
     if (result instanceof Error) {
-      jsonRet.error = result;
+      jsonRet.error = {'message': result.message, 'name': result.name};
     } else if (typeof(result) == 'string') {
       jsonRet.message = result;
     } else {

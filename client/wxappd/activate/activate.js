@@ -30,6 +30,8 @@ angular.module('ylbWxApp')
             if (!$scope.doctor.sex) {
               $scope.doctor.displaySex = resources.sex[doctor.wechat.sex];
               $scope.doctor.sex = doctor.wechat.sex;
+            } else {
+              $scope.doctor.displaySex = resources.sex[doctor.sex];
             }
           }
           prepareDropDownData();
@@ -120,6 +122,10 @@ angular.module('ylbWxApp')
         $scope.birthdayInvalid = true;
         return;
       }
-      console.log($scope.doctor);
+      $http.put('/api/doctors/' + $scope.doctor._id, $scope.doctor)
+        .success(function (res) {
+          $alert({content: '保存成功。', placement: 'top', type: 'success', container: 'form'});
+        });
+
     };
   }]);

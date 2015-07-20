@@ -70,9 +70,29 @@ module.exports = function (app) {
     });
   };
 
+  var saveDoctor = function (req, res) {
+    var doctor = req.body;
+    var doctorId = req.params.id;
+    if (!doctor || !doctorId) {
+      debug('Update doctor, invalid id or data: ', doctorId, doctor);
+      return res.status(400).json(utils.jsonResult(new Error('Invalid data')));
+    }
+    delete doctor.password;
+    delete doctor.wechat;
+    delete doctor.salt;
+    Doctor.findByIdAndUpdate(doctorId, {$set: doctor}, function (err, doctor) {
+      if (err) {
+        debug('Update doctor error: ', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      res.json(utils.jsonResult(doctor));
+    });
+  };
+
   return {
     login: login,
     createDoctor: createDoctor,
-    getDoctors: getDoctors
+    getDoctors: getDoctors,
+    saveDoctor: saveDoctor
   };
 };

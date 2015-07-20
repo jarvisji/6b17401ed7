@@ -49,6 +49,7 @@ var registerRoutes = function () {
   app.post('/wechat/menu', wechatCtrl.createMenu);
   //app.post('/doctors', doctorCtrl.createDoctor);
   app.get('/api/doctors', doctorCtrl.getDoctors);
+  app.put('/api/doctors/:id', doctorCtrl.saveDoctor);
 };
 
 var startServer = function () {
