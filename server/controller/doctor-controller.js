@@ -51,22 +51,27 @@ module.exports = function (app) {
   };
 
   var createDoctor = function (req, res) {
-    var doctor = new Doctor(req.body);
-    doctor.salt = Math.round((new Date().valueOf() * Math.random()));
-    doctor.password = sha512(doctor.salt + doctor.password);
-    doctor.save(function (err, data) {
-      if (err) {
-        debug('Save doctor error: ', err);
-        if (err.code == 11000) // duplicate key
-          return res.status(409).json(utils.jsonResult(err));
-        else
-          return res.status(500).json(utils.jsonResult(err));
-      }
-      debug('Save doctor success: ', err);
-      var retData = data.toObject();
-      delete retData.password;
-      delete retData.salt;
-      res.status(201).json(utils.jsonResult(retData));
+    //TODO: check authorization.
+    Doctor.count(function (err, count) {
+      if (err) return debug('Get doctor count error: ', err);
+      var doctor = new Doctor(req.body);
+      doctor.salt = Math.round((new Date().valueOf() * Math.random()));
+      doctor.password = sha512(doctor.salt + doctor.password);
+      doctor.number = count + 1;
+      doctor.save(function (err, data) {
+        if (err) {
+          debug('Save doctor error: ', err);
+          if (err.code == 11000) // duplicate key
+            return res.status(409).json(utils.jsonResult(err));
+          else
+            return res.status(500).json(utils.jsonResult(err));
+        }
+        debug('Save doctor success: ', err);
+        var retData = data.toObject();
+        delete retData.password;
+        delete retData.salt;
+        res.status(201).json(utils.jsonResult(retData));
+      });
     });
   };
 
@@ -77,9 +82,11 @@ module.exports = function (app) {
       debug('Update doctor, invalid id or data: ', doctorId, doctor);
       return res.status(400).json(utils.jsonResult(new Error('Invalid data')));
     }
+    // some fields cannot be updated via public api.
     delete doctor.password;
     delete doctor.wechat;
     delete doctor.salt;
+    delete doctor.level;
     Doctor.findByIdAndUpdate(doctorId, {$set: doctor}, function (err, doctor) {
       if (err) {
         debug('Update doctor error: ', err);

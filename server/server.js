@@ -47,7 +47,7 @@ var registerRoutes = function () {
   //});
   app.use('/wxproxy', wxproxyDoctor); // rename to /wxproxy-doctor
   app.post('/wechat/menu', wechatCtrl.createMenu);
-  //app.post('/doctors', doctorCtrl.createDoctor);
+  app.post('/api/doctors', doctorCtrl.createDoctor);
   app.get('/api/doctors', doctorCtrl.getDoctors);
   app.put('/api/doctors/:id', doctorCtrl.saveDoctor);
 };

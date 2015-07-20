@@ -5,8 +5,8 @@ var mongoose = require('mongoose');
 var should = require('should');
 var util = require('../testUtils');
 
-describe.skip('Test doctor APIs.', function () {
-  var mockMobile = 'test-' + new Date().getTime();
+describe('Test doctor APIs.', function () {
+  var mockMobile = mockOpenid = 'test-' + new Date().getTime();
 
   //beforeAll(function(){
   //  // TODO: delete test data for user. Get mongoose from util.
@@ -14,30 +14,47 @@ describe.skip('Test doctor APIs.', function () {
   beforeEach(function () {
   });
 
-  it.skip('Test create doctor.', function (done) {
-    util.req.json('post', '/doctors')
+  it('Test create doctor.', function (done) {
+    util.req.json('post', '/api/doctors')
+      .send({'mobile': mockMobile, 'wechat.openid': mockMobile})
       .expect(201)
-      .expect(function (res) {
+      .end(function (err, res) {
         var data = res.body.data;
         should(data).have.property('_id');
         should(data).have.property('created');
         should(data).have.property('lastModified');
         should(data).have.property('number').which.is.a.Number();
         should(data).not.have.property('password');
+        done();
       });
   });
 
-  it('Test register user with exists mobile phone number should fail', function (done) {
-    reqOption.url += '/users';
-    reqOption.body = newDoctor;
-    request.post(reqOption, function (error, response, body) {
-      done();
-      expect(response.statusCode).toEqual(409);
-      expect(body.error).toBeDefined();
-    })
+  it('Test create doctor with exists mobile phone number should fail', function (done) {
+    util.req.json('post', '/api/doctors')
+      .send({'mobile': mockMobile, 'wechat.openid': mockOpenid})
+      .expect(409, done);
   });
 
-  it('Test login success', function (done) {
+  it('Test find doctor by openid', function (done) {
+    util.req.json('get', '/api/doctors')
+      .query({filter: JSON.stringify({'wechat.openid': mockOpenid})})
+      .expect(200)
+      .end(function (err, res) {
+        should(res.body.count).equal(1);
+        done();
+      });
+  });
+
+  it('Test find doctors', function (done) {
+    util.req.json('get', '/api/doctors')
+      .expect(200)
+      .end(function (err, res) {
+        should(res.body.count).greaterThan(1);
+        done();
+      });
+  });
+
+  it.skip('Test login success', function (done) {
     var user = {mobile: mockMobile, password: 'pass'};
     reqOption.url += '/login';
     reqOption.body = user;
@@ -48,7 +65,7 @@ describe.skip('Test doctor APIs.', function () {
     });
   });
 
-  it('Test login failed', function (done) {
+  it.skip('Test login failed', function (done) {
     var user = {mobile: mockMobile, password: 'wrong pass'};
     reqOption.url += '/login';
     reqOption.body = user;
@@ -58,4 +75,7 @@ describe.skip('Test doctor APIs.', function () {
       expect(body.error).toBeDefined();
     });
   });
-});
+
+
+})
+;
