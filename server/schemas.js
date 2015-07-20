@@ -21,7 +21,7 @@ module.exports = function () {
   var doctorSchema = new Schema({
     name: String,
     number: {type: Number, index: true, unique: true},
-    level: String, // 1-normal, 2-regular, 3-real
+    level: {type: String, default: 1}, // 1-normal, 2-regular, 3-real
     province: String,
     city: String,
     hospital: String,
@@ -29,7 +29,7 @@ module.exports = function () {
     introduction: String,
     mobile: {type: String, index: true, unique: true},
     birthday: Date,
-    sex: String, // male, female
+    sex: String, // 1-male, 2-female, same to wechat
     password: String,
     salt: String,
     services: [serviceSchema],

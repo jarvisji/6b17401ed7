@@ -25,6 +25,7 @@ describe('Test wechat messages for doctor.', function () {
           if (err) return done(err);
           should(doctor.wechat.subscribe).equal(1);
           should(doctor.number).be.a.Number();
+          should(doctor.level).equal('1');
           done();
         });
       });

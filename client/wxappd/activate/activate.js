@@ -33,6 +33,7 @@ angular.module('ylbWxApp')
             } else {
               $scope.doctor.displaySex = resources.sex[doctor.sex];
             }
+            $scope.doctor.displayLevel = resources.doctorLevel[doctor.level];
           }
           prepareDropDownData();
         }).error(function (err) {
@@ -126,6 +127,5 @@ angular.module('ylbWxApp')
         .success(function (res) {
           $alert({content: '保存成功。', placement: 'top', type: 'success', container: 'form'});
         });
-
     };
   }]);
