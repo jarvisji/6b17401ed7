@@ -26,6 +26,7 @@ module.exports = function () {
     city: String,
     hospital: String,
     department: String,
+    title: String,
     introduction: String,
     mobile: {type: String, index: true, unique: true},
     birthday: Date,

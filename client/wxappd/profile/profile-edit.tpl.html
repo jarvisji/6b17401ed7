@@ -1,0 +1,71 @@
+<div id="base">
+  <div class="page-header">
+    <h1>设置基本信息</h1>
+  </div>
+  <div id="alert"></div>
+  <form id="form" name="baseForm" role="form" novalidate>
+    <div class="form-group" ng-class="{'has-error':baseForm.name.$dirty && baseForm.name.$invalid}">
+      <label class="control-label" for="name">姓名</label>
+      <input type="text" class="form-control" id="name" name="name" placeholder="" ng-model="doctor.name" required>
+    </div>
+    <div class="form-group">
+      <label for="number">编号：</label>
+      <span id="number">{{doctor.number}}</span>
+    </div>
+    <div class="form-group" ng-class="{'has-error':baseForm.mobile.$dirty && baseForm.mobile.$invalid}">
+      <label class="control-label" for="mobile">手机（11位数字）</label>
+      <input type="text" class="form-control" id="mobile" name="mobile" placeholder="" ng-model="doctor.mobile"
+             maxlength="11" ng-pattern="/^1[3-8]\d{9}$/" required>
+    </div>
+    <div class="form-group">
+      <label for="sex">性别</label>
+      <button type="button" class="btn btn-default btn-block" id="sex" name="sex" bs-dropdown="ddSex">
+        {{doctor.displaySex}} <span class="caret"></span></button>
+    </div>
+    <div class="form-group" ng-class="{'has-error':birthdayInvalid}">
+      <label class="control-label" for="year">出生日期</label><br>
+      <button type="button" class="btn btn-default" id="year" bs-dropdown="ddYear">
+        {{doctor.birthdayYear?doctor.birthdayYear:'年'}} <span class="caret"></span></button>
+      <button type="button" class="btn btn-default" bs-dropdown="ddMonth">
+        {{doctor.birthdayMonth?doctor.birthdayMonth:'月'}} <span class="caret"></span></button>
+      <button type="button" class="btn btn-default" bs-dropdown="ddDay">
+        {{doctor.birthdayDay?doctor.birthdayDay:'日'}} <span class="caret"></span></button>
+    </div>
+    <div class="form-group">
+      <label class="control-label" for="province">省份</label>
+      <button type="button" class="btn btn-default btn-block" id="province" name="province" bs-dropdown="ddProvince">
+        {{doctor.province?doctor.province:'请选择'}} <span class="caret"></span></button>
+    </div>
+    <div class="form-group">
+      <label class="control-label" for="city">城市</label>
+      <button type="button" class="btn btn-default btn-block" id="city" name="city" bs-dropdown="ddCity">
+        {{doctor.city?doctor.city:'请选择'}} <span class="caret"></span>
+      </button>
+    </div>
+    <div class="form-group" ng-class="{'has-error':baseForm.hospital.$dirty && baseForm.hospital.$invalid}">
+      <label class="control-label" for="hospital">医院</label>
+      <input type="text" class="form-control" id="hospital" name="hospital" placeholder="" ng-model="doctor.hospital"
+             required>
+    </div>
+    <div class="form-group" ng-class="{'has-error':baseForm.department.$dirty && baseForm.department.$invalid}">
+      <label class="control-label" for="department">科室</label>
+      <input type="text" class="form-control" id="department" name="department" placeholder=""
+             ng-model="doctor.department" required>
+    </div>
+    <div class="form-group" ng-class="{'has-error':baseForm.title.$dirty && baseForm.title.$invalid}">
+      <label class="control-label" for="title">职称</label>
+      <input type="text" class="form-control" id="title" name="title" placeholder=""
+             ng-model="doctor.title" required>
+    </div>
+    <div class="form-group" ng-class="{'has-error':baseForm.introduction.$dirty && baseForm.introduction.$invalid}">
+      <label class="control-label" for="introduction">介绍</label>
+      <textarea class="form-control" rows="3" id="introduction" name="introduction"
+                ng-model="doctor.introduction" required></textarea>
+    </div>
+    <div class="form-group">
+      <label for="level">级别：</label><span id="level">{{doctor.displayLevel}}</span>
+    </div>
+  </form>
+  <button type="button" class="btn btn-success btn-lg btn-block" ng-click="save(baseForm)">保存
+  </button>
+</div>

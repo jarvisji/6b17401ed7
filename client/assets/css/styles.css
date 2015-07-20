@@ -15,6 +15,49 @@ section {
   margin-bottom: 45px;
 }
 
+.profile-section {
+  position: relative;
+}
+
+.profile-section-action-button {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  font-size: 1.5em;
+  color: orange;
+}
+
+.profile-section-action-button a, a:visited {
+  color: orange;
+}
+
+.profile-usertitle-name {
+  color: #5a7391;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 7px;
+}
+
+.profile-usertitle-job {
+  color: #5b9bd1;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 7px;
+}
+
+.profile-desc-title {
+  color: #7f90a4;
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.profile-desc-text {
+  color: #7e8c9e;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
 /**------------------------------------------------
  * for ui.bootstrap. http://angular-ui.github.io/bootstrap
  * Removed empty href attributes from directive templates and as a result styling is not applied correctly
@@ -22,6 +65,7 @@ section {
 .nav, .pagination, .carousel, .panel-title a {
   cursor: pointer;
 }
+
 /**
  * ui.bootstrap end
  * ------------------------------------------------ */
