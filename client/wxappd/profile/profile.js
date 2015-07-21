@@ -37,18 +37,17 @@ angular.module('ylbWxApp')
         $scope[doctor.services[i].type] = doctor.services[i];
       }
       if (!$scope.jiahao) {
-        $scope.jiahao = {type: 'jiahao'};
+        $scope.jiahao = resources.doctorServices.jiahao;
       }
       if (!$scope.suizhen) {
-        $scope.suizhen = {type: 'suizhen'};
+        $scope.suizhen = resources.doctorServices.suizhen;
       }
       if (!$scope.huizhen) {
-        $scope.huizhen = {type: 'huizhen'};
+        $scope.huizhen = resources.doctorServices.huizhen;
       }
     };
 
     var alertErr = function () {
-      console.log('alert');
       $alert({title: '页面加载错误：', content: '请从微信访问此页面。', placement: 'top', type: 'danger', container: '#alert'});
     };
 
@@ -58,7 +57,7 @@ angular.module('ylbWxApp')
     $scope.editSuizhen = function () {
       if ($scope.editingSuizhen) {
         // save
-        console.log('save', $scope.suizhen);
+        updateService();
       } else {
         // edit
         console.log('edit');
@@ -71,11 +70,29 @@ angular.module('ylbWxApp')
     $scope.editHuizhen = function () {
       if ($scope.editingHuizhen) {
         // save
-        console.log('save', $scope.huizhen);
+        updateService();
       } else {
         // edit
         console.log('edit');
       }
       $scope.editingHuizhen = !$scope.editingHuizhen;
+    };
+
+    /**
+     * PUT '/api/doctors/:id' will overwrite services, so need put data for all services even only changed one.
+     */
+    var updateService = function () {
+      var servicesData = [$scope.jiahao, $scope.huizhen, $scope.suizhen];
+      $http.put('/api/doctors/' + $scope.doctor._id, {services: servicesData})
+        .success(function (resp) {
+          var updatedServices = resp.data.services;
+          console.log(updatedServices);
+          for (var i = 0; i < updatedServices.length; i++) {
+            $scope[updatedServices[i].type] = updatedServices [i];
+          }
+
+        }).error(function (err) {
+          $rootScope.alertError(err);
+        });
     };
   }]);
