@@ -75,6 +75,12 @@ module.exports = function (app) {
     });
   };
 
+  /**
+   * PUT /api/doctors/:id
+   * @param req
+   * @param res
+   * @returns {*}
+   */
   var saveDoctor = function (req, res) {
     var doctor = req.body;
     var doctorId = req.params.id;
@@ -87,13 +93,44 @@ module.exports = function (app) {
     delete doctor.wechat;
     delete doctor.salt;
     delete doctor.level;
-    Doctor.findByIdAndUpdate(doctorId, {$set: doctor}, function (err, doctor) {
+
+    //Doctor.findById(doctorId, function (err, doctor) {
+    //  if (err) {
+    //    debug('Get doctor %s error: %o', doctorId, err);
+    //    return res.status(500).json(utils.jsonResult(err));
+    //  }
+    //  if (!doctor) {
+    //    debug('Get doctor %s not found.', doctorId);
+    //    return res.status(404).json(utils.jsonResult('Doctor not found.'));
+    //  }
+    //
+    //
+    //  doctor.save(function (err) {
+    //    if (err) return handleError(err);
+    //    res.json(utils.jsonResult(doctor));
+    //  });
+    //});
+    Doctor.findByIdAndUpdate(doctorId, doctor, {upsert: true, new: true}, function (err, doctor) {
       if (err) {
         debug('Update doctor error: ', err);
         return res.status(500).json(utils.jsonResult(err));
       }
+      doctor = removeNoOutputData(doctor);
       res.json(utils.jsonResult(doctor));
     });
+  };
+
+  /**
+   * Remove some data not tend to expose to user.
+   * @param doctor
+   */
+  var removeNoOutputData = function (doctor) {
+    var ret = doctor.toObject();
+    delete ret.password;
+    delete ret.salt;
+    delete ret.wechat.unionid;
+    delete ret.wechat.groupid;
+    return ret;
   };
 
   return {
@@ -103,3 +140,4 @@ module.exports = function (app) {
     saveDoctor: saveDoctor
   };
 };
+
