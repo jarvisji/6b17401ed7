@@ -50,6 +50,11 @@ module.exports = function (app) {
     });
   };
 
+  /**
+   * POST /api/doctors
+   * @param req
+   * @param res
+   */
   var createDoctor = function (req, res) {
     //TODO: check authorization.
     Doctor.count(function (err, count) {
@@ -67,9 +72,7 @@ module.exports = function (app) {
             return res.status(500).json(utils.jsonResult(err));
         }
         debug('Save doctor success: ', err);
-        var retData = data.toObject();
-        delete retData.password;
-        delete retData.salt;
+        var retData = removeNoOutputData(data);
         res.status(201).json(utils.jsonResult(retData));
       });
     });
