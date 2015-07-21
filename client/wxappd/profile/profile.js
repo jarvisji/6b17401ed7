@@ -32,6 +32,7 @@ angular.module('ylbWxApp')
       $scope.doctor = doctor;
       $scope.doctor.age = commonUtils.calculateAge(doctor.birthday);
       $scope.doctor.displaySex = resources.sex[doctor.sex];
+      $scope.doctor.displayLevel = resources.doctorLevel[doctor.level];
 
       // prepare services data.
       for (var i = 0; i < doctor.services.length; i++) {
@@ -57,6 +58,15 @@ angular.module('ylbWxApp')
     var preparePageData = function () {
       // get days display names for jiahao service.
       $scope.days = resources.days;
+
+      // check doctor level for service privilege.
+      if ($scope.doctor.level == 1) {
+        $scope.disableServicePrivilege = true;
+      }
+
+      // TODO: check current wchat user is doctor himself or not.
+      $scope.isSelf = true;
+
     };
 
     var alertErr = function () {
@@ -122,5 +132,22 @@ angular.module('ylbWxApp')
           $rootScope.alertError(err);
         });
     };
+
+    $scope.buyJiahao = function () {
+
+    };
+
+    $scope.buyHuizhen = function () {
+
+    };
+
+    $scope.buySuizhen = function () {
+
+    };
+
+    $scope.followDoctor = function() {
+
+    };
+
   }])
 ;
