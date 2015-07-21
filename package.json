@@ -20,6 +20,7 @@
     "multer": "^0.1.8",
     "request": "^2.58.0",
     "serve-favicon": "^2.0.1",
+    "underscore": "^1.8.3",
     "wechat": "^2.0.1",
     "wechat-api": "^1.9.3",
     "wechat-oauth": "^1.1.0"

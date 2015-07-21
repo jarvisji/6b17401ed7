@@ -5,6 +5,7 @@
 var sha512 = require('crypto-js/sha512');
 var debug = require('debug')('ylb.doctorCtrl');
 var utils = require('../middleware/utils');
+var stringUtils = require('../utils/string-utils');
 
 module.exports = function (app) {
   var Doctor = app.models.Doctor;
@@ -36,11 +37,40 @@ module.exports = function (app) {
     }
   };
 
-  var getDoctors = function (req, res) {
+  /**
+   * Accept JSON object as filter. Also deal with '*' as wildcard. For example:
+   * '*val' means find value end with 'val'.
+   * 'val*' means find value start with 'val'.
+   * '*val*' means find value contains 'val', include equals.
+   * 'val' mean find value equals 'val'.
+   * 'va*l', the * in the middle will not be tread as wildcard, means find value equals 'va*l'.
+   * @param req
+   * @param res
+   */
+  var findDoctors = function (req, res) {
     var filter = {};
     if (req.query.filter) {
       filter = JSON.parse(req.query.filter);
     }
+
+    // deal with wildcard in search value.
+    for (var key in filter) {
+      var value = filter[key];
+      console.log('key:', key, value);
+      if (typeof(value) != 'string') {
+        break;
+      }
+      if (value == '*') {
+        delete filter[key];
+      } else if (stringUtils.startWith(value, '*') && stringUtils.endWith(value, '*')) {
+        filter[key] = new RegExp(value.substring(1, value.length - 1));
+      } else if (stringUtils.startWith(value, '*')) {
+        filter[key] = new RegExp(value.substr(1) + '$');
+      } else if (stringUtils.endWith(value, '*')) {
+        filter[key] = new RegExp('^' + value.substr(0, value.length - 1));
+      }
+    }
+
     Doctor.find(filter, function (err, doctors) {
       if (err) {
         debug('Find doctor error: ', err);
@@ -139,7 +169,7 @@ module.exports = function (app) {
   return {
     login: login,
     createDoctor: createDoctor,
-    getDoctors: getDoctors,
+    findDoctors: findDoctors,
     saveDoctor: saveDoctor
   };
 };

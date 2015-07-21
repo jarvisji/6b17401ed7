@@ -6,7 +6,8 @@ var should = require('should');
 var util = require('../testUtils');
 
 describe('Test doctor APIs.', function () {
-  var mockMobile = mockOpenid = 'test-' + new Date().getTime();
+  var ts = new Date().getTime();
+  var mockMobile = mockOpenid = 'test-' + ts;
   var doctorId;
 
   //beforeAll(function(){
@@ -38,7 +39,7 @@ describe('Test doctor APIs.', function () {
       .expect(409, done);
   });
 
-  it('Test find doctor by openid', function (done) {
+  it('Test find doctors with filter: openid', function (done) {
     util.req.json('get', '/api/doctors')
       .query({filter: JSON.stringify({'wechat.openid': mockOpenid})})
       .expect(200)
@@ -49,12 +50,24 @@ describe('Test doctor APIs.', function () {
       });
   });
 
-  it('Test find doctors', function (done) {
+  it('Test find doctors without filter', function (done) {
     util.req.json('get', '/api/doctors')
       .expect(200)
       .end(function (err, res) {
         if (err) done(err);
         should(res.body.count).greaterThan(1);
+        done();
+      });
+  });
+
+  it('Test find doctors with filter: wildcard', function (done) {
+    util.req.json('get', '/api/doctors')
+      .query({filter: JSON.stringify({'mobile': '*-' + ts})})
+      .expect(200)
+      .end(function (err, res) {
+        if (err) done(err);
+        should(res.body.count).equal(1);
+        should(res.body.data[0]._id).equal(doctorId);
         done();
       });
   });

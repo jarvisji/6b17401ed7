@@ -18,6 +18,11 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
       templateUrl: 'wxappd/search/search-doctor.tpl.html',
       controller: 'wxSearchDoctorCtrl'
     });
+    $stateProvider.state('search-doctor-result', {
+      url: '/search/doctor/result',
+      templateUrl: 'wxappd/search/search-doctor-result.tpl.html',
+      controller: 'wxSearchDoctorResultCtrl'
+    });
     //$urlRouterProvider.otherwise('wx_activate');
   }])
   .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$log', '$timeout', '$alert', function ($scope, $rootScope, $state, $log, $timeout, $alert) {
@@ -54,7 +59,11 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
      * Common method to alert error.
      * @param err
      */
-    $rootScope.alertError = function (err) {
-      $alert({title: err.name, content: err.message, placement: 'top', type: 'danger', container: '#alert'});
+    $rootScope.alertError = function (err, status) {
+      var title = 'error ';
+      if (status)
+        title += status;
+
+      $alert({title: title + ":", content: err, placement: 'top', type: 'danger', container: '#alert'});
     }
   }]);

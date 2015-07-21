@@ -1,0 +1,70 @@
+<div class="page-header">
+  <h2>搜索医生</h2>
+</div>
+<div id="alert"></div>
+<form class="form-horizontal">
+  <div class="form-group">
+    <label class="col-xs-2 control-label" for="province">省份</label>
+
+    <div class="col-xs-10">
+      <button type="button" class="btn btn-default btn-block" id="province" name="province" bs-dropdown="ddProvince">
+        {{search.province?search.province:'请选择'}} <span class="caret"></span></button>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="col-xs-2 control-label" for="city">城市</label>
+
+    <div class="col-xs-10">
+      <button type="button" class="btn btn-default btn-block" id="city" name="city" bs-dropdown="ddCity">
+        {{search.city?search.city:'请选择'}} <span class="caret"></span>
+      </button>
+    </div>
+  </div>
+  <div class="form-group" ng-class="{'has-error':baseForm.hospital.$dirty && baseForm.hospital.$invalid}">
+    <label class="col-xs-2 control-label" for="hospital">医院</label>
+
+    <div class="col-xs-10">
+      <input type="text" class="form-control" id="hospital" name="hospital" placeholder=""
+             ng-model="search.hospital">
+    </div>
+  </div>
+  <div class="form-group" ng-class="{'has-error':baseForm.department.$dirty && baseForm.department.$invalid}">
+    <label class="col-xs-2 control-label" for="department">科室</label>
+
+    <div class="col-xs-10">
+      <input type="text" class="form-control" id="department" name="department" placeholder=""
+             ng-model="search.department">
+    </div>
+  </div>
+  <div class="form-group" ng-class="{'has-error':baseForm.title.$dirty && baseForm.title.$invalid}">
+    <label class="col-xs-2 control-label" for="title">职称</label>
+
+    <div class="col-xs-10">
+      <input type="text" class="form-control" id="title" name="title" placeholder=""
+             ng-model="search.title">
+    </div>
+  </div>
+  <div class="form-group" ng-class="{'has-error':baseForm.name.$dirty && baseForm.name.$invalid}">
+    <label class="col-xs-2 control-label" for="name">姓名</label>
+
+    <div class="col-xs-10">
+      <input type="text" class="form-control" id="name" name="name" placeholder=""
+             ng-model="search.name">
+    </div>
+  </div>
+  <hr>
+  <div class="form-group">
+    <label class="col-xs-2 control-label" for="number">编号</label>
+
+    <div class="col-xs-10">
+      <input type="number" class="form-control" id="number" name="number" placeholder=""
+             ng-model="search.number">
+    </div>
+  </div>
+  {{search|json}}
+  <div class="form-group">
+    <div class="col-xs-12">
+      <button class="btn btn-success btn-block btn-lg" ng-click="performSearch()">搜索</button>
+    </div>
+  </div>
+</form>
