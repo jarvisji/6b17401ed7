@@ -44,8 +44,14 @@ angular.module('ylbWxApp')
       $scope.onProvinceSelected(provinceKey);
 
       // Upon 'onProvinceSelected' method will set $scope.doctor.city to ddCity[0], here need set it back..
-      if (!doctor.city) {
-        $scope.doctor.city = doctor.wechat.city;
+      if (!doctor.city && doctor.wechat.city) {
+        // wechat city is not always same to ours, for example, we defined '合肥市', but wechat is '合肥',
+        // so cannot use wechat value directly.
+        angular.forEach($scope.city, function (value, key) {
+          if (value.indexOf(doctor.wechat.city) == 0) {
+            $scope.doctor.city = value;
+          }
+        });
       } else {
         $scope.doctor.city = doctor.city;
       }

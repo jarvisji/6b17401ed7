@@ -13,6 +13,11 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
       templateUrl: 'wxappd/profile/profile-edit.tpl.html',
       controller: 'wxProfileEditCtrl'
     });
+    $stateProvider.state('search-doctor', {
+      url: '/search/doctor',
+      templateUrl: 'wxappd/search/search-doctor.tpl.html',
+      controller: 'wxSearchDoctorCtrl'
+    });
     //$urlRouterProvider.otherwise('wx_activate');
   }])
   .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$log', '$timeout', '$alert', function ($scope, $rootScope, $state, $log, $timeout, $alert) {
