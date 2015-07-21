@@ -58,15 +58,29 @@
 <section class="profile-section" ng-show="doctor">
   <div class="input-group input-group-lg">
     <span class="input-group-addon">加号</span>
-    <input type='number' class="form-control text-right" placeholder="0" ng-model="jiahao.price">
+    <input type='number' class="form-control text-right" placeholder="0" ng-model="jiahao.price"
+           ng-disabled="!editingJiahao">
     <span class="input-group-addon">元/次</span>
     <span class="input-group-btn">
-      <button class="btn btn-default" type="button">
-        <i class="fa fa-pencil-square-o profile-action-button"></i>
+      <button class="btn btn-default" type="button" ng-click="editJiahao()">
+        <i class="fa fa-pencil-square-o profile-action-button" ng-hide="editingJiahao"></i>
+        <i class="fa fa-check profile-action-button" ng-show="editingJiahao"></i>
       </button>
     </span>
   </div>
   <p></p>
+
+  <div id="editJiahao" class="panel panel-default" ng-show="editingJiahao">
+    <div class="panel-heading">设置每日加号数量</div>
+    <div class="panel-body">
+      <div class="input-group input-group-lg" ng-repeat="(day, number) in jiahao.weekQuantity">
+        <span class="input-group-addon">{{days[day]}}</span>
+        <input type='number' class="form-control text-right" placeholder="0" ng-model="jiahao.weekQuantity[day]">
+        <span class="input-group-addon">个</span>
+      </div>
+    </div>
+  </div>
+
 
   <div class="input-group input-group-lg">
     <span class="input-group-addon">随诊</span>

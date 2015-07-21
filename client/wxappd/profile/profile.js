@@ -4,6 +4,7 @@
  */
 angular.module('ylbWxApp')
   .controller('wxProfileCtrl', ['$scope', '$rootScope', '$stateParams', '$http', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $stateParams, $http, $alert, resources, commonUtils) {
+    var snapshot = {}; // snapshot data to compare changes.
     var openid = $stateParams.openid;
     if (openid) {
       // load doctor data.
@@ -14,7 +15,8 @@ angular.module('ylbWxApp')
             if (!$rootScope.checkProfileActivated(doctor)) {
               return;
             }
-            prepareDoctorDate(doctor);
+            prepareDoctorData(doctor);
+            preparePageData();
           } else {
             alertErr();
           }
@@ -26,7 +28,7 @@ angular.module('ylbWxApp')
       return;
     }
 
-    var prepareDoctorDate = function (doctor) {
+    var prepareDoctorData = function (doctor) {
       $scope.doctor = doctor;
       $scope.doctor.age = commonUtils.calculateAge(doctor.birthday);
       $scope.doctor.displaySex = resources.sex[doctor.sex];
@@ -35,16 +37,26 @@ angular.module('ylbWxApp')
       for (var i = 0; i < doctor.services.length; i++) {
         // type should be one of 'jiahao, suizhen, huizhen'.
         $scope[doctor.services[i].type] = doctor.services[i];
+        snapshot[doctor.services[i].type] = angular.copy(doctor.services[i]);
       }
       if (!$scope.jiahao) {
         $scope.jiahao = resources.doctorServices.jiahao;
+        $scope.jiahao.weekQuantity = {d1: '', d2: '', d3: '', d4: '', d5: ''};
+        snapshot.jiahao = angular.copy($scope.jiahao);
       }
       if (!$scope.suizhen) {
         $scope.suizhen = resources.doctorServices.suizhen;
+        snapshot.suizhen = angular.copy($scope.suizhen);
       }
       if (!$scope.huizhen) {
         $scope.huizhen = resources.doctorServices.huizhen;
+        snapshot.huizhen = angular.copy($scope.huizhen);
       }
+    };
+
+    var preparePageData = function () {
+      // get days display names for jiahao service.
+      $scope.days = resources.days;
     };
 
     var alertErr = function () {
@@ -52,15 +64,30 @@ angular.module('ylbWxApp')
     };
 
     /**
+     * Toogle edit status of JiaHao.
+     */
+    $scope.editJiahao = function () {
+      if ($scope.editingJiahao) {
+        // save
+        if (!angular.equals(snapshot.jiahao, $scope.jiahao)) {
+          updateService();
+        }
+      } else {
+        // edit
+      }
+      $scope.editingJiahao = !$scope.editingJiahao;
+    };
+    /**
      * Toggle edit status of SuiZhen.
      */
     $scope.editSuizhen = function () {
       if ($scope.editingSuizhen) {
         // save
-        updateService();
+        if (!angular.equals(snapshot.suizhen, $scope.suizhen)) {
+          updateService();
+        }
       } else {
         // edit
-        console.log('edit');
       }
       $scope.editingSuizhen = !$scope.editingSuizhen;
     };
@@ -70,10 +97,11 @@ angular.module('ylbWxApp')
     $scope.editHuizhen = function () {
       if ($scope.editingHuizhen) {
         // save
-        updateService();
+        if (!angular.equals(snapshot.huizhen, $scope.huizhen)) {
+          updateService();
+        }
       } else {
         // edit
-        console.log('edit');
       }
       $scope.editingHuizhen = !$scope.editingHuizhen;
     };
@@ -86,7 +114,6 @@ angular.module('ylbWxApp')
       $http.put('/api/doctors/' + $scope.doctor._id, {services: servicesData})
         .success(function (resp) {
           var updatedServices = resp.data.services;
-          console.log(updatedServices);
           for (var i = 0; i < updatedServices.length; i++) {
             $scope[updatedServices[i].type] = updatedServices [i];
           }
@@ -95,4 +122,5 @@ angular.module('ylbWxApp')
           $rootScope.alertError(err);
         });
     };
-  }]);
+  }])
+;

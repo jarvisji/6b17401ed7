@@ -17,6 +17,15 @@ angular.module('ylbWxApp')
       huizhen: {type: 'huizhen'},
       suizhen: {type: 'suizhen'}
     },
+    days: {
+      d0: '周日',
+      d1: '周一',
+      d2: '周二',
+      d3: '周三',
+      d4: '周四',
+      d5: '周五',
+      d6: '周六'
+    },
     province: {
       "1": "北京",
       "2": "上海",
