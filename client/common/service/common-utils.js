@@ -4,7 +4,7 @@
  */
 
 angular.module('ylbWxApp')
-  .factory('ylb.commonUtils', function () {
+  .factory('ylb.commonUtils', ['ylb.resources', function (resources) {
     return {
       calculateAge: function (birthday) {
         var birthdayDate = birthday;
@@ -26,6 +26,44 @@ angular.module('ylbWxApp')
           }
         }
         return age;
+      },
+      /**
+       * Get drop-down data for Provinces.
+       * @returns {Array}
+       */
+      getDdProvince: function () {
+        var scopeVar = [];
+        angular.forEach(resources.province, function (value, key) {
+          scopeVar.push({'text': value, 'click': 'onProvinceSelected("' + key + '")'});
+        });
+        return scopeVar;
+      },
+      /**
+       * Get province key by name.
+       * @param provinceName
+       * @returns {*}
+       */
+      getProvinceKey: function (provinceName) {
+        var ret;
+        angular.forEach(resources.province, function (value, key) {
+          if (value == provinceName) {
+            ret = key;
+          }
+        });
+        return ret;
+      },
+      /**
+       * Get drop-down data for Cities of special Province.
+       * @param provinceKey
+       * @returns {Array}
+       */
+      getDdCity: function (provinceKey) {
+        var scopeVar = [];
+        var city = resources.city[provinceKey];
+        angular.forEach(city, function (value, key) {
+          scopeVar.push({'text': value, 'click': 'onCitySelected("' + key + '")'})
+        });
+        return scopeVar;
       }
     }
-  });
+  }]);

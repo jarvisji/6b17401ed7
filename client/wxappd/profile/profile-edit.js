@@ -2,7 +2,7 @@
  * Created by Ting on 2015/7/20.
  */
 angular.module('ylbWxApp')
-  .controller('wxProfileEditCtrl', ['$scope', '$rootScope', '$stateParams', '$state', '$timeout', '$http', '$alert', 'ylb.resources', function ($scope, $rootScope, $stateParams, $state, $timeout, $http, $alert, resources) {
+  .controller('wxProfileEditCtrl', ['$scope', '$rootScope', '$stateParams', '$state', '$timeout', '$http', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $stateParams, $state, $timeout, $http, $alert, resources, commonUtils) {
 
     var openid = $stateParams.openid;
     // load doctor data on page init.
@@ -38,13 +38,18 @@ angular.module('ylbWxApp')
       }
 
       if (!$scope.doctor.province) {
-        angular.forEach(resources.province, function (value, key) {
-          if (value == doctor.wechat.province) {
-            $scope.onProvinceSelected(key);
-          }
-        });
-        $scope.doctor.city = doctor.wechat.city;
+        $scope.doctor.province = doctor.wechat.province;
       }
+      var provinceKey = commonUtils.getProvinceKey($scope.doctor.province);
+      $scope.onProvinceSelected(provinceKey);
+
+      // Upon 'onProvinceSelected' method will set $scope.doctor.city to ddCity[0], here need set it back..
+      if (!doctor.city) {
+        $scope.doctor.city = doctor.wechat.city;
+      } else {
+        $scope.doctor.city = doctor.city;
+      }
+
 
       if (!$scope.doctor.sex) {
         $scope.doctor.displaySex = resources.sex[doctor.wechat.sex];
@@ -72,10 +77,7 @@ angular.module('ylbWxApp')
         $scope.ddSex.push({'text': value, 'click': 'onSexSelected("' + key + '")'});
       });
 
-      $scope.ddProvince = [];
-      angular.forEach(resources.province, function (value, key) {
-        $scope.ddProvince.push({'text': value, 'click': 'onProvinceSelected("' + key + '")'});
-      });
+      $scope.ddProvince = commonUtils.getDdProvince();
 
       $scope.ddYear = [];
       var currentYear = new Date().getFullYear();
@@ -127,10 +129,7 @@ angular.module('ylbWxApp')
       $scope.doctor.province = resources.province[provinceKey];
       $scope.city = resources.city[provinceKey];
       // prepare city data.
-      $scope.ddCity = [];
-      angular.forEach($scope.city, function (value, key) {
-        $scope.ddCity.push({'text': value, 'click': 'onCitySelected("' + key + '")'})
-      });
+      $scope.ddCity = commonUtils.getDdCity(provinceKey);
       $scope.doctor.city = $scope.ddCity[0].text;
     };
 
