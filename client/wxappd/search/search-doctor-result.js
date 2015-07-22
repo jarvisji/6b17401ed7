@@ -2,7 +2,7 @@
  * Created by Ting on 2015/7/21.
  */
 angular.module('ylbWxApp')
-  .controller('wxSearchDoctorResultCtrl', ['$scope', '$rootScope', '$http', function ($scope, $rootScope, $http) {
+  .controller('wxSearchDoctorResultCtrl', ['$scope', '$rootScope', '$http', '$state', function ($scope, $rootScope, $http, $state) {
 
     if (!$rootScope.searchDoctorResult) {
       // most likely access this page directly.
@@ -23,8 +23,13 @@ angular.module('ylbWxApp')
             $scope.noMoreRecords = true;
           }
         }).error(function (err, status) {
-          $rootScope.alertError(err, status);
+          $rootScope.alertError(null, err, status);
         });
+    };
+
+    $scope.showDetails = function (idx) {
+      var openid = $rootScope.searchDoctorResult[idx].wechat.openid;
+      $state.go('profile', {openid: openid});
     }
 
   }]);

@@ -21,9 +21,9 @@ angular.module('ylbWxApp')
     };
 
     $scope.performSearch = function () {
-      var filter = {};
+      var filter = {level: {'$gt': 2}}; // search result will only include 'real' doctors.
       if ($scope.search.number != undefined && $scope.search.number != '') {
-        filter = {'number': $scope.search.number};
+        filter.number = $scope.search.number;
       } else {
         if ($scope.search.province) {
           filter.province = $scope.search.province;
@@ -49,9 +49,11 @@ angular.module('ylbWxApp')
             $rootScope.searchDoctorParams = params;
             $rootScope.searchDoctorResult = resp.data;
             $state.go('search-doctor-result');
+          } else {
+            $rootScope.alertWarn('', '找不到符合条件的医生。');
           }
         }).error(function (err, status) {
-          $rootScope.alertError(err, status);
+          $rootScope.alertError(null, err, status);
         });
     }
   }]);

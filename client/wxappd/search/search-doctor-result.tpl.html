@@ -1,6 +1,6 @@
 <section id="searchDoctorResult">
   <div class="general-item-list">
-    <div class="item" ng-repeat="doctor in searchDoctorResult">
+    <div class="item" ng-repeat="doctor in searchDoctorResult" ng-click="showDetails($index)">
       <div class="item-head">
         <div class="item-details">
           <img class="item-pic" ng-src="{{doctor.wechat.headimgurl}}">
