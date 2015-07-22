@@ -61,12 +61,12 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
      */
     $rootScope.alertError = function (_title, content, status) {
       var title = generateAlertTitle('错误 ', _title);
-      $alert({title: title + ":", content: err, placement: 'top', type: 'danger', container: '#alert'});
+      $alert({title: title + ":", content: err, placement: 'top', type: 'danger', duration: 2, container: '#alert'});
     };
 
     $rootScope.alertWarn = function (_title, content, status) {
       var title = generateAlertTitle('警告 ', _title);
-      $alert({title: title, content: content, placement: 'top', type: 'warning', container: '#alert'});
+      $alert({title: title, content: content, placement: 'top', type: 'warning', duration: 2, container: '#alert'});
     };
 
     var generateAlertTitle = function (title, _title) {
