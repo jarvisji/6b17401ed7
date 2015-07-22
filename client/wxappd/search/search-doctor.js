@@ -24,6 +24,7 @@ angular.module('ylbWxApp')
       var filter = {};
       if ($scope.search.number != undefined && $scope.search.number != '') {
         filter.number = $scope.search.number;
+        filter.level = {'$gt': 1}; // search result will only include 'regular' and 'real' doctors.
       } else {
         if ($scope.search.province) {
           filter.province = $scope.search.province;
@@ -41,8 +42,8 @@ angular.module('ylbWxApp')
         if ($scope.search.name) {
           filter.name = '*' + $scope.search.name + '*';
         }
+        filter.level = {'$gt': 2}; // search result will only include 'real' doctors.
       }
-      filter.level = {'$gt': 2}; // search result will only include 'real' doctors.
 
       var params = {filter: filter, limit: 2};
       $http.get('/api/doctors', {params: params})
