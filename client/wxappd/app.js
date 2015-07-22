@@ -13,7 +13,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
       controller: 'wxProfileCtrl'
     });
     $stateProvider.state('profile-edit', {
-      url: '/profile/:openid/edit',
+      url: '/profile/:openid/edit?firstTime',
       templateUrl: 'wxappd/profile/profile-edit.tpl.html',
       controller: 'wxProfileEditCtrl'
     });
@@ -48,10 +48,21 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
         .success(function (resp) {
           // save user verification info to session.
           $cookies.putObject('currentUser', resp.data);
-          $state.go('profile', {openid: openid});
+          if (resp.data.doctor && !resp.data.doctor.name) {
+            $state.go('profile-edit', {openid: openid, firstTime: true});
+          } else if (resp.data.patient && !resp.data.patient.name) {
+            $state.go('profile-patient-edit', {openid: openid, firstTime: true});
+          } else {
+            $state.go(redirect, {openid: openid});
+          }
         }).error(function (resp, status) {
           $cookies.remove('currentUser');
-          $rootScope.alertError(null, resp.error.message, status);
+          if (status == 404) {
+            // user not registered
+            $rootScope.alertError('', '您还未关注我们的公众号。');
+          } else {
+            $rootScope.alertError(null, resp.error.message, status);
+          }
         });
     };
     verifyAndGetUserInfo();
@@ -90,8 +101,11 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
      * Every page should call this method to make sure user is verified.
      */
     $rootScope.checkUserVerified = function () {
-      if (!$cookies.getObject('currentUser')) {
+      var verifiedData = $cookies.getObject('currentUser');
+      if (!verifiedData) {
         $state.go('error-not-from-wechat');
+      } else {
+        return verifiedData;
       }
     };
 

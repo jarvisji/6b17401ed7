@@ -6,6 +6,7 @@ angular.module('ylbWxApp')
     $rootScope.checkUserVerified();
 
     var openid = $stateParams.openid;
+    $scope.firstTime = $stateParams.firstTime;
     // load doctor data on page init.
     if (openid) {
       $http.get('/api/doctors', {params: {filter: {'wechat.openid': openid}}})
