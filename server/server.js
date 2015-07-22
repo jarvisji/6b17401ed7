@@ -4,6 +4,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+var wechatApi = require('wechat-api');
 var debug = require('debug')('ylb.app');
 var conf = require('./conf');
 
@@ -38,15 +39,15 @@ var registerModels = function () {
 
 var registerRoutes = function () {
   debug('Register routes...');
-  var wxproxyDoctor = require('./middleware/wxproxy-doctor')(app);
+  var api = new wechatApi(conf.wechat.appid, conf.wechat.appsecret);
+  var wxproxyDoctor = require('./middleware/wxproxy-doctor')(app, api);
   var doctorCtrl = require('./controller/doctor-controller')(app);
-  var wechatCtrl = require('./controller/wechat-controller')(app);
-  //app.use('/wxproxy', function(req, res, next){
-  //  debug('Got request data: ', req.body);
-  //  next();
-  //});
-  app.use('/wxproxy', wxproxyDoctor); // rename to /wxproxy-doctor
+  var wechatCtrl = require('./controller/wechat-controller')(app, api);
+
+  // TODO: add authentication for following APIs.
+  app.use('/wxproxy', wxproxyDoctor); // TODO: rename to /wxproxy-doctor
   app.post('/wechat/menu', wechatCtrl.createMenu);
+  app.get('/wechat/jssdkconfig', wechatCtrl.getJsSdkConfig);
   app.post('/api/doctors', doctorCtrl.createDoctor);
   app.get('/api/doctors', doctorCtrl.findDoctors);
   app.put('/api/doctors/:id', doctorCtrl.saveDoctor);

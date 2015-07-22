@@ -2,13 +2,11 @@
  Created by Ting on 2015/7/17.
  */
 var wechat = require('wechat');
-var wechatApi = require('wechat-api');
 var debug = require('debug')('ylb.wechat');
 var resources = require('../resources')();
 var conf = require('../conf');
 
-module.exports = function (app) {
-  var api = new wechatApi(conf.wechat.appid, conf.wechat.appsecret);
+module.exports = function (app, api) {
   var Doctor = app.models.Doctor;
 
   /**
