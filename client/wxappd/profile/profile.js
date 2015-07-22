@@ -21,7 +21,7 @@ angular.module('ylbWxApp')
             alertErr();
           }
         }).error(function (err) {
-          $rootScope.alertError(err);
+          $rootScope.alertError(null, err, status);
         });
     } else {
       alertErr();
@@ -129,7 +129,7 @@ angular.module('ylbWxApp')
           }
 
         }).error(function (err) {
-          $rootScope.alertError(err);
+          $rootScope.alertError(null, err, status);
         });
     };
 

@@ -59,11 +59,25 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
      * Common method to alert error.
      * @param err
      */
-    $rootScope.alertError = function (err, status) {
-      var title = 'error ';
-      if (status)
-        title += status;
-
+    $rootScope.alertError = function (_title, content, status) {
+      var title = generateAlertTitle('错误 ', _title);
       $alert({title: title + ":", content: err, placement: 'top', type: 'danger', container: '#alert'});
+    };
+
+    $rootScope.alertWarn = function (_title, content, status) {
+      var title = generateAlertTitle('警告 ', _title);
+      $alert({title: title, content: content, placement: 'top', type: 'warning', container: '#alert'});
+    };
+
+    var generateAlertTitle = function (title, _title) {
+      if (_title != undefined && _title != null)
+        title = _title;
+
+      if (status)
+        title += '[' + status + ']：';
+      else if (title != '') {
+        title += '：';
+      }
+      return title;
     }
   }]);
