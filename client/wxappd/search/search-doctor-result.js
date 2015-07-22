@@ -3,6 +3,7 @@
  */
 angular.module('ylbWxApp')
   .controller('wxSearchDoctorResultCtrl', ['$scope', '$rootScope', '$http', '$state', function ($scope, $rootScope, $http, $state) {
+    $rootScope.checkUserVerified();
 
     if (!$rootScope.searchDoctorResult) {
       // most likely access this page directly.

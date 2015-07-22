@@ -4,6 +4,8 @@
  */
 angular.module('ylbWxApp')
   .controller('wxProfileCtrl', ['$scope', '$rootScope', '$stateParams', '$http', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $stateParams, $http, $alert, resources, commonUtils) {
+    $rootScope.checkUserVerified();
+
     var snapshot = {}; // snapshot data to compare changes.
     var openid = $stateParams.openid;
     if (openid) {

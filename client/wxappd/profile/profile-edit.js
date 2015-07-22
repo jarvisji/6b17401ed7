@@ -3,6 +3,7 @@
  */
 angular.module('ylbWxApp')
   .controller('wxProfileEditCtrl', ['$scope', '$rootScope', '$stateParams', '$state', '$timeout', '$http', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $stateParams, $state, $timeout, $http, $alert, resources, commonUtils) {
+    $rootScope.checkUserVerified();
 
     var openid = $stateParams.openid;
     // load doctor data on page init.

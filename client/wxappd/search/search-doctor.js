@@ -4,6 +4,7 @@
  */
 angular.module('ylbWxApp')
   .controller('wxSearchDoctorCtrl', ['$scope', '$rootScope', '$http', '$state', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, resources, commonUtils) {
+    $rootScope.checkUserVerified();
 
     $scope.search = {};
     $scope.ddProvince = commonUtils.getDdProvince();

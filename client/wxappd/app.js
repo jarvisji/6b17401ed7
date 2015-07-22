@@ -3,6 +3,10 @@
  */
 angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStrap'])
   .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+    $stateProvider.state('entry', {
+      url: '/?openid&access_token&redirect',
+      controller: 'rootCtrl'
+    });
     $stateProvider.state('profile', {
       url: '/profile/:openid',
       templateUrl: 'wxappd/profile/profile.tpl.html',
@@ -23,9 +27,36 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
       templateUrl: 'wxappd/search/search-doctor-result.tpl.html',
       controller: 'wxSearchDoctorResultCtrl'
     });
-    //$urlRouterProvider.otherwise('wx_activate');
+    $stateProvider.state('error-not-from-wechat', {
+      template: '<div class="alert alert-danger" role="alert">请从微信访问此页面。</div>'
+    });
+    //$urlRouterProvider.otherwise('entry');
   }])
-  .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$log', '$timeout', '$alert', function ($scope, $rootScope, $state, $log, $timeout, $alert) {
+  .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', '$timeout', '$alert', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log, $timeout, $alert) {
+    /**
+     * Get user information by given openid and access_token.
+     * This is the first step to access web application. If this step failed, all other pages should not be able to accessed.
+     */
+    var verifyAndGetUserInfo = function () {
+      var openid = $stateParams.openid;
+      var access_token = $stateParams.access_token;
+      var redirect = $stateParams.redirect;
+      if (!openid || !access_token)
+        return;
+
+      $http.get('/api/verify', {params: {openid: openid, access_token: access_token}})
+        .success(function (resp) {
+          // save user verification info to session.
+          $cookies.putObject('currentUser', resp.data);
+          $state.go('profile', {openid: openid});
+        }).error(function (resp, status) {
+          $cookies.remove('currentUser');
+          $rootScope.alertError(null, resp.error.message, status);
+        });
+    };
+    verifyAndGetUserInfo();
+
+
     // Common method for each controller.
     $rootScope.validateForm = function (form) {
       var formValid = form.$valid;
@@ -56,12 +87,21 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
     };
 
     /**
+     * Every page should call this method to make sure user is verified.
+     */
+    $rootScope.checkUserVerified = function () {
+      if (!$cookies.getObject('currentUser')) {
+        $state.go('error-not-from-wechat');
+      }
+    };
+
+    /**
      * Common method to alert error.
      * @param err
      */
     $rootScope.alertError = function (_title, content, status) {
       var title = generateAlertTitle('错误 ', _title);
-      $alert({title: title + ":", content: err, placement: 'top', type: 'danger', duration: 2, container: '#alert'});
+      $alert({title: title, content: content, placement: 'top', type: 'danger', duration: 5, container: '#alert'});
     };
 
     $rootScope.alertWarn = function (_title, content, status) {
