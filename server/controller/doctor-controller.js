@@ -49,8 +49,16 @@ module.exports = function (app) {
    */
   var findDoctors = function (req, res) {
     var filter = {};
+    var limit = 10;
+    var sort = {created: -1};
     if (req.query.filter) {
       filter = JSON.parse(req.query.filter);
+    }
+    if (!isNaN(req.query.limit)) {
+      limit = Number(req.query.limit);
+    }
+    if (req.query.sort) {
+      sort = JSON.parse(req.query.sort);
     }
 
     // deal with wildcard in search value.
@@ -71,7 +79,7 @@ module.exports = function (app) {
       }
     }
 
-    Doctor.find(filter, function (err, doctors) {
+    Doctor.find(filter).limit(limit).sort(sort).exec(function (err, doctors) {
       if (err) {
         debug('Find doctor error: ', err);
         return res.status(500).json(utils.jsonResult(err));
@@ -87,12 +95,12 @@ module.exports = function (app) {
    */
   var createDoctor = function (req, res) {
     //TODO: check authorization.
-    Doctor.count(function (err, count) {
-      if (err) return debug('Get doctor count error: ', err);
+    Doctor.find({}, 'number').limit(1).sort({'number': -1}).exec(function (err, maxNumberDoctor) {
+      if (err) return debug('Get max doctor number error: ', err);
       var doctor = new Doctor(req.body);
       doctor.salt = Math.round((new Date().valueOf() * Math.random()));
       doctor.password = sha512(doctor.salt + doctor.password);
-      doctor.number = count + 1;
+      doctor.number = maxNumberDoctor[0].number + 1;
       doctor.save(function (err, data) {
         if (err) {
           debug('Save doctor error: ', err);

@@ -3,7 +3,7 @@
  * Created by Ting on 2015/7/21.
  */
 angular.module('ylbWxApp')
-  .controller('wxSearchDoctorCtrl', ['$scope', '$rootScope', '$http','$state', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, resources, commonUtils) {
+  .controller('wxSearchDoctorCtrl', ['$scope', '$rootScope', '$http', '$state', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, resources, commonUtils) {
 
     $scope.search = {};
     $scope.ddProvince = commonUtils.getDdProvince();
@@ -42,11 +42,11 @@ angular.module('ylbWxApp')
           filter.name = '*' + $scope.search.name + '*';
         }
       }
-      console.log(filter);
-      $http.get('/api/doctors', {params: {filter: filter}})
+      var params = {filter: filter, limit: 2};
+      $http.get('/api/doctors', {params: params})
         .success(function (resp) {
-          console.log(resp);
           if (resp.count > 0) {
+            $rootScope.searchDoctorParams = params;
             $rootScope.searchDoctorResult = resp.data;
             $state.go('search-doctor-result');
           }

@@ -62,6 +62,69 @@ section {
 }
 
 /**------------------------------------------------
+ * General item list styles for doctors/patients.
+ */
+
+.general-item-list > .item {
+  padding: 10px 0;
+  border-bottom: 1px solid #F1F4F7;
+}
+.general-item-list > .item:last-child {
+  border-bottom: 0;
+}
+.general-item-list > .item > .item-head {
+  margin-bottom: 5px;
+}
+.general-item-list > .item > .item-head:before, .general-item-list > .item > .item-head:after {
+  content: " ";
+  display: table;
+}
+.general-item-list > .item > .item-head:after {
+  clear: both;
+}
+.general-item-list > .item > .item-head > .item-details {
+  display: inline-block;
+  float: left;
+}
+.general-item-list > .item > .item-head > .item-details > .item-pic {
+  height: 35px;
+  margin-right: 10px;
+}
+.general-item-list > .item > .item-head > .item-details > .item-pic-round {
+  height: 35px;
+  margin-right: 10px;
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  -ms-border-radius: 100%;
+  -o-border-radius: 100%;
+  border-radius: 100%;
+}
+.general-item-list > .item > .item-head > .item-details > .item-name {
+  display: inline-block;
+  margin-right: 10px;
+}
+.general-item-list > .item > .item-head > .item-details > .item-label {
+  color: #C0C9CC;
+}
+.general-item-list > .item > .item-head > .item-status {
+  color: #C0C9CC;
+  top: 10px;
+  position: relative;
+  display: inline-block;
+  float: right;
+}
+.general-item-list > .item > .item-head > .item-status > .badge {
+  margin-top: -2px;
+}
+.general-item-list > .item > .item-body {
+  color: #96a5aa;
+}
+
+/**
+ * General item list styles end
+ * ------------------------------------------------ */
+
+/**------------------------------------------------
  * for ui.bootstrap. http://angular-ui.github.io/bootstrap
  * Removed empty href attributes from directive templates and as a result styling is not applied correctly
  */

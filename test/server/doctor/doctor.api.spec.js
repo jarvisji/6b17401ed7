@@ -9,6 +9,12 @@ describe('Test doctor APIs.', function () {
   var ts = new Date().getTime();
   var mockMobile = mockOpenid = 'test-' + ts;
   var doctorId;
+  var mockDoctor = {
+    'mobile': mockMobile,
+    'name': mockMobile,
+    'wechat.openid': mockOpenid,
+    'wechat.headimgurl': '/assets/image/avatar-64.jpg'
+  };
 
   //beforeAll(function(){
   //  // TODO: delete test data for user. Get mongoose from util.
@@ -18,7 +24,7 @@ describe('Test doctor APIs.', function () {
 
   it('Test create doctor.', function (done) {
     util.req.json('post', '/api/doctors')
-      .send({'mobile': mockMobile, 'wechat.openid': mockMobile})
+      .send(mockDoctor)
       .expect(201)
       .end(function (err, res) {
         if (err) done(err);
@@ -35,7 +41,7 @@ describe('Test doctor APIs.', function () {
 
   it('Test create doctor with exists mobile phone number should fail', function (done) {
     util.req.json('post', '/api/doctors')
-      .send({'mobile': mockMobile, 'wechat.openid': mockOpenid})
+      .send(mockDoctor)
       .expect(409, done);
   });
 
