@@ -64,9 +64,8 @@ module.exports = function (app) {
     // deal with wildcard in search value.
     for (var key in filter) {
       var value = filter[key];
-      console.log('key:', key, value);
       if (typeof(value) != 'string') {
-        break;
+        continue;
       }
       if (value == '*') {
         delete filter[key];
@@ -79,6 +78,7 @@ module.exports = function (app) {
       }
     }
 
+    debug('Finding doctors, filter: %o, limit: %d, sort: %o', filter, limit, sort);
     Doctor.find(filter).limit(limit).sort(sort).exec(function (err, doctors) {
       if (err) {
         debug('Find doctor error: ', err);
