@@ -1,0 +1,57 @@
+<div id="alert"></div>
+<div ng-show="patient">
+  <section class="profile-section">
+    <div class="row">
+      <div class="col-xs-6">
+        <img ng-src="{{patient.wechat.headimgurl}}" class="img-rounded" style="width:100%">
+      </div>
+      <div class="col-xs-6">
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="profile-usertitle-name">{{patient.name}}</div>
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="profile-desc-title">年龄：{{patient.age}}</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="profile-desc-title">性别：{{patient.displaySex}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p></p>
+
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="profile-desc-title">医联邦ID：{{patient.number}}</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="profile-desc-title">地区：{{patient.province}} {{patient.city}}</div>
+      </div>
+    </div>
+
+    <div class="row" ng-repeat="sickness in patient.sickness">
+      <div class="col-xs-12 profile-desc-text">
+        {{sickness}}
+      </div>
+    </div>
+
+    <div class="profile-section-action-button profile-action-button" ng-show="isSelf">
+      <a ui-sref="profile-patient-edit({ openid: patient.wechat.openid })"><i class="fa fa-pencil-square-o"></i></a>
+    </div>
+  </section>
+
+
+  <section>
+    <div class="follow-buttons" ng-hide="isSelf">
+      <button type="button" class="btn btn-primary btn-block btn-lg" ng-click="followPatient()">关注病友</button>
+    </div>
+  </section>
+</div>
