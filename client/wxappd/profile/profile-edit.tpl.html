@@ -20,7 +20,7 @@
     <input type="text" class="form-control" id="mobile" name="mobile" placeholder="" ng-model="doctor.mobile"
            maxlength="11" ng-pattern="/^1[3-8]\d{9}$/" required>
   </div>
-  <div class="form-group">
+  <div class="form-group" ng-class="{'has-error':sexInvalid}">
     <label for="sex">性别</label>
     <button type="button" class="btn btn-default btn-block" id="sex" name="sex" bs-dropdown="ddSex">
       {{doctor.displaySex}} <span class="caret"></span></button>
@@ -34,12 +34,12 @@
     <button type="button" class="btn btn-default" bs-dropdown="ddDay">
       {{doctor.birthdayDay?doctor.birthdayDay:'日'}} <span class="caret"></span></button>
   </div>
-  <div class="form-group">
+  <div class="form-group" ng-class="{'has-error':provinceInvalid}">
     <label class="control-label" for="province">省份</label>
     <button type="button" class="btn btn-default btn-block" id="province" name="province" bs-dropdown="ddProvince">
       {{doctor.province?doctor.province:'请选择'}} <span class="caret"></span></button>
   </div>
-  <div class="form-group">
+  <div class="form-group" ng-class="{'has-error':cityInvalid}">
     <label class="control-label" for="city">城市</label>
     <button type="button" class="btn btn-default btn-block" id="city" name="city" bs-dropdown="ddCity">
       {{doctor.city?doctor.city:'请选择'}} <span class="caret"></span>

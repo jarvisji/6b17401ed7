@@ -12,6 +12,10 @@ angular.module('ylbWxApp')
       2: '正式',
       3: '实名'
     },
+    patientLevel: {
+      1: '普通',
+      2: '正式'
+    },
     doctorServices: {
       jiahao: {type: 'jiahao'},
       huizhen: {type: 'huizhen'},

@@ -14,9 +14,6 @@ angular.module('ylbWxApp')
         .success(function (res) {
           if (res.count > 0) {
             var doctor = res.data[0];
-            if (!$rootScope.checkProfileActivated(doctor)) {
-              return;
-            }
             prepareDoctorData(doctor);
             preparePageData();
           } else {
@@ -35,6 +32,7 @@ angular.module('ylbWxApp')
       $scope.doctor.age = commonUtils.calculateAge(doctor.birthday);
       $scope.doctor.displaySex = resources.sex[doctor.sex];
       $scope.doctor.displayLevel = resources.doctorLevel[doctor.level];
+      $rootScope.checkAvatar(doctor);
 
       // prepare services data.
       for (var i = 0; i < doctor.services.length; i++) {

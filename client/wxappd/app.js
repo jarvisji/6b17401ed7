@@ -8,14 +8,24 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
       controller: 'rootCtrl'
     });
     $stateProvider.state('profile', {
-      url: '/profile/:openid',
+      url: '/profile/doctor/:openid',
       templateUrl: 'wxappd/profile/profile.tpl.html',
       controller: 'wxProfileCtrl'
     });
     $stateProvider.state('profile-edit', {
-      url: '/profile/:openid/edit?firstTime',
+      url: '/profile/doctor/:openid/edit?firstTime',
       templateUrl: 'wxappd/profile/profile-edit.tpl.html',
       controller: 'wxProfileEditCtrl'
+    });
+    $stateProvider.state('profile-patient', {
+      url: '/profile/patient/:openid',
+      templateUrl: 'wxappd/profile/profile-patient.tpl.html',
+      controller: 'wxProfilePatientCtrl'
+    });
+    $stateProvider.state('profile-patient-edit', {
+      url: '/profile/patient/:openid/edit?firstTime',
+      templateUrl: 'wxappd/profile/profile-patient-edit.tpl.html',
+      controller: 'wxProfilePatientEditCtrl'
     });
     $stateProvider.state('search-doctor', {
       url: '/search/doctor',
@@ -38,21 +48,26 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
      * This is the first step to access web application. If this step failed, all other pages should not be able to accessed.
      */
     var verifyAndGetUserInfo = function () {
+      $log.info('rootCtrl:verifyAndGetUserInfo()');
+      //$cookies.remove('currentUser');
       var openid = $stateParams.openid;
       var access_token = $stateParams.access_token;
       var redirect = $stateParams.redirect;
-      if (!openid || !access_token)
+      if (!openid || !access_token) {
+        console.log('return');
         return;
+      }
 
       $http.get('/api/verify', {params: {openid: openid, access_token: access_token}})
         .success(function (resp) {
           // save user verification info to session.
           $cookies.putObject('currentUser', resp.data);
+          // User must activate before start to use any functions.
           if (resp.data.doctor && !resp.data.doctor.name) {
             $state.go('profile-edit', {openid: openid, firstTime: true});
           } else if (resp.data.patient && !resp.data.patient.name) {
             $state.go('profile-patient-edit', {openid: openid, firstTime: true});
-          } else {
+          } else if (redirect) {
             $state.go(redirect, {openid: openid});
           }
         }).error(function (resp, status) {
@@ -85,17 +100,17 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
      * Common method to check doctor/patient activated or not. User must activate before start to use any functions.
      * @param profile Doctor/Patient
      */
-    $rootScope.checkProfileActivated = function (profile) {
-      if (!profile.name) {
-        $alert({title: '账户未激活：', content: '请先完善个人信息。', placement: 'top', type: 'danger', container: '#alert'});
-        $timeout(function () {
-          $state.go('profile-edit', {openid: profile.wechat.openid})
-        }, 2000);
-        return false;
-      } else {
-        return true;
-      }
-    };
+    //$rootScope.checkProfileActivated = function (profile) {
+    //  if (!profile.name) {
+    //    $alert({title: '账户未激活：', content: '请先完善个人信息。', placement: 'top', type: 'danger', container: '#alert'});
+    //    $timeout(function () {
+    //      $state.go('profile-edit', {openid: profile.wechat.openid})
+    //    }, 2000);
+    //    return false;
+    //  } else {
+    //    return true;
+    //  }
+    //};
 
     /**
      * Every page should call this method to make sure user is verified.
@@ -133,5 +148,15 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
         title += '：';
       }
       return title;
-    }
+    };
+
+    /**
+     * If doctor/patient doesn't have avatar set in wechat, use default.
+     * @param user
+     */
+    $rootScope.checkAvatar = function(user) {
+      if (!user.wechat.headimgurl) {
+        user.wechat.headimgurl = '/assets/image/avatar-64.jpg';
+      }
+    };
   }]);

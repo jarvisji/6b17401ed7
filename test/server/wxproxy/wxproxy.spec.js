@@ -8,7 +8,7 @@ var conf = require('../testConfig');
 describe('Test wxproxy functions.', function () {
 
   it('Wechat server request verification.', function (done) {
-    util.req.json('get', conf.wxProxyUrl)
+    util.req.json('get', conf.doctorWxProxyUrl)
       .expect(200)
       .expect(conf.echostr, done);
   });

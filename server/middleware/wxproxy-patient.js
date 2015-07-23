@@ -1,45 +1,46 @@
 /**
- Created by Ting on 2015/7/17.
+ Created by Ting on 2015/7/22.
  */
 var wechat = require('wechat');
-var debug = require('debug')('ylb.wechat');
+var debug = require('debug')('ylb.wechat.patient');
 var resources = require('../resources')();
 var conf = require('../conf');
 
 module.exports = function (app, api) {
-  var Doctor = app.models.Doctor;
+  var Patient = app.models.Patient;
 
   /**
-   * Get wechat account information and create doctor account if not exist.
+   * Get wechat account information and create patient account if not exist.
    * @param message
    * @param res
    */
   var subscribe = function (message, res) {
-    debug('Doctor subscribe');
+    debug('Patient subscribe');
     api.getUser(message.FromUserName, function (err, result) {
       if (err) return debug('Subscribe: Get wechat user error: ', err);
-      Doctor.find({"wechat.openid": result.openid}, function (err, doctor) {
-        if (err) return debug('Subscribe: Find doctor in db error: ', err);
-        if (doctor.length && doctor.length > 0) {
-          debug('Subscribe: Doctor exist, update.');
-          Doctor.update({"wechat.openid": result.openid}, {
+      Patient.find({"wechat.openid": result.openid}, function (err, patient) {
+        if (err) return debug('Subscribe: Find patient in db error: ', err);
+        if (patient.length && patient.length > 0) {
+          debug('Subscribe: Patient exist, update.');
+          Patient.update({"wechat.openid": result.openid}, {
             wechat: result
           }, function (err, raw) {
-            if (err) return debug('Subscribe: Update doctor error: ', err);
-            debug('Subscribe: Update doctor success: ', raw);
+            if (err) return debug('Subscribe: Update patient error: ', err);
+            debug('Subscribe: Update patient success: ', raw);
             res.reply(resources.get('event.subscribe.welcome'));
           });
         } else {
-          debug('Subscribe: Doctor not exist, create.');
-          Doctor.find({}, 'number').limit(1).sort({'number': -1}).exec(function (err, maxNumberDoctor) {
-            if (err) return debug('Get doctor max number error: ', err);
-            Doctor.create({
+          debug('Subscribe: Patient not exist, create.');
+          Patient.find({}, 'number').limit(1).sort({'number': -1}).exec(function (err, maxNumberPatient) {
+            if (err) return debug('Get patient max number error: ', err);
+            console.log('maxNumberPatient:', maxNumberPatient);
+            Patient.create({
               mobile: 'openid_' + result.openid,
-              number: maxNumberDoctor + 1,
+              number: maxNumberPatient + 1,
               wechat: result
             }, function (err, raw) {
-              if (err) return debug('Subscribe: Save doctor error: ', err);
-              debug('Subscribe: Save doctor success: ', raw);
+              if (err) return debug('Subscribe: Save patient error: ', err);
+              debug('Subscribe: Save patient success: ', raw);
               res.reply(resources.get('event.subscribe.welcome'));
             });
           });
@@ -49,10 +50,10 @@ module.exports = function (app, api) {
   };
 
   var unsubscribe = function (message, res) {
-    debug('Doctor unsubscribe');
-    Doctor.update({'wechat.openid': message.FromUserName}, {'wechat.subscribe': 0}, function (err, result) {
-      if (err) debug('Unsubscribe: Update doctor subscribe status error: ', err);
-      debug('Unsubscribe: Doctor unsubscribe success: ', result);
+    debug('Patient unsubscribe');
+    Patient.update({'wechat.openid': message.FromUserName}, {'wechat.subscribe': 0}, function (err, result) {
+      if (err) debug('Unsubscribe: Update patient subscribe status error: ', err);
+      debug('Unsubscribe: Patient unsubscribe success: ', result);
       res.reply('unsubscribed');
     })
   };
@@ -66,7 +67,7 @@ module.exports = function (app, api) {
       } else if (message.Event == 'unsubscribe') {
         unsubscribe(message, res);
       } else if (message.MsgType == 'event' && message.Event == 'VIEW') {
-        // Doctor click menu which points to a url.
+        // Patient click menu which points to a url.
         // Windows client will not trigger this event.
         var url = message.EventKey;
         if (url.indexOf('openid=') > 0) {
@@ -78,5 +79,4 @@ module.exports = function (app, api) {
       }
     }
   )
-}
-;
+};

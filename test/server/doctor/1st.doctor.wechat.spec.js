@@ -1,4 +1,5 @@
 /**
+ * * This should the first running describe of doctor cases. Since other cases depends on registered data.
  * Created by Ting on 2015/7/17.
  */
 var should = require('should');
@@ -17,7 +18,7 @@ describe('Test wechat messages for doctor.', function () {
     message += '  <Event><![CDATA[subscribe]]></Event>';
     message += '</xml>';
 
-    test.req.xml('post', test.conf.wxProxyUrl)
+    test.req.xml('post', test.conf.doctorWxProxyUrl)
       .send(message)
       .expect(200)
       .end(function (err, res) {

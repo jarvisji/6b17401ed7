@@ -3,12 +3,11 @@
  */
 angular.module('ylbWxApp')
   .controller('wxProfileEditCtrl', ['$scope', '$rootScope', '$stateParams', '$state', '$timeout', '$http', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $stateParams, $state, $timeout, $http, $alert, resources, commonUtils) {
-    $rootScope.checkUserVerified();
-
+    var currentUser = $rootScope.checkUserVerified();
     var openid = $stateParams.openid;
     $scope.firstTime = $stateParams.firstTime;
     // load doctor data on page init.
-    if (openid) {
+    var loadDoctorData = function () {
       $http.get('/api/doctors', {params: {filter: {'wechat.openid': openid}}})
         .success(function (res) {
           if (res.count > 0) {
@@ -19,9 +18,11 @@ angular.module('ylbWxApp')
         }).error(function (err) {
 
         });
+    };
+    if (currentUser && currentUser.openid == openid) {
+      loadDoctorData();
     } else {
-      $alert({title: '页面加载错误：', content: '请从微信访问此页面。', placement: 'top', type: 'danger', container: '#alert'});
-      return;
+      $rootScope.alertError('', '没有权限。');
     }
 
     /**
@@ -35,7 +36,7 @@ angular.module('ylbWxApp')
         $scope.doctor.name = doctor.wechat.nickname;
       }
 
-      if ($scope.doctor.mobile.indexOf('openid_') == 0) {
+      if (isNaN($scope.doctor.mobile)) {
         $scope.doctor.mobile = '';
       }
 
@@ -58,13 +59,14 @@ angular.module('ylbWxApp')
         $scope.doctor.city = doctor.city;
       }
 
-
-      if (!$scope.doctor.sex) {
-        $scope.doctor.displaySex = resources.sex[doctor.wechat.sex];
-        $scope.doctor.sex = doctor.wechat.sex;
-      } else {
-        $scope.doctor.displaySex = resources.sex[doctor.sex];
+      if (!resources.sex[$scope.doctor.sex]) {
+        if (doctor.wechat.sex) {
+          $scope.doctor.sex = doctor.wechat.sex;
+        } else {
+          $scope.doctor.sex = 1;
+        }
       }
+      $scope.doctor.displaySex = resources.sex[$scope.doctor.sex];
 
       if ($scope.doctor.birthday) {
         var date = new Date($scope.doctor.birthday);
@@ -148,10 +150,15 @@ angular.module('ylbWxApp')
     $scope.save = function (form) {
       if (!$rootScope.validateForm(form))
         return;
-      if (!$scope.doctor.birthday) {
-        $scope.birthdayInvalid = true;
+
+      $scope.birthdayInvalid = !$scope.doctor.birthday;
+      $scope.provinceInvalid = !$scope.doctor.province;
+      $scope.cityInvalid = !$scope.doctor.city;
+      $scope.sexInvalid = !$scope.doctor.sex;
+      if ($scope.birthdayInvalid || $scope.provinceInvalid || $scope.cityInvalid || $scope.sexInvalid) {
         return;
       }
+
       var openid = $scope.doctor.wechat.openid;
       delete $scope.doctor.wechat; // won't change wechat data.
       $http.put('/api/doctors/' + $scope.doctor._id, $scope.doctor)

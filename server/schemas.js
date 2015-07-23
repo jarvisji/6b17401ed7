@@ -105,7 +105,7 @@ module.exports = function () {
   var patientSchema = new Schema({
     name: String,
     number: {type: Number, index: true, unique: true},
-    level: String, // 1-normal, 2-regular
+    level: {type: String, default: 1}, // 1-normal, 2-regular
     province: String,
     city: String,
     sickness: [String],
