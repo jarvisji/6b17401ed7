@@ -7,22 +7,10 @@ var util = require('../testUtils');
 
 describe('Test doctor APIs.', function () {
   var ts = new Date().getTime();
-  var mockMobile = mockOpenid = 'test-' + ts;
-  var doctorId;
-  var mockDoctor = {
-    'mobile': mockMobile,
-    'name': mockMobile,
-    'wechat.openid': mockOpenid,
-    'wechat.headimgurl': '/assets/image/avatar-64.jpg'
-  };
+  var doctorId, mockMobile;
+  var mockDoctor = util.conf.testData.doctors[0];
 
-  //beforeAll(function(){
-  //  // TODO: delete test data for user. Get mongoose from util.
-  //});
-  beforeEach(function () {
-  });
-
-  it('Test create doctor.', function (done) {
+  it.skip('Test create doctor.', function (done) {
     util.req.json('post', '/api/doctors')
       .send(mockDoctor)
       .expect(201)
@@ -39,7 +27,7 @@ describe('Test doctor APIs.', function () {
       });
   });
 
-  it('Test create doctor with exists mobile phone number should fail', function (done) {
+  it.skip('Test create doctor with exists mobile phone number should fail', function (done) {
     util.req.json('post', '/api/doctors')
       .send(mockDoctor)
       .expect(409, done);
@@ -47,11 +35,13 @@ describe('Test doctor APIs.', function () {
 
   it('Test find doctors with filter: openid', function (done) {
     util.req.json('get', '/api/doctors')
-      .query({filter: JSON.stringify({'wechat.openid': mockOpenid})})
+      .query({filter: JSON.stringify({'wechat.openid': mockDoctor.wechat.openid})})
       .expect(200)
       .end(function (err, res) {
         if (err) done(err);
         should(res.body.count).equal(1);
+        doctorId = res.body.data[0]._id;
+        console.log('find doctorId:', doctorId);
         done();
       });
   });
@@ -68,12 +58,11 @@ describe('Test doctor APIs.', function () {
 
   it('Test find doctors with filter: wildcard', function (done) {
     util.req.json('get', '/api/doctors')
-      .query({filter: JSON.stringify({'mobile': '*-' + ts})})
+      .query({filter: JSON.stringify({'mobile': 'test*'})})
       .expect(200)
       .end(function (err, res) {
         if (err) done(err);
-        should(res.body.count).equal(1);
-        should(res.body.data[0]._id).equal(doctorId);
+        should(res.body.count).equal(util.conf.testData.doctors.length);
         done();
       });
   });
@@ -151,7 +140,4 @@ describe('Test doctor APIs.', function () {
       expect(body.error).toBeDefined();
     });
   });
-
-
-})
-;
+});

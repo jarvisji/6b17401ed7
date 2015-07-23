@@ -22,6 +22,7 @@ describe('Test wechat messages for doctor.', function () {
       .send(message)
       .expect(200)
       .end(function (err, res) {
+        if (err) done(err);
         Doctor.findOne({'wechat.openid': test.conf.doctorOpenId}, function (err, doctor) {
           if (err) return done(err);
           should(doctor.wechat.subscribe).equal(1);
