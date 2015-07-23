@@ -52,7 +52,7 @@
     </div>
   </div>
 
-  <div class="profile-section-action-button profile-action-button">
+  <div class="profile-section-action-button profile-action-button" ng-show="isSelf">
     <a ui-sref="profile-edit({ openid: doctor.wechat.openid })"><i class="fa fa-pencil-square-o"></i></a>
   </div>
 </section>
@@ -60,8 +60,6 @@
 <section>
   测试选项：
   <ul>
-    <li><a href="" ng-click="isSelf=true">切换为医生</a></li>
-    <li><a href="" ng-click="isSelf=false">切换为患者</a></li>
     <li><a href="" ng-click="disableServicePrivilege=false">提升医生等级</a></li>
     <li><a href="" ng-click="disableServicePrivilege=true">降低医生等级</a></li>
   </ul>

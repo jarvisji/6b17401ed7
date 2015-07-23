@@ -4,12 +4,11 @@
  */
 angular.module('ylbWxApp')
   .controller('wxProfileCtrl', ['$scope', '$rootScope', '$stateParams', '$http', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $stateParams, $http, $alert, resources, commonUtils) {
-    $rootScope.checkUserVerified();
-
+    var currentUser = $rootScope.checkUserVerified();
     var snapshot = {}; // snapshot data to compare changes.
     var openid = $stateParams.openid;
-    if (openid) {
-      // load doctor data.
+
+    var loadDoctorData = function () {
       $http.get('/api/doctors', {params: {filter: {'wechat.openid': openid}}})
         .success(function (res) {
           if (res.count > 0) {
@@ -17,14 +16,15 @@ angular.module('ylbWxApp')
             prepareDoctorData(doctor);
             preparePageData();
           } else {
-            alertErr();
+            $rootScope.alertError('', '用户未注册。');
           }
         }).error(function (err) {
           $rootScope.alertError(null, err, status);
         });
-    } else {
-      alertErr();
-      return;
+    };
+    if (openid) {
+      $scope.isSelf = openid == currentUser.openid;
+      loadDoctorData();
     }
 
     var prepareDoctorData = function (doctor) {
@@ -63,18 +63,10 @@ angular.module('ylbWxApp')
       if ($scope.doctor.level == 1) {
         $scope.disableServicePrivilege = true;
       }
-
-      // TODO: check current wchat user is doctor himself or not.
-      $scope.isSelf = true;
-
-    };
-
-    var alertErr = function () {
-      $alert({title: '页面加载错误：', content: '请从微信访问此页面。', placement: 'top', type: 'danger', container: '#alert'});
     };
 
     /**
-     * Toogle edit status of JiaHao.
+     * Toggle edit status of JiaHao.
      */
     $scope.editJiahao = function () {
       if ($scope.editingJiahao) {
@@ -145,7 +137,7 @@ angular.module('ylbWxApp')
 
     };
 
-    $scope.followDoctor = function() {
+    $scope.followDoctor = function () {
 
     };
 
