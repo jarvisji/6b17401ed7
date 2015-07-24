@@ -65,7 +65,7 @@ var registerRoutes = function () {
   app.put('/api/patients/:id', patientCtrl.save);
 
   /**
-   * GET '/api/patients/:id/follows?embed'
+   * GET '/api/patients/:id/follows?[expand=true]'
    * Get doctors list that a patient follows.
    */
   app.get('/api/patients/:id/follows', patientCtrl.getFollows);

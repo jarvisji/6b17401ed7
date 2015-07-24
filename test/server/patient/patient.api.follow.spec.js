@@ -68,20 +68,20 @@ describe.only('Test patient follow doctor.', function () {
       });
   });
 
-  it('Verify created follow with embed doctor', function (done) {
-    util.req.json('get', '/api/patients/' + patient._id + '/follows?embed=doctor')
+  it('Verify created follow with expand doctor info', function (done) {
+    util.req.json('get', '/api/patients/' + patient._id + '/follows?expand=true')
       .expect(200)
       .end(function (err, res) {
         if (err) done(err);
         should(res.body.data).is.a.Array();
         should(res.body.data.length).equal(1);
-        should(res.body.data[0].id).equal(doctor.id);
-        should(res.body.data[0]).have.property('doctor');
+        should(res.body.data[0]._id).equal(doctor.id);
+        should(res.body.data[0]).have.property('number');
         done();
       });
   });
 
-  it('Verify isFollowed true', function(done){
+  it('Verify isFollowed true', function (done) {
     util.req.json('get', '/api/patients/' + patient._id + '/follows/' + doctor._id)
       .expect(200)
       .end(function (err, res) {
@@ -107,7 +107,7 @@ describe.only('Test patient follow doctor.', function () {
       })
   });
 
-  it('Verify isFollowed false', function(done){
+  it('Verify isFollowed false', function (done) {
     util.req.json('get', '/api/patients/' + patient._id + '/follows/' + doctor._id)
       .expect(200)
       .end(function (err, res) {
