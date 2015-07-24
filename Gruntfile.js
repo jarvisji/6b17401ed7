@@ -52,8 +52,8 @@ module.exports = function (grunt) {
           dest: '.tmp/concat/js/app.js',
           src: [
             //'client/app/app.js',
-            'client/common/**/*.js',
             'client/wxappd/app.js',
+            'client/common/**/*.js',
             'client/wxappd/**/*.js'
           ]
         }]
