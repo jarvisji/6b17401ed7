@@ -10,6 +10,8 @@ var stringUtils = require('../utils/string-utils');
 module.exports = function (app) {
   var Patient = app.models.Patient;
   var Doctor = app.models.Doctor;
+  var doctorExcludeFields = app.models.doctorExcludeFields;
+  var patientExcludeFields = app.models.patientExcludeFields;
 
   /**
    * GET /api/patients
@@ -54,7 +56,7 @@ module.exports = function (app) {
     }
 
     debug('Finding patients, filter: %o, limit: %d, sort: %o', filter, limit, sort);
-    Patient.find(filter).limit(limit).sort(sort).exec(function (err, patients) {
+    Patient.find(filter).select(patientExcludeFields).limit(limit).sort(sort).exec(function (err, patients) {
       if (err) {
         debug('Find patient error: ', err);
         return res.status(500).json(utils.jsonResult(err));
@@ -118,7 +120,7 @@ module.exports = function (app) {
 
       if (expand) {
         debug('getFollows(), getting expand info of doctors that followed: %o ', patient.doctorFollowed);
-        Doctor.find({'_id': {'$in': patient.doctorFollowed}}, function (err, doctors) {
+        Doctor.find({'_id': {'$in': patient.doctorFollowed}}, doctorExcludeFields, function (err, doctors) {
           if (err) {
             debug('getFollows(), get patient followed doctors failed: ', err);
             return res.status(500).json(utils.jsonResult(err));

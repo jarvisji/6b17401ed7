@@ -11,5 +11,7 @@ module.exports = {
   ServiceOrder: mongoose.model('ServiceOrder', schemas.serviceOrderSchema),
   Comment: mongoose.model('Comment', schemas.commentSchema),
   Patient: mongoose.model('Patient', schemas.patientSchema),
-  CaseHistory: mongoose.model('CaseHistory', schemas.caseHistorySchema)
+  CaseHistory: mongoose.model('CaseHistory', schemas.caseHistorySchema),
+  doctorExcludeFields: '-password -salt', // we don't want to show these fields in output result.
+  patientExcludeFields: '-password -salt'
 };

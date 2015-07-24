@@ -31,6 +31,7 @@ describe('Test patient APIs.', function () {
       .end(function (err, res) {
         if (err) done(err);
         should(res.body.count).equal(1);
+        should(res.body.data[0]).not.have.property('password');
         patientId = res.body.data[0]._id;
         done();
       });

@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var should = require('should');
 var util = require('../testUtils');
 
-describe.only('Test patient follow doctor.', function () {
+describe('Test patient follow doctor.', function () {
   var patient, doctor;
 
   before('Get registered data of patient and doctor', function (done) {
@@ -77,6 +77,8 @@ describe.only('Test patient follow doctor.', function () {
         should(res.body.data.length).equal(1);
         should(res.body.data[0]._id).equal(doctor.id);
         should(res.body.data[0]).have.property('number');
+        should(res.body.data[0]).not.have.property('password');
+        should(res.body.data[0]).not.have.property('salt');
         done();
       });
   });

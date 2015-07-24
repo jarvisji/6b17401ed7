@@ -9,6 +9,7 @@ var stringUtils = require('../utils/string-utils');
 
 module.exports = function (app) {
   var Doctor = app.models.Doctor;
+  var excludeFields = app.models.doctorExcludeFields;
 
   var login = function (req, res) {
     var loginUser = req.body;
@@ -79,7 +80,7 @@ module.exports = function (app) {
     }
 
     debug('Finding doctors, filter: %o, limit: %d, sort: %o', filter, limit, sort);
-    Doctor.find(filter).limit(limit).sort(sort).exec(function (err, doctors) {
+    Doctor.find(filter).select(excludeFields).limit(limit).sort(sort).exec(function (err, doctors) {
       if (err) {
         debug('Find doctor error: ', err);
         return res.status(500).json(utils.jsonResult(err));
