@@ -120,6 +120,8 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
       if (!verifiedData) {
         $state.go('error-not-from-wechat');
       } else {
+        verifiedData.isPatient = !!verifiedData.patient;
+        verifiedData.isDoctor = !!verifiedData.doctor;
         return verifiedData;
       }
     };
@@ -130,12 +132,38 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
      */
     $rootScope.alertError = function (_title, content, status) {
       var title = generateAlertTitle('错误 ', _title);
-      $alert({title: title, content: content, placement: 'top', type: 'danger', duration: 5, container: '#alert'});
+      $alert({
+        title: title,
+        content: content,
+        placement: 'top',
+        type: 'danger',
+        duration: 5,
+        animation: 'am-fade-and-slide-top'
+      });
     };
 
     $rootScope.alertWarn = function (_title, content, status) {
       var title = generateAlertTitle('警告 ', _title);
-      $alert({title: title, content: content, placement: 'top', type: 'warning', duration: 2, container: '#alert'});
+      $alert({
+        title: title,
+        content: content,
+        placement: 'top',
+        type: 'warning',
+        duration: 3,
+        animation: 'am-fade-and-slide-top'
+      });
+    };
+
+    $rootScope.alertSuccess = function (_title, content, status) {
+      var title = generateAlertTitle('成功', _title);
+      $alert({
+        title: title,
+        content: content,
+        placement: 'top',
+        type: 'success',
+        duration: 3,
+        animation: 'am-fade-and-slide-top'
+      });
     };
 
     var generateAlertTitle = function (title, _title) {
@@ -154,7 +182,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
      * If doctor/patient doesn't have avatar set in wechat, use default.
      * @param user
      */
-    $rootScope.checkAvatar = function(user) {
+    $rootScope.checkAvatar = function (user) {
       if (!user.wechat.headimgurl) {
         user.wechat.headimgurl = '/assets/image/avatar-64.jpg';
       }
