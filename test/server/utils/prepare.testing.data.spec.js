@@ -18,7 +18,7 @@ before(function (done) {
   // find test data, will not create again if they are exist.
   var filter = {'wechat.openid': {'$in': testDoctorsOpenId}};
   Doctor.find(filter, function (err, found) {
-    if (err) done(err);
+    if (err) return done(err);
     console.log('trying to insert %d test doctors.', mockDoctors.length);
     console.log('found %d test doctors in db.', found.length);
     // only create mock doctors which not in db.
@@ -33,7 +33,7 @@ before(function (done) {
       }
 
       Doctor.find({}, 'number').limit(1).sort({'number': -1}).exec(function (err, maxNumberDoctor) {
-        if (err) done(err);
+        if (err) return done(err);
         var maxNumber = maxNumberDoctor[0].number;
         console.log('max number of doctors is: %d', maxNumber);
         // set number.
@@ -62,7 +62,7 @@ before(function (done) {
   // find test data, will not create again if they are exist.
   var filter = {'wechat.openid': {'$in': testPatientOpenId}};
   Patient.find(filter, function (err, found) {
-    if (err) done(err);
+    if (err) return done(err);
     console.log('trying to insert %d test patients.', mockPatient.length);
     console.log('found %d test patients in db.', found.length);
     // only create mock patients which not in db.
@@ -77,8 +77,8 @@ before(function (done) {
       }
 
       Patient.find({}, 'number').limit(1).sort({'number': -1}).exec(function (err, maxNumberPatient) {
-        if (err) done(err);
-        var maxNumber = maxNumberPatient[0].number;
+        if (err) return done(err);
+        var maxNumber = maxNumberPatient.length > 0 ? maxNumberPatient[0].number : 0;
         console.log('max number of patients is: %d', maxNumber);
         // set number.
         for (var i = 0; i < mockPatient.length; i++) {
@@ -86,7 +86,7 @@ before(function (done) {
         }
 
         Patient.create(mockPatient, function (err, createdPatients) {
-          if (err) done(err);
+          if (err) return done(err);
           console.log('insert test patients success.');
           done();
         });
@@ -99,5 +99,5 @@ before(function (done) {
 });
 
 after(function () {
-  console.log('Deleting test data................');
+  //console.log('Deleting test data................');
 });

@@ -100,7 +100,7 @@ module.exports = function (app) {
       var doctor = new Doctor(req.body);
       doctor.salt = Math.round((new Date().valueOf() * Math.random()));
       doctor.password = sha512(doctor.salt + doctor.password);
-      doctor.number = maxNumberDoctor[0].number + 1;
+      doctor.number = maxNumberDoctor.length > 0 ? maxNumberDoctor[0].number + 1 : 1;
       doctor.save(function (err, data) {
         if (err) {
           debug('Save doctor error: ', err);

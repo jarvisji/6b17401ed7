@@ -35,7 +35,7 @@ module.exports = function (app, api) {
             if (err) return debug('Get doctor max number error: ', err);
             Doctor.create({
               mobile: 'openid_' + result.openid,
-              number: maxNumberDoctor + 1,
+              number: maxNumberDoctor.length > 0 ? maxNumberDoctor[0].number + 1 : 1,
               wechat: result
             }, function (err, raw) {
               if (err) return debug('Subscribe: Save doctor error: ', err);
