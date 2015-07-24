@@ -16,6 +16,7 @@ module.exports = {
       "level": "1",
       "province": "北京",
       "city": "朝阳区",
+      "password": "NotInUseNowJustForTest",
       "services": [],
       "doctorFriends": [],
       "wechat": {
@@ -28,6 +29,7 @@ module.exports = {
       "level": "2",
       "province": "北京",
       "city": "朝阳区",
+      "password": "NotInUseNowJustForTest",
       "services": [{
         "type": "jiahao",
         "price": 8,
@@ -56,6 +58,7 @@ module.exports = {
       "level": "3",
       "province": "北京",
       "city": "朝阳区",
+      "password": "NotInUseNowJustForTest",
       "services": [{
         "type": "jiahao",
         "price": 8,
@@ -85,6 +88,7 @@ module.exports = {
       "level": "1",
       "province": "北京",
       "city": "朝阳区",
+      "password": "NotInUseNowJustForTest",
       "doctorFollowed": [],
       "patientFriends": [],
       "wechat": {
@@ -97,6 +101,7 @@ module.exports = {
       "level": "2",
       "province": "北京",
       "city": "朝阳区",
+      "password": "NotInUseNowJustForTest",
       "doctorFollowed": [],
       "patientFriends": [],
       "wechat": {
