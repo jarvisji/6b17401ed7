@@ -1,7 +1,7 @@
 /**
  * Created by Ting on 2015/6/19.
  */
-angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStrap'])
+angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'mgcrea.ngStrap'])
   .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
     $stateProvider.state('entry', {
       url: '/?openid&access_token&redirect',
