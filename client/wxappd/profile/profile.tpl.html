@@ -139,8 +139,8 @@
     <button type="button" class="btn btn-primary btn-block btn-lg" ng-show="currentUser.isPatient && !isFollowed"
             ng-click="followDoctor()">关注医生
     </button>
-    <button type="button" class="btn btn-primary btn-block btn-lg" ng-show="currentUser.isPatient && isFollowed"
-            ng-click="followDoctor()" disabled>已关注
+    <button type="button" class="btn btn-danger btn-block btn-lg" ng-show="currentUser.isPatient && isFollowed"
+            ng-click="unfollowDoctor()">取消关注
     </button>
     <button type="button" class="btn btn-primary btn-block btn-lg" ng-show="currentUser.isDoctor"
             ng-click="addFriend()">加好友

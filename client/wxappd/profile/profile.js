@@ -158,6 +158,18 @@ angular.module('ylbWxApp')
         });
     };
 
+    $scope.unfollowDoctor = function () {
+      var profileDoctorId = $scope.doctor._id;
+      var patientId = currentUser.patient._id;
+      $http.delete('/api/patients/' + patientId + '/follows/' + profileDoctorId)
+        .success(function (resp) {
+          $rootScope.alertSuccess('', '已取消关注。');
+          $scope.isFollowed = false;
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
+
     // doctor add profile doctor as friend.
     $scope.addFriend = function () {
     };
