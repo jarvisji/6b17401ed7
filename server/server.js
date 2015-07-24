@@ -63,6 +63,14 @@ var registerRoutes = function () {
 
   app.get('/api/patients', patientCtrl.find);
   app.put('/api/patients/:id', patientCtrl.save);
+  // Get doctors list that a patient follows.
+  app.get('/api/patients/:id/follows', patientCtrl.getFollows);
+  /**
+   * POST '/api/patients/:id/follows'
+   * Data: {"doctorId":"string"}
+   */
+  app.post('/api/patients/:id/follows', patientCtrl.createFollow);
+  app.delete('/api/patients/:id/follows/:doctorId', patientCtrl.deleteFollow);
 };
 
 var startServer = function () {

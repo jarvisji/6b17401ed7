@@ -92,6 +92,74 @@ module.exports = function (app) {
   };
 
   /**
+   * GET /api/patients/:id/follows
+   * Get doctors list that a patient follows.
+   * @param req
+   * @param res
+   */
+  var getFollows = function (req, res) {
+    var patientId = req.params.id;
+    debug('Getting follow, patientId: %s.', patientId);
+    Patient.findById(patientId, 'doctorFollowed', function (err, patient) {
+      if (err) {
+        debug('Get patient follows failed: ', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      res.json(utils.jsonResult(patient.doctorFollowed));
+    });
+  };
+
+  /**
+   * POST /api/patients/:id/follows
+   * Data: {'doctorId':''}
+   * Create follow relationship that a patient follows a doctor.
+   * @param req
+   * @param res
+   */
+  var createFollow = function (req, res) {
+    var patientId = req.params.id;
+    var doctorId = req.body.doctorId;
+    var Doctor = app.models.Doctor;
+    debug('Creating follow, patientId: %s, doctorId: %s.', patientId, doctorId);
+    Doctor.findById(doctorId, function (err, doctor) {
+      if (err) {
+        debug('Get doctor which trying to follow failed: ', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      if (!doctor) {
+        debug('Doctor does not exist, id: ', doctorId);
+        return res.status(404).json(utils.jsonResult('Doctor not exist'));
+      }
+      Patient.findByIdAndUpdate(patientId, {'$addToSet': {'doctorFollowed': doctorId}}, function (err, ret) {
+        if (err) {
+          debug('Create follows failed: ', err);
+          return res.status(500).json(utils.jsonResult(err));
+        }
+        res.status(201).json(utils.jsonResult('success'));
+      })
+    })
+  };
+
+  /**
+   * DELETE /api/patients/:id/follows/:followId
+   * Delete follow relationship that a patient follows a doctor.
+   * @param req
+   * @param res
+   */
+  var deleteFollow = function (req, res) {
+    var patientId = req.params.id;
+    var doctorId = req.params.doctorId;
+    debug('Deleting follow, patientId: %s, doctorId: %s.', patientId, doctorId);
+    Patient.findByIdAndUpdate(patientId, {'$pull': {'doctorFollowed': doctorId}}, function (err, ret) {
+      if (err) {
+        debug('Delete follows failed: ', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      res.status(200).json(utils.jsonResult('success'));
+    })
+  };
+
+  /**
    * Remove some data not tend to expose to user.
    * @param patient
    */
@@ -106,7 +174,10 @@ module.exports = function (app) {
 
   return {
     find: find,
-    save: save
+    save: save,
+    getFollows: getFollows,
+    createFollow: createFollow,
+    deleteFollow: deleteFollow
   };
 };
 
