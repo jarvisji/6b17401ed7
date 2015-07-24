@@ -9,6 +9,7 @@ var stringUtils = require('../utils/string-utils');
 
 module.exports = function (app) {
   var Patient = app.models.Patient;
+  var Doctor = app.models.Doctor;
 
   /**
    * GET /api/patients
@@ -92,20 +93,53 @@ module.exports = function (app) {
   };
 
   /**
-   * GET /api/patients/:id/follows
+   * GET /api/patients/:id/follows?embed
    * Get doctors list that a patient follows.
    * @param req
    * @param res
    */
   var getFollows = function (req, res) {
     var patientId = req.params.id;
-    debug('Getting follow, patientId: %s.', patientId);
+    var embed = req.query.embed;
+    debug('getFollows(), patientId: %s, embed: %s.', patientId, embed);
     Patient.findById(patientId, 'doctorFollowed', function (err, patient) {
       if (err) {
-        debug('Get patient follows failed: ', err);
+        debug('getFollows(), get patient follows failed: ', err);
         return res.status(500).json(utils.jsonResult(err));
       }
-      res.json(utils.jsonResult(patient.doctorFollowed));
+
+      if (!patient) {
+        debug('getFollows() error: patient not found, id: %s', patientId);
+        return res.status(404).json(utils.jsonResult('Patient not found'));
+      }
+
+      if (!patient.doctorFollowed || !patient.doctorFollowed.length)
+        patient.doctorFollowed = [];
+
+      if (embed) {
+        debug('getFollows(), getting embed doctors that followed: %o ', patient.doctorFollowed);
+        Doctor.find({'_id': {'$in': patient.doctorFollowed}}, function (err, doctors) {
+          if (err) {
+            debug('getFollows(), get patient followed doctors failed: ', err);
+            return res.status(500).json(utils.jsonResult(err));
+          }
+          // return data format: [{'id': 'string', 'doctor':{object}}].
+          var embedResult = [];
+          for (var i = 0; i < patient.doctorFollowed.length; i++) {
+            var ret = {'id': patient.doctorFollowed[i]};
+            for (var j in doctors) {
+              if (ret.id == doctors[j]._id) {
+                ret.doctor = doctors[j];
+                break;
+              }
+            }
+            embedResult.push(ret);
+          }
+          res.json(utils.jsonResult(embedResult));
+        })
+      } else {
+        res.json(utils.jsonResult(patient.doctorFollowed));
+      }
     });
   };
 
@@ -119,7 +153,6 @@ module.exports = function (app) {
   var createFollow = function (req, res) {
     var patientId = req.params.id;
     var doctorId = req.body.doctorId;
-    var Doctor = app.models.Doctor;
     debug('Creating follow, patientId: %s, doctorId: %s.', patientId, doctorId);
     Doctor.findById(doctorId, function (err, doctor) {
       if (err) {
