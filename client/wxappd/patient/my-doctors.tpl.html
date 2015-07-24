@@ -1,0 +1,82 @@
+<div class="panel-group" role="tablist" aria-multiselectable="true" bs-collapse>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab">
+      <h4 class="panel-title">
+        <a bs-collapse-toggle>
+          随诊医生
+        </a>
+      </h4>
+    </div>
+    <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+      <div class="panel-body">
+
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab">
+      <h4 class="panel-title">
+        <a bs-collapse-toggle>
+          既往医生
+        </a>
+      </h4>
+    </div>
+    <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+      <div class="panel-body">
+
+      </div>
+    </div>
+  </div>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab">
+      <h4 class="panel-title">
+        <a bs-collapse-toggle>
+          普通医生
+        </a>
+      </h4>
+    </div>
+    <div class="panel-collapse" role="tabpanel" bs-collapse-target>
+      <div class="panel-body">
+        <div class="general-item-list">
+          <div class="item" ng-repeat="doctor in doctorFollowed" ng-click="showDetails(doctor.wechat.openid)">
+            <div class="item-head">
+              <div class="item-details">
+                <img class="item-pic" ng-src="{{doctor.wechat.headimgurl}}">
+                <span class="item-name">{{doctor.name}}</span>
+                <span class="item-label"></span>
+              </div>
+              <span class="item-status">{{doctor.hospital}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+我觉得按钮组的效果好一些
+<div class="btn-group btn-group-justified" ng-model="displayType" bs-radio-group>
+  <label class="btn btn-default">
+    <input type="radio" class="btn btn-default" value="suizhen" ng-click="displayDoctors(displayType)"> 随诊医生</label>
+  <label class="btn btn-default">
+    <input type="radio" class="btn btn-default" value="jiwang" ng-click="displayDoctors(displayType)"> 既往医生</label>
+  <label class="btn btn-default">
+    <input type="radio" class="btn btn-default" value="putong" ng-click="displayDoctors(displayType)"> 普通医生</label>
+</div>
+
+<section id="myDoctors">
+  <span ng-hide="doctors.length > 0">没有数据</span>
+
+  <div class="general-item-list">
+    <div class="item" ng-repeat="doctor in doctors" ng-click="showDetails(doctor.wechat.openid)">
+      <div class="item-head">
+        <div class="item-details">
+          <img class="item-pic" ng-src="{{doctor.wechat.headimgurl}}">
+          <span class="item-name">{{doctor.name}}</span>
+          <span class="item-label"></span>
+        </div>
+        <span class="item-status">{{doctor.hospital}}</span>
+      </div>
+    </div>
+  </div>
+</section>

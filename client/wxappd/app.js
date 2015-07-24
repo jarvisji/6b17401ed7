@@ -37,6 +37,11 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
       templateUrl: 'wxappd/search/search-doctor-result.tpl.html',
       controller: 'wxSearchDoctorResultCtrl'
     });
+    $stateProvider.state('my-doctors', {
+      url: '/patient/doctors',
+      templateUrl: 'wxappd/patient/my-doctors.tpl.html',
+      controller: 'wxMyDoctorsCtrl'
+    });
     $stateProvider.state('error-not-from-wechat', {
       template: '<div class="alert alert-danger" role="alert">请从微信访问此页面。</div>'
     });
