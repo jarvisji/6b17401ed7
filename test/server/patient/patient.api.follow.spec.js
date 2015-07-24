@@ -81,11 +81,21 @@ describe.only('Test patient follow doctor.', function () {
       });
   });
 
+  it('Verify isFollowed true', function(done){
+    util.req.json('get', '/api/patients/' + patient._id + '/follows/' + doctor._id)
+      .expect(200)
+      .end(function (err, res) {
+        if (err) return done(err);
+        should(res.body.data).equal(true);
+        done();
+      });
+  });
+
   it('Test delete follow', function (done) {
     util.req.json('delete', '/api/patients/' + patient._id + '/follows/' + doctor._id)
       .expect(200)
       .end(function (err, res) {
-        if (err) done(err);
+        if (err) return done(err);
         util.req.json('get', '/api/patients/' + patient._id + '/follows')
           .expect(200)
           .end(function (err, res) {
@@ -95,5 +105,15 @@ describe.only('Test patient follow doctor.', function () {
             done();
           });
       })
+  });
+
+  it('Verify isFollowed false', function(done){
+    util.req.json('get', '/api/patients/' + patient._id + '/follows/' + doctor._id)
+      .expect(200)
+      .end(function (err, res) {
+        if (err) return done(err);
+        should(res.body.data).equal(false);
+        done();
+      });
   });
 });

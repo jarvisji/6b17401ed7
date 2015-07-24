@@ -174,6 +174,27 @@ module.exports = function (app) {
   };
 
   /**
+   * Check patient is followed a doctor or not.
+   * GET '/api/patients/:id/follows/:doctorId'
+   * @Response: {data: true/false}
+   * @param req
+   * @param res
+   */
+  var isFollowed = function (req, res) {
+    var patientId = req.params.id;
+    var doctorId = req.params.doctorId;
+    debug('isFollowed(), patientId: %s, doctorId: %s.', patientId, doctorId);
+    Patient.find({'_id': patientId, 'doctorFollowed': doctorId}, function (err, found) {
+      if (err) {
+        debug('isFollowed(), get follows failed: ', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      var isFollowed = found.length > 0;
+      res.json(utils.jsonResult(isFollowed));
+    });
+  };
+
+  /**
    * DELETE /api/patients/:id/follows/:followId
    * Delete follow relationship that a patient follows a doctor.
    * @param req
@@ -210,6 +231,7 @@ module.exports = function (app) {
     save: save,
     getFollows: getFollows,
     createFollow: createFollow,
+    isFollowed: isFollowed,
     deleteFollow: deleteFollow
   };
 };

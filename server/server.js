@@ -71,9 +71,15 @@ var registerRoutes = function () {
   app.get('/api/patients/:id/follows', patientCtrl.getFollows);
   /**
    * POST '/api/patients/:id/follows'
-   * Data: {"doctorId":"string"}
+   * @Data: {"doctorId":"string"}
    */
   app.post('/api/patients/:id/follows', patientCtrl.createFollow);
+  /**
+   * Check patient is followed a doctor or not.
+   * GET '/api/patients/:id/follows/:doctorId'
+   * @Response: {data: true/false}
+   */
+  app.get('/api/patients/:id/follows/:doctorId', patientCtrl.isFollowed);
   app.delete('/api/patients/:id/follows/:doctorId', patientCtrl.deleteFollow);
 };
 
