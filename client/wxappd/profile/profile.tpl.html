@@ -136,7 +136,11 @@
 
 <section>
   <div class="follow-buttons" ng-hide="isSelf">
-    <button type="button" class="btn btn-primary btn-block btn-lg" ng-click="followDoctor()">关注医生</button>
-
+    <button type="button" class="btn btn-primary btn-block btn-lg" ng-show="currentUser.isPatient"
+            ng-click="followDoctor()">关注医生
+    </button>
+    <button type="button" class="btn btn-primary btn-block btn-lg" ng-show="currentUser.isDoctor"
+            ng-click="addFriend()">加好友
+    </button>
   </div>
 </section>

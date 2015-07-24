@@ -4,7 +4,7 @@
  */
 angular.module('ylbWxApp')
   .controller('wxProfileCtrl', ['$scope', '$rootScope', '$stateParams', '$http', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $stateParams, $http, $alert, resources, commonUtils) {
-    var currentUser = $rootScope.checkUserVerified();
+    var currentUser = $scope.currentUser = $rootScope.checkUserVerified();
     var snapshot = {}; // snapshot data to compare changes.
     var openid = $stateParams.openid;
 
@@ -137,9 +137,20 @@ angular.module('ylbWxApp')
 
     };
 
+    // patient follow profile doctor.
     $scope.followDoctor = function () {
-
+      var profileDoctorId = $scope.doctor._id;
+      var patientId = currentUser.patient._id;
+      $http.post('/api/patients/' + patientId + '/follows', {'doctorId': profileDoctorId})
+        .success(function (resp) {
+          $rootScope.alertSuccess('', '已加关注。');
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
     };
 
-  }])
-;
+    // doctor add profile doctor as friend.
+    $scope.addFriend = function () {
+    };
+
+  }]);
