@@ -34,6 +34,14 @@ angular.module('ylbWxApp')
       $scope.doctor.displayLevel = resources.doctorLevel[doctor.level];
       $rootScope.checkAvatar(doctor);
 
+      // get current user follow this doctor or not.
+      if (currentUser.isPatient) {
+        $http.get('/api/patients/' + currentUser.patient._id + '/follows/' + doctor._id)
+          .success(function (resp) {
+            $scope.isFollowed = resp.data;
+          });
+      }
+
       // prepare services data.
       for (var i = 0; i < doctor.services.length; i++) {
         // type should be one of 'jiahao, suizhen, huizhen'.
@@ -144,6 +152,7 @@ angular.module('ylbWxApp')
       $http.post('/api/patients/' + patientId + '/follows', {'doctorId': profileDoctorId})
         .success(function (resp) {
           $rootScope.alertSuccess('', '已加关注。');
+          $scope.isFollowed = true;
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });
