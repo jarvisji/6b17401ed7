@@ -23,7 +23,7 @@ angular.module('ylbWxApp')
 
     $scope.performSearch = function () {
       var filter = {};
-      if ($scope.search.number != undefined && $scope.search.number != '') {
+      if ($scope.search.number !== undefined && $scope.search.number !== '') {
         filter.number = $scope.search.number;
         filter.level = {'$gt': 1}; // search result will only include 'regular' and 'real' doctors.
       } else {
@@ -59,5 +59,5 @@ angular.module('ylbWxApp')
         }).error(function (err, status) {
           $rootScope.alertError(null, err, status);
         });
-    }
+    };
   }]);

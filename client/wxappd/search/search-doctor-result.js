@@ -31,6 +31,6 @@ angular.module('ylbWxApp')
     $scope.showDetails = function (idx) {
       var openid = $rootScope.searchDoctorResult[idx].wechat.openid;
       $state.go('profile', {openid: openid});
-    }
+    };
 
   }]);

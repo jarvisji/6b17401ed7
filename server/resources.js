@@ -10,5 +10,5 @@ module.exports = function () {
     get: function (key) {
       return defaultResource[key];
     }
-  }
+  };
 };

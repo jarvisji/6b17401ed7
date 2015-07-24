@@ -17,19 +17,19 @@ describe('Test patient follow doctor.', function () {
     var patientPromise = Patient.find({'wechat.openid': testPatient.wechat.openid}).exec();
     var doctorPromise = Doctor.find({'wechat.openid': testDoctor.wechat.openid}).exec();
     patientPromise.then(function (patients) {
-      if (patients.length == 0) {
+      if (patients.length === 0) {
         done(new Error('no patient data found.'));
       }
       patient = patients[0];
       return doctorPromise;
     }).then(function (doctors) {
-      if (doctors.length == 0) {
+      if (doctors.length === 0) {
         done(new Error('no doctor data found.'));
       }
       doctor = doctors[0];
       console.log('Testing data. patientId: %s, doctorId: %s.', patient._id, doctor._id);
       done();
-    })
+    });
   });
 
   it('Make sure test data is clean', function (done) {
@@ -50,7 +50,7 @@ describe('Test patient follow doctor.', function () {
   });
 
   it('Test create follow non exist doctor', function (done) {
-    var nonExistDoctorId = new mongoose.Types.ObjectId;
+    var nonExistDoctorId = new mongoose.Types.ObjectId();
     util.req.json('post', '/api/patients/' + patient._id + '/follows')
       .send({'doctorId': nonExistDoctorId})
       .expect(404, done);
@@ -106,7 +106,7 @@ describe('Test patient follow doctor.', function () {
             should(res.body.data.length).equal(0);
             done();
           });
-      })
+      });
   });
 
   it('Verify isFollowed false', function (done) {

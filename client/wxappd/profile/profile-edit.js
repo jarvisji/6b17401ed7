@@ -51,7 +51,7 @@ angular.module('ylbWxApp')
         // wechat city is not always same to ours, for example, we defined '合肥市', but wechat is '合肥',
         // so cannot use wechat value directly.
         angular.forEach($scope.city, function (value, key) {
-          if (value.indexOf(doctor.wechat.city) == 0) {
+          if (value.indexOf(doctor.wechat.city) === 0) {
             $scope.doctor.city = value;
           }
         });
@@ -108,15 +108,15 @@ angular.module('ylbWxApp')
       $scope.doctor.birthdayMonth = month;
       $scope.ddDay = [];
       var days = 31;
-      if (month % 2 == 0) {
+      if (month % 2 === 0) {
         if (month == 2) {
-          if ($scope.doctor.birthdayYear % 4 == 0) {
+          if ($scope.doctor.birthdayYear % 4 === 0) {
             days = 29;
           } else {
             days = 28;
           }
         } else {
-          days = 30
+          days = 30;
         }
       }
       for (var day = 1; day <= days; day++) {
@@ -166,7 +166,7 @@ angular.module('ylbWxApp')
           $alert({content: '保存成功。', placement: 'top', type: 'success', container: 'form'});
           $timeout(function () {
             $state.go('profile', {openid: openid});
-          }, 1000)
+          }, 1000);
         });
     };
   }]);

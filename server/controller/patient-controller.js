@@ -126,7 +126,7 @@ module.exports = function (app) {
             return res.status(500).json(utils.jsonResult(err));
           }
           res.json(utils.jsonResult(doctors));
-        })
+        });
       } else {
         res.json(utils.jsonResult(patient.doctorFollowed));
       }
@@ -159,8 +159,8 @@ module.exports = function (app) {
           return res.status(500).json(utils.jsonResult(err));
         }
         res.status(201).json(utils.jsonResult('success'));
-      })
-    })
+      });
+    });
   };
 
   /**
@@ -200,7 +200,7 @@ module.exports = function (app) {
         return res.status(500).json(utils.jsonResult(err));
       }
       res.status(200).json(utils.jsonResult('success'));
-    })
+    });
   };
 
   /**

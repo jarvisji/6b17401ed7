@@ -15,7 +15,7 @@ module.exports = function (app, api, oauth) {
         else {
           res.json(result);
         }
-      })
+      });
     },
     getJsSdkConfig: function (req, res) {
       var param = {
@@ -26,7 +26,7 @@ module.exports = function (app, api, oauth) {
       api.getJsConfig(param, function (err, config) {
         if (err) return res.json(utils.jsonResult(err));
         res.json(utils.jsonResult(config));
-      })
+      });
     },
     /**
      * Verify given 'openid' and 'access_token' from wechat server.
@@ -77,5 +77,5 @@ module.exports = function (app, api, oauth) {
       });
       //});
     }
-  }
+  };
 };

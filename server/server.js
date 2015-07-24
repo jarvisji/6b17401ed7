@@ -15,8 +15,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 // connect to MongoDB
-if (mongoose.connection.readyState != mongoose.STATES.connected
-  && mongoose.connection.readyState != mongoose.STATES.connecting) {
+if (mongoose.connection.readyState != mongoose.STATES.connected && mongoose.connection.readyState != mongoose.STATES.connecting) {
   mongoose.connect(conf.mongoDbUrl);
   var db = mongoose.connection;
   db.on('error', console.error.bind(console, 'connection error:'));

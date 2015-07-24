@@ -2,7 +2,7 @@ module.exports = function (grunt) {
 
   grunt.initConfig({
     jshint: {
-      files: ['Gruntfile.js', 'client/**/*.js', 'server/**/*.js', 'test/**/*.js'],
+      files: ['Gruntfile.js', 'client/**/*.js', '!client/vendor/**/*.js', 'server/**/*.js', 'test/**/*.js'],
       options: {
         globals: {
           jQuery: false
@@ -19,7 +19,7 @@ module.exports = function (grunt) {
     copy: {
       client: {
         expand: true,
-        src: ['package.json', 'client/**', '!client/vendor/**', '!client/assets/css/**', 'server/**'],
+        src: ['.bowerrc', 'bower.json', 'package.json', 'client/**/*.html', '!client/vendor/**', '!client/assets/css/**', 'server/**'],
         dest: 'dist'
       }
     },

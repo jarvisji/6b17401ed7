@@ -55,13 +55,13 @@ before(function (done) {
   console.log('Preparing test data for patient................');
   var testPatientOpenId = [];
   var mockPatient = util.conf.testData.patients.concat();
-  for (var i = 0; i < mockPatient.length; i++) {
-    testPatientOpenId.push(mockPatient[i].wechat.openid);
+  for (var j = 0; j < mockPatient.length; j++) {
+    testPatientOpenId.push(mockPatient[j].wechat.openid);
   }
   var Patient = util.app.models.Patient;
   // find test data, will not create again if they are exist.
-  var filter = {'wechat.openid': {'$in': testPatientOpenId}};
-  Patient.find(filter, function (err, found) {
+  var patientFilter = {'wechat.openid': {'$in': testPatientOpenId}};
+  Patient.find(patientFilter, function (err, found) {
     if (err) return done(err);
     console.log('trying to insert %d test patients.', mockPatient.length);
     console.log('found %d test patients in db.', found.length);

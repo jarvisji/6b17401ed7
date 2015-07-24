@@ -170,5 +170,5 @@ module.exports = function () {
     commentSchema: commentSchema,
     patientSchema: patientSchema,
     caseHistorySchema: caseHistorySchema
-  }
+  };
 };

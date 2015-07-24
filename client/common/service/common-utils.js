@@ -61,9 +61,9 @@ angular.module('ylbWxApp')
         var scopeVar = [];
         var city = resources.city[provinceKey];
         angular.forEach(city, function (value, key) {
-          scopeVar.push({'text': value, 'click': 'onCitySelected("' + key + '")'})
+          scopeVar.push({'text': value, 'click': 'onCitySelected("' + key + '")'});
         });
         return scopeVar;
       }
-    }
+    };
   }]);

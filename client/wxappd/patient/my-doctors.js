@@ -53,5 +53,5 @@ angular.module('ylbWxApp')
           $scope.doctors = $scope.doctorFollowed;
         }
       }
-    }
+    };
   }]);

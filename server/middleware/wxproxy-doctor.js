@@ -54,7 +54,7 @@ module.exports = function (app, api) {
       if (err) debug('Unsubscribe: Update doctor subscribe status error: ', err);
       debug('Unsubscribe: Doctor unsubscribe success: ', result);
       res.reply('unsubscribed');
-    })
+    });
   };
 
   return wechat(conf.wechat, function (req, res, next) {
@@ -77,6 +77,5 @@ module.exports = function (app, api) {
         res.redirect(url);
       }
     }
-  )
-}
-;
+  );
+};

@@ -172,12 +172,12 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'm
     };
 
     var generateAlertTitle = function (title, _title) {
-      if (_title != undefined && _title != null)
+      if (_title !== undefined && _title !== null)
         title = _title;
 
       if (status)
         title += '[' + status + ']：';
-      else if (title != '') {
+      else if (title !== '') {
         title += '：';
       }
       return title;
