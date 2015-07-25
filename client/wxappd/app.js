@@ -4,7 +4,7 @@
 angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'mgcrea.ngStrap'])
   .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
     $stateProvider.state('entry', {
-      url: '/?openid&access_token&redirect',
+      url: '/?openid&token&redirect',
       controller: 'rootCtrl'
     });
     $stateProvider.state('profile', {
@@ -56,7 +56,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'm
       $log.info('rootCtrl:verifyAndGetUserInfo()');
       //$cookies.remove('currentUser');
       var openid = $stateParams.openid;
-      var access_token = $stateParams.access_token;
+      var access_token = $stateParams.token;
       var redirect = $stateParams.redirect;
       if (!openid || !access_token) {
         console.log('return');
