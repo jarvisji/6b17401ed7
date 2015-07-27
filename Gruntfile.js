@@ -2,7 +2,7 @@ module.exports = function (grunt) {
 
   grunt.initConfig({
     jshint: {
-      files: ['Gruntfile.js', 'client/**/*.js', '!client/vendor/**/*.js', 'server/**/*.js', 'test/**/*.js'],
+      files: ['client/**/*.js', '!client/vendor/**/*.js', 'server/**/*.js', 'test/**/*.js'],
       options: {
         globals: {
           jQuery: false
@@ -19,7 +19,10 @@ module.exports = function (grunt) {
     copy: {
       client: {
         expand: true,
-        src: ['.bowerrc', 'bower.json', 'package.json', 'client/**/*.html', '!client/vendor/**', '!client/assets/css/**', 'server/**'],
+        src: ['.bowerrc', 'bower.json', 'package.json',
+          'client/**/*.html', 'client/assets/image/**/*',
+          'server/**',
+          '!client / vendor/**', '!client/assets/css/**'],
         dest: 'dist'
       }
     },
@@ -53,10 +56,11 @@ module.exports = function (grunt) {
           src: [
             //'client/app/app.js',
             'client/wxappd/app.js',
-            'client/common/**/*.js',
+            'client/common/**/ *.js',
             'client/wxappd/**/*.js'
           ]
-        }]
+        }
+        ]
       }
     },
     uglify: {
@@ -69,23 +73,26 @@ module.exports = function (grunt) {
           src: ['.tmp/concat/js/app.js']
         }]
       }
-    },
+    }
+    ,
     cssmin: {
       dist: {
         files: [{
           'dist/client/assets/css/app.min.css': ['client/assets/css/styles.css']
         }]
       }
-    },
+    }
+    ,
     rev: {
       files: {
         src: ['dist/client/assets/**/*.{js,css}']
       }
     }
-  });
+  })
+  ;
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  //grunt.loadNpmTasks('grunt-contrib-watch');
+//grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-text-replace');
   grunt.loadNpmTasks('grunt-contrib-copy');
@@ -98,4 +105,5 @@ module.exports = function (grunt) {
   grunt.registerTask('default', ['jshint', 'copy', 'replace:forAliyun', 'useminPrepare', 'concat:dist', 'uglify:dist', 'cssmin:dist', 'rev', 'usemin']);
   grunt.registerTask('localhost', ['jshint', 'copy', 'replace:forLocalhost', 'useminPrepare', 'concat:dist', 'uglify:dist', 'cssmin:dist', 'rev', 'usemin']);
 
-};
+}
+;
