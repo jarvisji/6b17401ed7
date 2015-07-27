@@ -34,7 +34,7 @@ before(function (done) {
 
       Doctor.find({}, 'number').limit(1).sort({'number': -1}).exec(function (err, maxNumberDoctor) {
         if (err) return done(err);
-        var maxNumber = maxNumberDoctor[0].number;
+        var maxNumber = maxNumberDoctor.length > 0 ? maxNumberDoctor[0].number : 0;
         console.log('max number of doctors is: %d', maxNumber);
         // set number.
         for (var i = 0; i < mockDoctors.length; i++) {
