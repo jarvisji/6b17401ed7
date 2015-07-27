@@ -61,8 +61,10 @@ module.exports = function () {
   var doctorFriendSchema = new Schema({
     from: String, // from user id
     fromName: String,
+    fromAvatar: String,
+    fromOpenid: String,
     to: String, // to user id
-    isAccepted: {type: Boolean, default: false},
+    status: {type: String, default: 'requested'}, // requested, accepted, rejected
     message: String,
     created: {type: Date, default: Date.now},
     lastModified: {type: Date, default: Date.now}
@@ -70,7 +72,7 @@ module.exports = function () {
   doctorFriendSchema.pre('update', function () {
     this.update({}, {$set: {lastModified: new Date()}});
   });
-  doctorFriendSchema.index({from: 1, to: 1, isAccepted: -1, created: -1});
+  doctorFriendSchema.index({from: 1, to: 1, status: 1, created: -1});
 
 
   var serviceStockSchema = new Schema({
@@ -156,6 +158,8 @@ module.exports = function () {
   var patientFriendSchema = new Schema({
     from: String, // from user id
     fromName: String,
+    fromAvatar: String,
+    fromOpenid: String,
     to: String, // to user id
     isAccepted: Boolean,
     message: String,

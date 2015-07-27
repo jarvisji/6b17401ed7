@@ -67,7 +67,14 @@ var registerRoutes = function () {
   app.post('/api/doctors/:id/friends/requests', doctorCtrl.createFriendsRequests);
   app.get('/api/doctors/:id/friends/requests', doctorCtrl.getFriendsRequests);
   app.put('/api/doctors/friends/requests/:reqId/acceptance', doctorCtrl.acceptFriendsRequests);
+  app.put('/api/doctors/friends/requests/:reqId/rejection', doctorCtrl.rejectFriendsRequests);
   app.delete('/api/doctors/friends/requests/:reqId', doctorCtrl.deleteFriendsRequests);
+  /**
+   * GET '/api/doctors/friends/:id1/:id2'
+   * Response: doctorFriendSchema if exist.
+   * Check the friend relationship between two doctors.
+   */
+  app.get('/api/doctors/friends/:id1/:id2', doctorCtrl.getFriendsRequestsStatus);
   app.get('/api/doctors/:id/friends', doctorCtrl.getFriends);
 
   app.get('/api/patients', patientCtrl.find);

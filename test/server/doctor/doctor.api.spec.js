@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var should = require('should');
 var util = require('../testUtils');
 
-describe.only('Test doctor APIs.', function () {
+describe('Test doctor APIs.', function () {
   var ts = new Date().getTime();
   var doctorId, doctorId2, mockMobile, friendRequestId;
   var mockDoctor = util.conf.testData.doctors[0];
@@ -138,8 +138,9 @@ describe.only('Test doctor APIs.', function () {
         var data = res.body.data;
         should(data.from).equal(doctorId);
         should(data.fromName).equal(mockDoctor.name);
+        should(data.fromOpenid).equal(mockDoctor.wechat.openid);
         should(data.to).equal(doctorId2);
-        should(data.isAccepted).equal(false);
+        should(data.status).equal('requested');
         done();
       });
   });
@@ -168,10 +169,19 @@ describe.only('Test doctor APIs.', function () {
         should(data.length).equal(1);
         should(data[0].from).equal(doctorId);
         should(data[0].fromName).equal(mockDoctor.name);
-        should(data[0].isAccepted).equal(false);
+        should(data[0].status).equal('requested');
         friendRequestId = data[0]._id;
         done();
       });
+  });
+
+  it('Test get request between two doctors', function (done) {
+    util.req.json('get', '/api/doctors/friends/' + doctorId + '/' + doctorId2)
+      .expect(200, done);
+  });
+  it('Test get request between two doctors reverse', function (done) {
+    util.req.json('get', '/api/doctors/friends/' + doctorId2 + '/' + doctorId)
+      .expect(200, done);
   });
 
   // doctor2 accept the request.

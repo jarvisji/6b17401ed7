@@ -184,13 +184,20 @@ module.exports = function (app) {
             debug('createFriendsRequests(), friend relationship exists, skip creating.');
             throw new Error('friend_relationship_exists');
           } else {
-            return Doctor.findById(fromDoctorId, 'name').exec();
+            return Doctor.findById(fromDoctorId).exec();
           }
         }).then(function (doctor) {
           var doctorName = doctor.name;
-          debug('createFriendsRequests(), found doctor name: "%s" of fromId: %s', doctorName, fromDoctorId);
+          var doctorOpenid = doctor.wechat.openid;
+          var doctorAvatar = doctor.wechat.headimgurl;
+          debug('createFriendsRequests(), found doctor name: "%s", openid: %s, of fromId: %s', doctorName, doctorOpenid, fromDoctorId);
           return DoctorFriend.create({
-            from: fromDoctorId, fromName: doctorName, to: toDoctorId, message: message
+            from: fromDoctorId,
+            fromName: doctorName,
+            fromAvatar: doctorAvatar,
+            fromOpenid: doctorOpenid,
+            to: toDoctorId,
+            message: message
           });
         }).then(function (createdFriendRequest) {
           debug('createFriendsRequests(), created.');
@@ -213,7 +220,7 @@ module.exports = function (app) {
    */
   var getFriendsRequests = function (req, res) {
     var id = req.params.id;
-    DoctorFriend.find({to: id, isAccepted: false}, function (err, requests) {
+    DoctorFriend.find({to: id, status: 'requested'}, function (err, requests) {
       if (err) {
         debug('getFriendsRequests(), error:%o', err);
         return res.status(500).json(utils.jsonResult(err));
@@ -229,7 +236,7 @@ module.exports = function (app) {
    */
   var acceptFriendsRequests = function (req, res) {
     var reqId = req.params.reqId;
-    DoctorFriend.findByIdAndUpdate(reqId, {isAccepted: true}, function (err, ret) {
+    DoctorFriend.findByIdAndUpdate(reqId, {status: 'accepted'}, function (err, ret) {
       if (err) {
         debug('acceptFriendsRequests(), error:%o', err);
         return res.status(500).json(utils.jsonResult(err));
@@ -238,6 +245,21 @@ module.exports = function (app) {
     });
   };
 
+  /**
+   * PUT '/api/doctors/friends/requests/:reqId/rejection'
+   * @param req
+   * @param res
+   */
+  var rejectFriendsRequests = function (req, res) {
+    var reqId = req.params.reqId;
+    DoctorFriend.findByIdAndUpdate(reqId, {status: 'rejected'}, function (err, ret) {
+      if (err) {
+        debug('rejectFriendsRequests(), error:%o', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      res.end();
+    });
+  };
   /**
    * DELETE '/api/doctors/friends/requests/:reqId'
    * @param req
@@ -250,6 +272,38 @@ module.exports = function (app) {
   };
 
   /**
+   * GET '/api/doctors/friends/:id1/:id2'
+   * Response: doctorFriendSchema if exist.
+   * @param req
+   * @param res
+   */
+  var getFriendsRequestsBetween2Doctors = function (req, res) {
+    var id1 = req.params.id1;
+    var id2 = req.params.id2;
+    DoctorFriend.find({from: id1, to: id2}, function (err, found) {
+      if (err) {
+        debug('getFriendsRequestsBetween2Doctors(), get requests error:%o', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      if (found.length > 0) {
+        res.json(utils.jsonResult(found[0]));
+      } else {
+        DoctorFriend.find({from: id2, to: id1}, function (err, found) {
+          if (err) {
+            debug('getFriendsRequestsBetween2Doctors(), get requests error:%o', err);
+            return res.status(500).json(utils.jsonResult(err));
+          }
+          if (found.length > 0) {
+            res.json(utils.jsonResult(found[0]));
+          } else {
+            res.status(404).end();
+          }
+        });
+      }
+    });
+  };
+
+  /**
    * GET '/api/doctors/:id/friends'
    * @param req
    * @param res
@@ -257,7 +311,7 @@ module.exports = function (app) {
   var getFriends = function (req, res) {
     var id = req.params.id;
     debug('getFriends(), finding friends for id: %s', id);
-    DoctorFriend.find({'$or': [{from: id}, {to: id}], isAccepted: true}, function (err, requests) {
+    DoctorFriend.find({'$or': [{from: id}, {to: id}], status: 'accepted'}, function (err, requests) {
       if (err) {
         debug('getFriends(), get accepted requests error:%o', err);
         return res.status(500).json(utils.jsonResult(err));
@@ -303,7 +357,9 @@ module.exports = function (app) {
     createFriendsRequests: createFriendsRequests,
     getFriendsRequests: getFriendsRequests,
     acceptFriendsRequests: acceptFriendsRequests,
+    rejectFriendsRequests: rejectFriendsRequests,
     deleteFriendsRequests: deleteFriendsRequests,
+    getFriendsRequestsStatus: getFriendsRequestsBetween2Doctors,
     getFriends: getFriends
   };
 };
