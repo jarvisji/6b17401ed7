@@ -9,6 +9,7 @@ var stringUtils = require('../utils/string-utils');
 
 module.exports = function (app) {
   var Doctor = app.models.Doctor;
+  var DoctorFriend = app.models.DoctorFriend;
   var excludeFields = app.models.doctorExcludeFields;
 
   var login = function (req, res) {
@@ -163,6 +164,125 @@ module.exports = function (app) {
   };
 
   /**
+   * POST '/api/doctors/:id/friends/requests'
+   * Data: {'toDoctorId': 'String', 'message': 'String'}
+   * @param req
+   * @param res
+   */
+  var createFriendsRequests = function (req, res) {
+    var fromDoctorId = req.params.id;
+
+    if (!req.body || !req.body['toDoctorId']) {
+      res.status(400).end();
+    } else {
+      var toDoctorId = req.body['toDoctorId'];
+      var message = req.body.message;
+      debug('createFriendsRequests(), from: %s, to: %s', fromDoctorId, toDoctorId);
+      DoctorFriend.find({from: fromDoctorId, to: toDoctorId}).exec()
+        .then(function (existFriendRelationship) {
+          if (existFriendRelationship.length > 0) {
+            debug('createFriendsRequests(), friend relationship exists, skip creating.');
+            throw new Error('friend_relationship_exists');
+          } else {
+            return Doctor.findById(fromDoctorId, 'name').exec();
+          }
+        }).then(function (doctor) {
+          var doctorName = doctor.name;
+          debug('createFriendsRequests(), found doctor name: "%s" of fromId: %s', doctorName, fromDoctorId);
+          return DoctorFriend.create({
+            from: fromDoctorId, fromName: doctorName, to: toDoctorId, message: message
+          });
+        }).then(function (createdFriendRequest) {
+          debug('createFriendsRequests(), created.');
+          res.status(201).json(utils.jsonResult(createdFriendRequest));
+        }, function (err) {
+          if (err.message !== 'friend_relationship_exists') {
+            debug('createFriendsRequests(), error: %o', err);
+            res.status(500).json(utils.jsonResult(err));
+          } else {
+            res.status(409).end();
+          }
+        });
+    }
+  };
+
+  /**
+   * GET '/api/doctors/:id/friends/requests'
+   * @param req
+   * @param res
+   */
+  var getFriendsRequests = function (req, res) {
+    var id = req.params.id;
+    DoctorFriend.find({to: id, isAccepted: false}, function (err, requests) {
+      if (err) {
+        debug('getFriendsRequests(), error:%o', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      res.json(utils.jsonResult(requests));
+    })
+  };
+
+  /**
+   * PUT '/api/doctors/friends/requests/:reqId/acceptance'
+   * @param req
+   * @param res
+   */
+  var acceptFriendsRequests = function (req, res) {
+    var reqId = req.params.reqId;
+    DoctorFriend.findByIdAndUpdate(reqId, {isAccepted: true}, function (err, ret) {
+      if (err) {
+        debug('acceptFriendsRequests(), error:%o', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      res.end();
+    });
+  };
+
+  /**
+   * DELETE '/api/doctors/friends/requests/:reqId'
+   * @param req
+   * @param res
+   */
+  var deleteFriendsRequests = function (req, res) {
+    var reqId = req.params.reqId;
+    DoctorFriend.remove({_id: reqId}).exec();
+    res.end();
+  };
+
+  /**
+   * GET '/api/doctors/:id/friends'
+   * @param req
+   * @param res
+   */
+  var getFriends = function (req, res) {
+    var id = req.params.id;
+    debug('getFriends(), finding friends for id: %s', id);
+    DoctorFriend.find({'$or': [{from: id}, {to: id}], isAccepted: true}, function (err, requests) {
+      if (err) {
+        debug('getFriends(), get accepted requests error:%o', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      debug('getFriends(), found accepted requests: %o', requests);
+      var ids = [];
+      for (var i = 0; i < requests.length; i++) {
+        if (requests[i].from == id) {
+          ids.push(requests[i].to);
+        } else {
+          ids.push(requests[i].from);
+        }
+      }
+      debug('getFriends(), parsed friends ids: %o', ids);
+      Doctor.find({_id: {'$in': ids}}, function (err, doctors) {
+        if (err) {
+          debug('getFriends(), get doctors error:%o', err);
+          return res.status(500).json(utils.jsonResult(err));
+        }
+        res.json(utils.jsonResult(doctors));
+      });
+    })
+  };
+
+  /**
    * Remove some data not tend to expose to user.
    * @param doctor
    */
@@ -179,7 +299,12 @@ module.exports = function (app) {
     login: login,
     createDoctor: createDoctor,
     findDoctors: findDoctors,
-    saveDoctor: saveDoctor
+    saveDoctor: saveDoctor,
+    createFriendsRequests: createFriendsRequests,
+    getFriendsRequests: getFriendsRequests,
+    acceptFriendsRequests: acceptFriendsRequests,
+    deleteFriendsRequests: deleteFriendsRequests,
+    getFriends: getFriends
   };
 };
 

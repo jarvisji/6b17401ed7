@@ -59,6 +59,16 @@ var registerRoutes = function () {
   app.post('/api/doctors', doctorCtrl.createDoctor);
   app.get('/api/doctors', doctorCtrl.findDoctors);
   app.put('/api/doctors/:id', doctorCtrl.saveDoctor);
+  /**
+   * POST '/api/doctors/:id/friends/requests'
+   * Data: {'toDoctorId': 'String', 'message': 'String'}
+   * Add a doctor as a friend to the doctor which 'id' identify.
+   */
+  app.post('/api/doctors/:id/friends/requests', doctorCtrl.createFriendsRequests);
+  app.get('/api/doctors/:id/friends/requests', doctorCtrl.getFriendsRequests);
+  app.put('/api/doctors/friends/requests/:reqId/acceptance', doctorCtrl.acceptFriendsRequests);
+  app.delete('/api/doctors/friends/requests/:reqId', doctorCtrl.deleteFriendsRequests);
+  app.get('/api/doctors/:id/friends', doctorCtrl.getFriends);
 
   app.get('/api/patients', patientCtrl.find);
   app.put('/api/patients/:id', patientCtrl.save);

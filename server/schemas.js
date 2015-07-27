@@ -49,7 +49,7 @@ module.exports = function () {
       remark: String,
       groupid: Number
     },
-    doctorFriends: [String], // doctorId
+    //doctorFriends: [String], // doctorId
     created: {type: Date, default: Date.now},
     lastModified: {type: Date, default: Date.now}
   });
@@ -57,6 +57,20 @@ module.exports = function () {
     this.update({}, {$set: {lastModified: new Date()}});
   });
   doctorSchema.index({province: 1, city: 1, hospital: 1, department: 1});
+
+  var doctorFriendSchema = new Schema({
+    from: String, // from user id
+    fromName: String,
+    to: String, // to user id
+    isAccepted: {type: Boolean, default: false},
+    message: String,
+    created: {type: Date, default: Date.now},
+    lastModified: {type: Date, default: Date.now}
+  });
+  doctorFriendSchema.pre('update', function () {
+    this.update({}, {$set: {lastModified: new Date()}});
+  });
+  doctorFriendSchema.index({from: 1, to: 1, isAccepted: -1, created: -1});
 
 
   var serviceStockSchema = new Schema({
@@ -130,7 +144,7 @@ module.exports = function () {
       groupid: Number
     },
     doctorFollowed: [String], // doctorId
-    patientFriends: [String], // patientId
+    //patientFriends: [String], // patientId
     created: {type: Date, default: Date.now},
     lastModified: {type: Date, default: Date.now}
   });
@@ -139,6 +153,19 @@ module.exports = function () {
   });
   patientSchema.index({province: 1, city: 1, sickness: 1});
 
+  var patientFriendSchema = new Schema({
+    from: String, // from user id
+    fromName: String,
+    to: String, // to user id
+    isAccepted: Boolean,
+    message: String,
+    created: {type: Date, default: Date.now},
+    lastModified: {type: Date, default: Date.now}
+  });
+  patientFriendSchema.pre('update', function () {
+    this.update({}, {$set: {lastModified: new Date()}});
+  });
+  patientFriendSchema.index({from: 1, to: 1, isAccepted: -1, created: -1});
 
   var caseHistorySchema = new Schema({
     patientId: String,
@@ -164,11 +191,13 @@ module.exports = function () {
 
   return {
     doctorSchema: doctorSchema,
+    doctorFriendSchema: doctorFriendSchema,
     serviceSchema: serviceSchema,
     serviceStockSchema: serviceStockSchema,
     serviceOrderSchema: serviceOrderSchema,
     commentSchema: commentSchema,
     patientSchema: patientSchema,
+    patientFriendSchema: patientFriendSchema,
     caseHistorySchema: caseHistorySchema
   };
 };
