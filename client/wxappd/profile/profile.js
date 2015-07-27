@@ -3,7 +3,7 @@
  * Created by Ting on 2015/7/11.
  */
 angular.module('ylbWxApp')
-  .controller('wxProfileCtrl', ['$scope', '$rootScope', '$stateParams', '$http', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $stateParams, $http, $alert, resources, commonUtils) {
+  .controller('wxProfileCtrl', ['$scope', '$rootScope', '$stateParams', '$http', '$alert', '$modal', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $stateParams, $http, $alert, $modal, resources, commonUtils) {
     var currentUser = $scope.currentUser = $rootScope.checkUserVerified();
     var snapshot = {}; // snapshot data to compare changes.
     var openid = $stateParams.openid;
@@ -170,8 +170,29 @@ angular.module('ylbWxApp')
         });
     };
 
+    // Pre-fetch an external template populated with a custom scope
+    var addFriendModal = $modal({scope: $scope, template: 'wxappd/profile/add-friend-modal.tpl.html', show: false});
+    // Show when some event occurs (use $promise property to ensure the template has been loaded)
+    $scope.showAddFriendModal = function () {
+      addFriendModal.$promise.then(addFriendModal.show);
+    };
+
     // doctor add profile doctor as friend.
-    $scope.addFriend = function () {
+    $scope.addFriend = function (message) {
+      var currentDoctorId = currentUser.doctor._id;
+      var profileDoctorId = $scope.doctor._id;
+      $http.post('/api/doctors/' + currentDoctorId + '/friends/requests', {
+        toDoctorId: profileDoctorId,
+        message: message
+      }).success(function (resp) {
+        $rootScope.alertSuccess('', '添加好友请求已发送。');
+      }).error(function (resp, status) {
+        if (status === 409) {
+          $rootScope.alertSuccess('', '添加好友请求已发送。');
+        }
+        else
+          $rootScope.alertError(null, resp, status);
+      });
     };
 
   }]);

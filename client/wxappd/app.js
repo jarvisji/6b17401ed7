@@ -51,6 +51,12 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'm
     /**
      * Get user information by given openid and access_token.
      * This is the first step to access web application. If this step failed, all other pages should not be able to accessed.
+     * {
+     * "data":{"openid":"oWTqJs8SEbDON98vMor20rnXh9UQ", "access_token":"bbb", "verified":1437977798305,
+     *   "doctor":{"_id":"55acf0bc8e23e96c2e23b20e", "name":"xxx"}
+     *   "patient":{"_id":"55acf0bc8e23e96c2e23b20e", "name":"xxx"}
+     * }
+     * }
      */
     var verifyAndGetUserInfo = function () {
       $log.info('rootCtrl:verifyAndGetUserInfo()');
@@ -59,7 +65,6 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'm
       var access_token = $stateParams.token;
       var redirect = $stateParams.redirect;
       if (!openid || !access_token) {
-        console.log('return');
         return;
       }
 
