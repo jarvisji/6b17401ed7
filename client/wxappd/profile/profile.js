@@ -1,5 +1,6 @@
 /**
  * Display doctor profile.
+ * $scope.friendStatus controls status of friend buttons. Check tpl file to see the logic.
  * Created by Ting on 2015/7/11.
  */
 angular.module('ylbWxApp')
@@ -15,6 +16,7 @@ angular.module('ylbWxApp')
             var doctor = res.data[0];
             prepareDoctorData(doctor);
             preparePageData();
+            loadDoctorFriendRelationship();
           } else {
             $rootScope.alertError('', '用户未注册。');
           }
@@ -26,6 +28,27 @@ angular.module('ylbWxApp')
       $scope.isSelf = openid == currentUser.openid;
       loadDoctorData();
     }
+
+    var loadDoctorFriendRelationship = function () {
+      if (currentUser.isDoctor) {
+        var profileDoctorId = $scope.doctor._id;
+        var currentDoctorId = currentUser.doctor._id;
+        if (profileDoctorId != currentDoctorId) {
+          $http.get('/api/doctors/friends/' + currentDoctorId + '/' + profileDoctorId)
+            .success(function (resp) {
+              $scope.friendStatus = resp.data;
+              $scope.friendStatus.isFromMe = resp.data.from == currentDoctorId;
+              $scope.friendStatus.isToMe = resp.data.to == currentDoctorId;
+            }).error(function (resp, status) {
+              if (status == 404) {
+                // the two doctors are not friends, also no pending requests. Nothing to do.
+              } else {
+                $rootScope.alertError(null, err, status);
+              }
+            });
+        }
+      }
+    };
 
     var prepareDoctorData = function (doctor) {
       $scope.doctor = doctor;
@@ -186,13 +209,24 @@ angular.module('ylbWxApp')
         message: message
       }).success(function (resp) {
         $rootScope.alertSuccess('', '添加好友请求已发送。');
+        $scope.friendStatus = {isFromMe: true, status: 'requested'};
       }).error(function (resp, status) {
         if (status === 409) {
           $rootScope.alertSuccess('', '添加好友请求已发送。');
+          $scope.friendStatus = {isFromMe: true, status: 'requested'};
         }
         else
           $rootScope.alertError(null, resp, status);
       });
+    };
+
+    $scope.deleteFriend = function (reqId) {
+      $http.delete('/api/doctors/friends/requests/' + reqId)
+        .success(function (resp) {
+          $scope.friendStatus = undefined;
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
     };
 
   }]);
