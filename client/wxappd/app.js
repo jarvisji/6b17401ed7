@@ -3,6 +3,15 @@
  */
 angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'mgcrea.ngStrap'])
   .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+    $stateProvider.state('testDoctorIndex', {
+      url: '/doctor/index',
+      templateUrl: 'wxappd/doctor/test-index.tpl.html',
+      controller: 'rootCtrl'
+    });
+    $stateProvider.state('testPatientIndex', {
+      url: '/patient/index',
+      templateUrl: 'wxappd/patient/test-index.tpl.html'
+    });
     $stateProvider.state('entry', {
       url: '/?openid&token&redirect',
       controller: 'rootCtrl'
@@ -37,7 +46,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'm
       templateUrl: 'wxappd/search/search-doctor-result.tpl.html',
       controller: 'wxSearchDoctorResultCtrl'
     });
-    $stateProvider.state('my-doctors', {
+    $stateProvider.state('patient-my-doctors', {
       url: '/patient/doctors',
       templateUrl: 'wxappd/patient/my-doctors.tpl.html',
       controller: 'wxMyDoctorsCtrl'
