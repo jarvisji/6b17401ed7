@@ -46,7 +46,7 @@ angular.module('ylbWxApp')
         filter.level = {'$gt': 2}; // search result will only include 'real' doctors.
       }
 
-      var params = {filter: filter, limit: 2};
+      var params = {filter: filter, limit: 20};
       $http.get('/api/doctors', {params: params})
         .success(function (resp) {
           if (resp.count > 0) {

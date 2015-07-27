@@ -44,7 +44,7 @@ before(function (done) {
         Doctor.create(mockDoctors, function (err, createdDoctors) {
           if (err) done(err);
           console.log('insert test doctors success.');
-          done();
+          //done();
         });
       });
     } else {
