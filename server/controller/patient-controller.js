@@ -9,6 +9,7 @@ var stringUtils = require('../utils/string-utils');
 
 module.exports = function (app) {
   var Patient = app.models.Patient;
+  var PatientFriend = app.models.PatientFriend;
   var Doctor = app.models.Doctor;
   var doctorExcludeFields = app.models.doctorExcludeFields;
   var patientExcludeFields = app.models.patientExcludeFields;
@@ -203,6 +204,181 @@ module.exports = function (app) {
     });
   };
 
+
+  /**
+   * POST '/api/patients/:id/friends/requests'
+   * Data: {'toPatientId': 'String', 'message': 'String'}
+   * @param req
+   * @param res
+   */
+  var createFriendsRequests = function (req, res) {
+    var fromPatientId = req.params.id;
+
+    if (!req.body || !req.body['toPatientId']) {
+      res.status(400).end();
+    } else {
+      var toPatientId = req.body['toPatientId'];
+      var message = req.body.message;
+      debug('createFriendsRequests(), from: %s, to: %s', fromPatientId, toPatientId);
+      PatientFriend.find({from: fromPatientId, to: toPatientId}).exec()
+        .then(function (existFriendRelationship) {
+          if (existFriendRelationship.length > 0) {
+            debug('createFriendsRequests(), friend relationship exists, skip creating.');
+            throw new Error('friend_relationship_exists');
+          } else {
+            return Patient.findById(fromPatientId).exec();
+          }
+        }).then(function (patient) {
+          var name = patient.name;
+          var openid = patient.wechat.openid;
+          var avatar = patient.wechat.headimgurl;
+          debug('createFriendsRequests(), found patient name: "%s", openid: %s, of fromId: %s', name, openid, fromPatientId);
+          return PatientFriend.create({
+            from: fromPatientId,
+            fromName: name,
+            fromAvatar: avatar,
+            fromOpenid: openid,
+            to: toPatientId,
+            message: message
+          });
+        }).then(function (createdFriendRequest) {
+          debug('createFriendsRequests(), created.');
+          res.status(201).json(utils.jsonResult(createdFriendRequest));
+        }, function (err) {
+          if (err.message !== 'friend_relationship_exists') {
+            debug('createFriendsRequests(), error: %o', err);
+            res.status(500).json(utils.jsonResult(err));
+          } else {
+            res.status(409).end();
+          }
+        });
+    }
+  };
+
+  /**
+   * GET '/api/patients/:id/friends/requests'
+   * @param req
+   * @param res
+   */
+  var getFriendsRequests = function (req, res) {
+    var id = req.params.id;
+    PatientFriend.find({to: id, status: 'requested'}, function (err, requests) {
+      if (err) {
+        debug('getFriendsRequests(), error:%o', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      res.json(utils.jsonResult(requests));
+    })
+  };
+
+  /**
+   * PUT '/api/patients/friends/requests/:reqId/acceptance'
+   * @param req
+   * @param res
+   */
+  var acceptFriendsRequests = function (req, res) {
+    var reqId = req.params.reqId;
+    PatientFriend.findByIdAndUpdate(reqId, {status: 'accepted'}, function (err, ret) {
+      if (err) {
+        debug('acceptFriendsRequests(), error:%o', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      res.end();
+    });
+  };
+
+  /**
+   * PUT '/api/patients/friends/requests/:reqId/rejection'
+   * @param req
+   * @param res
+   */
+  var rejectFriendsRequests = function (req, res) {
+    var reqId = req.params.reqId;
+    PatientFriend.findByIdAndUpdate(reqId, {status: 'rejected'}, function (err, ret) {
+      if (err) {
+        debug('rejectFriendsRequests(), error:%o', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      res.end();
+    });
+  };
+  /**
+   * DELETE '/api/patients/friends/requests/:reqId'
+   * @param req
+   * @param res
+   */
+  var deleteFriendsRequests = function (req, res) {
+    var reqId = req.params.reqId;
+    PatientFriend.remove({_id: reqId}).exec();
+    res.end();
+  };
+
+  /**
+   * GET '/api/patients/friends/:id1/:id2'
+   * Response: PatientFriendSchema if exist.
+   * @param req
+   * @param res
+   */
+  var getFriendsRequestsBetween2Patients = function (req, res) {
+    var id1 = req.params.id1;
+    var id2 = req.params.id2;
+    PatientFriend.find({from: id1, to: id2}, function (err, found) {
+      if (err) {
+        debug('getFriendsRequestsBetween2Patients(), get requests error:%o', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      if (found.length > 0) {
+        res.json(utils.jsonResult(found[0]));
+      } else {
+        PatientFriend.find({from: id2, to: id1}, function (err, found) {
+          if (err) {
+            debug('getFriendsRequestsBetween2Patients(), get requests error:%o', err);
+            return res.status(500).json(utils.jsonResult(err));
+          }
+          if (found.length > 0) {
+            res.json(utils.jsonResult(found[0]));
+          } else {
+            res.status(404).end();
+          }
+        });
+      }
+    });
+  };
+
+  /**
+   * GET '/api/patients/:id/friends'
+   * @param req
+   * @param res
+   */
+  var getFriends = function (req, res) {
+    var id = req.params.id;
+    debug('getFriends(), finding friends for id: %s', id);
+    PatientFriend.find({'$or': [{from: id}, {to: id}], status: 'accepted'}, function (err, requests) {
+      if (err) {
+        debug('getFriends(), get accepted requests error:%o', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      debug('getFriends(), found accepted requests: %o', requests);
+      var ids = [];
+      for (var i = 0; i < requests.length; i++) {
+        if (requests[i].from == id) {
+          ids.push(requests[i].to);
+        } else {
+          ids.push(requests[i].from);
+        }
+      }
+      debug('getFriends(), parsed friends ids: %o', ids);
+      Patient.find({_id: {'$in': ids}}, function (err, patients) {
+        if (err) {
+          debug('getFriends(), get patients error:%o', err);
+          return res.status(500).json(utils.jsonResult(err));
+        }
+        res.json(utils.jsonResult(patients));
+      });
+    })
+  };
+
+
   /**
    * Remove some data not tend to expose to user.
    * @param patient
@@ -222,7 +398,14 @@ module.exports = function (app) {
     getFollows: getFollows,
     createFollow: createFollow,
     isFollowed: isFollowed,
-    deleteFollow: deleteFollow
+    deleteFollow: deleteFollow,
+    createFriendsRequests: createFriendsRequests,
+    getFriendsRequests: getFriendsRequests,
+    acceptFriendsRequests: acceptFriendsRequests,
+    rejectFriendsRequests: rejectFriendsRequests,
+    deleteFriendsRequests: deleteFriendsRequests,
+    getFriendsRequestsStatus: getFriendsRequestsBetween2Patients,
+    getFriends: getFriends
   };
 };
 

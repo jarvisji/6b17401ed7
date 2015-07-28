@@ -51,7 +51,24 @@
 
   <section>
     <div class="follow-buttons" ng-hide="isSelf">
-      <button type="button" class="btn btn-primary btn-block btn-lg" ng-click="followPatient()">关注病友</button>
+      <button type="button" class="btn btn-primary btn-block btn-lg"
+              ng-show="!friendStatus" ng-click="showAddFriendModal()">加为好友
+      </button>
+      <button type="button" class="btn btn-danger btn-block btn-lg"
+              ng-show="friendStatus.status=='accepted'" ng-click="deleteFriend(friendStatus._id)">删除好友
+      </button>
+      <button type="button" class="btn btn-warning btn-block btn-lg"
+              ng-show="friendStatus.isFromMe && friendStatus.status=='requested'" disabled>已发送好友请求，等待对方响应
+      </button>
+      <button type="button" class="btn btn-warning btn-block btn-lg"
+              ng-show="friendStatus.isFromMe && friendStatus.status=='rejected'" disabled>对方已拒绝你的好友请求
+      </button>
+      <button type="button" class="btn btn-warning btn-block btn-lg"
+              ng-show="friendStatus.isToMe && friendStatus.status=='rejected'" disabled>你已拒绝对方的好友请求
+      </button>
+      <button type="button" class="btn btn-warning btn-block btn-lg"
+              ng-show="friendStatus.isToMe && friendStatus.status=='requested'" disabled>对方请求加你为好友
+      </button>
     </div>
   </section>
 </div>

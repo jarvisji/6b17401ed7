@@ -10,7 +10,8 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'm
     });
     $stateProvider.state('testPatientIndex', {
       url: '/patient/index',
-      templateUrl: 'wxappd/patient/test-index.tpl.html'
+      templateUrl: 'wxappd/patient/test-index.tpl.html',
+      controller: 'rootCtrl'
     });
     $stateProvider.state('entry', {
       url: '/?openid&token&redirect',
@@ -96,6 +97,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'm
         .success(function (resp) {
           // save user verification info to session.
           $cookies.putObject('currentUser', resp.data);
+          $rootScope.currentUser = resp.data;
           // User must activate before start to use any functions.
           if (resp.data.doctor && !resp.data.doctor.name) {
             $state.go('profile-edit', {openid: openid, firstTime: true});

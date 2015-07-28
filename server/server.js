@@ -77,8 +77,26 @@ var registerRoutes = function () {
   app.get('/api/doctors/friends/:id1/:id2', doctorCtrl.getFriendsRequestsStatus);
   app.get('/api/doctors/:id/friends', doctorCtrl.getFriends);
 
+  /* Patient APIs ----------------------------------------------------------------------------------------*/
   app.get('/api/patients', patientCtrl.find);
   app.put('/api/patients/:id', patientCtrl.save);
+  /**
+   * POST '/api/patient/:id/friends/requests'
+   * Data: {'toPatientId': 'String', 'message': 'String'}
+   * Add a patient as a friend to the patient which 'id' identify.
+   */
+  app.post('/api/patients/:id/friends/requests', patientCtrl.createFriendsRequests);
+  app.get('/api/patients/:id/friends/requests', patientCtrl.getFriendsRequests);
+  app.put('/api/patients/friends/requests/:reqId/acceptance', patientCtrl.acceptFriendsRequests);
+  app.put('/api/patients/friends/requests/:reqId/rejection', patientCtrl.rejectFriendsRequests);
+  app.delete('/api/patients/friends/requests/:reqId', patientCtrl.deleteFriendsRequests);
+  /**
+   * GET '/api/patients/friends/:id1/:id2'
+   * Response: patientFriendSchema if exist.
+   * Check the friend relationship between two patients.
+   */
+  app.get('/api/patients/friends/:id1/:id2', patientCtrl.getFriendsRequestsStatus);
+  app.get('/api/patients/:id/friends', patientCtrl.getFriends);
 
   /**
    * GET '/api/patients/:id/follows?[expand=true]'

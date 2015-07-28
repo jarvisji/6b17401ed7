@@ -161,7 +161,7 @@ module.exports = function () {
     fromAvatar: String,
     fromOpenid: String,
     to: String, // to user id
-    isAccepted: Boolean,
+    status: {type: String, default: 'requested'}, // requested, accepted, rejected
     message: String,
     created: {type: Date, default: Date.now},
     lastModified: {type: Date, default: Date.now}
@@ -169,7 +169,7 @@ module.exports = function () {
   patientFriendSchema.pre('update', function () {
     this.update({}, {$set: {lastModified: new Date()}});
   });
-  patientFriendSchema.index({from: 1, to: 1, isAccepted: -1, created: -1});
+  patientFriendSchema.index({from: 1, to: 1, status: -1, created: -1});
 
   var caseHistorySchema = new Schema({
     patientId: String,
