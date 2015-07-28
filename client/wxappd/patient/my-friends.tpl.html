@@ -1,0 +1,60 @@
+<div class="row" ng-if="requests && requests.length>0 && !isShowRequests">
+  <div class="col-xs-12">
+    <div class="alert alert-info" role="alert" ng-click="showRequests()">你有 {{requests.length}} 条好友请求未处理。</div>
+  </div>
+</div>
+
+<div class="row" ng-if="isShowRequests">
+  <div class="col-xs-12">
+    <div class="general-item-list">
+      <div class="item" ng-repeat="request in requests">
+        <div class="item-head">
+          <div class="item-details" ng-click="showRequestProfile($index)">
+            <img class="item-pic" ng-src="{{request.fromAvatar}}">
+            <span class="item-name">{{request.fromName}}</span>
+            <span class="item-label">{{request.message}}</span>
+          </div>
+          <span class="item-status">
+            <button type="button" class="btn btn-danger" ng-click="reject($index)">拒绝</button>
+            <button type="button" class="btn btn-success" ng-click="accept($index)">同意</button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row" ng-if="friends.length>0 && !isShowRequests">
+  <div class="col-xs-12">
+    <div class="general-item-list">
+      <div class="item" ng-repeat="patient in friends" ng-click="showDetails($index)">
+        <div class="item-head">
+          <div class="item-details">
+            <img class="item-pic" ng-src="{{patient.wechat.headimgurl}}">
+            <span class="item-name">{{patient.name}}</span>
+            <span class="item-label"></span>
+          </div>
+          <span class="item-status"></span>
+        </div>
+        <div ng-if="$index == showDetailIndex">
+          <div class="row">
+            <div class="col-xs-3">年龄：{{patient.age}}</div>
+            <div class="col-xs-3">性别：{{patient.displaySex}}</div>
+            <div class="col-xs-6">地区：{{patient.city}}</div>
+          </div>
+          <div class="row">
+            <div class="col-xs-10">疾病：{{patient.sickness}}</div>
+            <div class="col-xs-2">
+              <button class="btn btn-success btn-sm">病历</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row" ng-if="(!friends || friends.length == 0) && !isShowRequests">
+  <div class="col-xs-12">
+    <h4 class="text-center">目前没有好友</h4>
+  </div>
+</div>

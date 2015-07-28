@@ -14,6 +14,7 @@ angular.module('ylbWxApp')
           if (res.count > 0) {
             var patient = res.data[0];
             preparePatientData(patient);
+            loadFriendRelationship();
           } else {
             $rootScope.alertError('', '用户未注册。');
           }

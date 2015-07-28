@@ -62,6 +62,11 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'm
       templateUrl: 'wxappd/patient/my-doctors.tpl.html',
       controller: 'wxMyDoctorsCtrl'
     });
+    $stateProvider.state('patient-my-friends', {
+      url: '/patient/friends',
+      templateUrl: 'wxappd/patient/my-friends.tpl.html',
+      controller: 'wxPatientFriendsCtrl'
+    });
     $stateProvider.state('doctor-my-friends', {
       url: '/doctor/friends',
       templateUrl: 'wxappd/doctor/my-friends.tpl.html',

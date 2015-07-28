@@ -2,11 +2,11 @@
   <h1>患者端测试页面</h1>
 </div>
 
-患者一
+患者：{{currentUser.patient.name}}
 
 <ul class="list-group">
   <li class="list-group-item">
-    <a ui-sref="profile-patient({openid: 'oWTqJs_isFdwO0vesXACDsELhiLI'})">个人设置</a>
+    <a ng-href="/wxindex.html#/profile/patient/{{currentUser.openid}}">个人设置</a>
   </li>
   <li class="list-group-item">
     <a ui-sref="search-doctor">搜索医生</a>
@@ -18,9 +18,6 @@
     <a ui-sref="search-patient">搜索患者</a>
   </li>
   <li class="list-group-item">
-    <a ui-sref=""></a>
-  </li>
-  <li class="list-group-item">
-    <a ui-sref=""></a>
+    <a ui-sref="patient-my-friends">我的病友</a>
   </li>
 </ul>
