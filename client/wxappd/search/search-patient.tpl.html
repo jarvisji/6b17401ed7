@@ -1,7 +1,7 @@
 <div class="page-header">
   <h2>搜索患者</h2>
 </div>
-
+<div class="alert alert-warning" role="alert" ng-show="!matchLevelToSearch">您还未达到正式级别，无法搜索患者。完成一次交易即可升级为正式会员。</div>
 <form class="form-horizontal">
   <div class="form-group">
     <label class="col-xs-2 control-label" for="province">省份</label>
@@ -30,7 +30,8 @@
   </div>
   <div class="form-group">
     <div class="col-xs-12">
-      <button class="btn btn-success btn-block btn-lg" ng-click="performSearch()">搜索</button>
+      <button class="btn btn-success btn-block btn-lg" ng-click="performSearch()" ng-disabled="!matchLevelToSearch">搜索
+      </button>
     </div>
   </div>
 </form>

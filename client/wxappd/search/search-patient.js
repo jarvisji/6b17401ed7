@@ -4,7 +4,8 @@
  */
 angular.module('ylbWxApp')
   .controller('wxSearchPatientCtrl', ['$scope', '$rootScope', '$http', '$state', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, resources, commonUtils) {
-    $rootScope.checkUserVerified();
+    var currentUser = $rootScope.checkUserVerified();
+    $scope.matchLevelToSearch = currentUser.isPatient && currentUser.patient.level > 1;
     $scope.search = {};
     $scope.ddProvince = commonUtils.getDdProvince();
 
