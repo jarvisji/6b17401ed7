@@ -1,0 +1,19 @@
+<section id="searchPatientResult">
+  <div class="general-item-list">
+    <div class="item" ng-repeat="patient in searchPatientResult" ng-click="showDetails($index)">
+      <div class="item-head">
+        <div class="item-details">
+          <img class="item-pic" ng-src="{{patient.wechat.headimgurl}}">
+          <span class="item-name">{{patient.name}}</span>
+          <span class="item-label"></span>
+        </div>
+        <span class="item-status"></span>
+      </div>
+    </div>
+  </div>
+</section>
+<section>
+  <button type="button" class="btn btn-success btn-block btn-lg" ng-click="showMore()"
+          ng-hide="noMoreRecords">显示更多
+  </button>
+</section>

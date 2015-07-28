@@ -46,6 +46,16 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'm
       templateUrl: 'wxappd/search/search-doctor-result.tpl.html',
       controller: 'wxSearchDoctorResultCtrl'
     });
+    $stateProvider.state('search-patient', {
+      url: '/search/patient',
+      templateUrl: 'wxappd/search/search-patient.tpl.html',
+      controller: 'wxSearchPatientCtrl'
+    });
+    $stateProvider.state('search-patient-result', {
+      url: '/search/patient/result',
+      templateUrl: 'wxappd/search/search-patient-result.tpl.html',
+      controller: 'wxSearchPatientResultCtrl'
+    });
     $stateProvider.state('patient-my-doctors', {
       url: '/patient/doctors',
       templateUrl: 'wxappd/patient/my-doctors.tpl.html',
