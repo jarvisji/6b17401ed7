@@ -430,6 +430,15 @@ module.exports = function (app) {
   };
 
   /**
+   *
+   * @param req
+   * @param res
+   */
+  var getCasesPostPrivilege = function(req, res) {
+
+  };
+
+  /**
    * GET '/api/patients/:id/cases'
    * @param req
    * @param res
@@ -744,6 +753,7 @@ module.exports = function (app) {
     getFriendsRequestsStatus: getFriendsRequestsBetween2Patients,
     getFriends: getFriends,
     createCase: createCase,
+    getCasesPostPrivilege: getCasesPostPrivilege,
     getCases: getCases,
     deleteCase: deleteCase,
     createCaseComment: createCaseComment,

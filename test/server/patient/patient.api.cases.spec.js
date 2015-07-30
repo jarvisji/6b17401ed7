@@ -30,7 +30,6 @@ describe.only('Tests for APIs of patient cases.', function () {
         return Doctor.findOne({'wechat.openid': testDoctor.wechat.openid}).exec();
       }).then(function (doctor) {
         doctorId = doctor.id;
-        // make sure patient and patient2 are friends.
         return PatientFriend.find({
           "$or": [{
             from: patientId,
@@ -43,6 +42,7 @@ describe.only('Tests for APIs of patient cases.', function () {
           }]
         }).exec();
       }).then(function (friends) {
+        // make sure patient and patient2 are friends.
         if (friends.length == 0) {
           PatientFriend.create({
             from: patientId,
@@ -50,8 +50,36 @@ describe.only('Tests for APIs of patient cases.', function () {
             status: util.app.consts.friendStatus.accepted
           }, function (err) {
             if (err) return done(err);
-            done();
           })
+        }
+        return PatientFriend.find({
+          "$or": [{
+            from: patientId,
+            to: patientId3,
+            status: util.app.consts.friendStatus.accepted
+          }, {
+            from: patientId3,
+            to: patientId,
+            status: util.app.consts.friendStatus.accepted
+          }]
+        }).exec();
+      }).then(function (friends) {
+        // make sure patient and patient3 are NOT friends.
+        if (friends.length > 0) {
+          for (var i = 0; i < friends.length; i++) {
+            PatientFriend.remove({_id: friends[i].id}, function (err, ret) {
+              if (err) return done(err);
+            })
+          }
+        }
+        return ServiceOrder.find({doctorId: doctorId, patientId: patientId}).exec();
+      }).then(function (orders) {
+        // make sure doctor and patient has orders
+        if (orders.length == 0) {
+          ServiceOrder.create({doctorId: doctorId, patientId: patientId}, function (err) {
+            if (err) return done(err);
+            done();
+          });
         } else {
           done();
         }
@@ -78,33 +106,19 @@ describe.only('Tests for APIs of patient cases.', function () {
   });
 
   it('Create case will success because doctor has order relationship.', function (done) {
-    ServiceOrder.find({doctorId: doctorId, patientId: patientId}).exec()
-      .then(function (orders) {
-        if (orders.length > 0) {
-          callApi();
-        } else {
-          ServiceOrder.create({doctorId: doctorId, patientId: patientId}, function (err) {
-            if (err) return done(err);
-            callApi();
-          });
-        }
+    util.req.json('post', '/api/patients/' + patientId + '/cases?openid=' + testDoctor.wechat.openid + '&role=' + util.app.consts.role.doctor)
+      .send({content: 'test case'})
+      .expect(200)
+      .end(function (err, res) {
+        if (err) return done(err);
+        var createdCase = res.body.data;
+        caseIdByDoctor = createdCase._id;
+        should(createdCase.content).equal('test case');
+        should(createdCase.creator.id).equal(doctorId);
+        should(createdCase.creator.name).equal(testDoctor.name);
+        should(createdCase.creator.role).equal(util.app.consts.role.doctor);
+        done();
       });
-
-    var callApi = function () {
-      util.req.json('post', '/api/patients/' + patientId + '/cases?openid=' + testDoctor.wechat.openid + '&role=' + util.app.consts.role.doctor)
-        .send({content: 'test case'})
-        .expect(200)
-        .end(function (err, res) {
-          if (err) return done(err);
-          var createdCase = res.body.data;
-          caseIdByDoctor = createdCase._id;
-          should(createdCase.content).equal('test case');
-          should(createdCase.creator.id).equal(doctorId);
-          should(createdCase.creator.name).equal(testDoctor.name);
-          should(createdCase.creator.role).equal(util.app.consts.role.doctor);
-          done();
-        });
-    }
   });
 
   it('Create case will fail because wrong link type.', function (done) {
