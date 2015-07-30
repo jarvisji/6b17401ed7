@@ -122,8 +122,8 @@ var registerRoutes = function () {
    */
   app.get('/api/patients/:id/cases', patientCtrl.getCases);
   app.delete('/api/patients/:id/cases/:caseId', patientCtrl.deleteCase);
-  app.post('/api/patients/:id/case/:caseId/comments', patientCtrl.createCaseComment);
-  app.delete('/api/patients/:id/case/:caseId/comments/commentId', patientCtrl.deleteCaseComment);
+  app.post('/api/patients/:id/cases/:caseId/comments', patientCtrl.createCaseComment);
+  app.delete('/api/patients/:id/cases/:caseId/comments/:commentId', patientCtrl.deleteCaseComment);
 };
 
 var startServer = function () {

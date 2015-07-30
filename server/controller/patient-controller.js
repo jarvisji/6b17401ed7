@@ -14,6 +14,7 @@ module.exports = function (app) {
   var Doctor = app.models.Doctor;
   var CaseHistory = app.models.CaseHistory;
   var ServiceOrder = app.models.ServiceOrder;
+  var Comment = app.models.Comment;
   var doctorExcludeFields = app.models.doctorExcludeFields;
   var patientExcludeFields = app.models.patientExcludeFields;
 
@@ -403,45 +404,19 @@ module.exports = function (app) {
       return res.status(400).json(utils.jsonResult(new Error('Invalid content')));
     }
 
-
-
-    // Get creator by passed in openid
-    var creatorUser;
-    getUserByOpenid(openid, role, function (err, user) {
-      if (err) {
-        debug('createCase(), get user error: %o', err);
-        return res.status(500).json(utils.jsonResult(err));
-      }
-      creatorUser = user;
-      // check creator have privilege to create case or not.
-      if (role == app.consts.role.doctor) {
-        // doctor create case, check order relationship.
-        debug('createCase(), creator is doctor, check if they have order relationship.');
-        getOrdersBetweenDoctorAndPatient(user.id, patientId, function (err, orders) {
-          if (err) {
-            debug('createCase(), get order relationship error:%o', err);
-            return res.status(500).json(utils.jsonResult(err));
-          }
-          if (orders.length > 0) {
-            debug('createCase(), doctor and patient has order relationship, create case.');
-            createCase();
-          } else {
-            debug('createCase(), doctor: %s, openid: %s has no privilege to create case for patient: %s.', user.id, openid, patientId);
-            res.status(403).json(utils.jsonResult(new Error('No privilege')));
-          }
-        });
-      } else if (user.id == patientId) {
-        // patient self
-        debug('createCase(), creator is patient self, create case.');
-        createCase();
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, creatorUser) {
+      if (arguments.length === 1) {
+        res.status(500).json(utils.jsonResult(err));
       } else {
-        // no privilege.
-        debug('createCase(), user: %s, openid: %s has no privilege to create case for patient: %s.', user.id, openid, patientId);
-        res.status(403).json(utils.jsonResult(new Error('No privilege')));
+        if (isSelf || hasOrder) {
+          createCase(creatorUser);
+        } else {
+          res.status(403).json(utils.jsonResult(err));
+        }
       }
     });
 
-    var createCase = function () {
+    var createCase = function (creatorUser) {
       newCase.creator = {id: creatorUser.id, name: creatorUser.name, role: role};
       newCase.patientId = patientId;
       CaseHistory.create(newCase, function (err, created) {
@@ -460,44 +435,19 @@ module.exports = function (app) {
    * @param res
    */
   var getCases = function (req, res) {
-    var openid = req.query.openid; // creator
-    var role = req.query.role; // creator
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
     var patientId = req.params.id;
-    getUserByOpenid(openid, role, function (err, user) {
-      if (err) {
-        debug('getCases(), get user error: %o', err);
-        return res.status(500).json(utils.jsonResult(err));
-      }
-      if (user.id == patientId) {
-        getCasesData();
-      } else if (role == app.consts.role.doctor) {
-        getOrdersBetweenDoctorAndPatient(user.id, patientId, function (err, orders) {
-          if (err) {
-            debug('getCases(), get order relationship error: %o', err);
-            return res.status(500).json(utils.jsonResult(err));
-          }
-          if (orders.length > 0) {
-            debug('getCases(), doctor and patient has order relationship, get case.');
-            getCasesData();
-          } else {
-            debug('getCases(), doctor: %s, openid: %s has no privilege to get case for patient: %s.', user.id, openid, patientId);
-            res.status(403).json(utils.jsonResult(new Error('No privilege')));
-          }
-        })
-      } else if (role == app.consts.role.patient) {
-        getPatientFriendRelations(user.id, patientId, function (err, friends) {
-          if (err) {
-            debug('getCases(), get friend relationship error: %o', err);
-            return res.status(500).json(utils.jsonResult(err));
-          }
-          if (friends.length > 0) {
-            debug('getCases(), patient and patient has friend relationship, get case.');
-            getCasesData();
-          } else {
-            debug('getCases(), patient: %s, openid: %s has no privilege to get case for patient: %s.', user.id, openid, patientId);
-            res.status(403).json(utils.jsonResult(new Error('No privilege')));
-          }
-        });
+
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+      if (arguments.length === 1) {
+        res.status(500).json(utils.jsonResult(err));
+      } else {
+        if (isSelf || isFriend || hasOrder) {
+          getCasesData();
+        } else {
+          res.status(403).json(utils.jsonResult(err));
+        }
       }
     });
 
@@ -518,25 +468,197 @@ module.exports = function (app) {
    * @param res
    */
   var deleteCase = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var patientId = req.params.id;
+    var caseId = req.params.caseId;
 
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+      if (arguments.length === 1) {
+        res.status(500).json(utils.jsonResult(err));
+      } else {
+        CaseHistory.findById(caseId, function (err, theCase) {
+          if (err) {
+            debug('deleteCase(), get case error: %o', err);
+            return res.status(500).json(utils.jsonResult(err));
+          }
+          if (!theCase) {
+            debug('deleteCase(), the case %s is not found', caseId);
+            return res.status(404).json(utils.jsonResult(new Error('not found')));
+          }
+          if (isSelf || theCase.creator.id == opUser.id) {
+            CaseHistory.remove({_id: caseId}, function (err, ret) {
+              if (err) {
+                debug('deleteCase(), remove case error: %o', err);
+                return res.status(500).json(utils.jsonResult(err));
+              }
+              res.json('success');
+            });
+          } else {
+            res.status(403).json(utils.jsonResult(err));
+          }
+        });
+      }
+    });
   };
 
   /**
-   * POST '/api/patients/:id/case/:caseId/comments'
+   * POST '/api/patients/:id/cases/:caseId/comments'
    * @param req
    * @param res
    */
   var createCaseComment = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var patientId = req.params.id;
+    var caseId = req.params.caseId;
+    var newComment = req.body;
 
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+      if (arguments.length === 1) {
+        res.status(500).json(utils.jsonResult(err));
+      } else {
+        if (isSelf || isFriend || hasOrder) {
+          createComment(opUser);
+        } else {
+          res.status(403).json(utils.jsonResult(err));
+        }
+      }
+    });
+
+    var createComment = function (opUser) {
+      CaseHistory.findById(caseId, function (err, theCase) {
+        if (err) return handleError(err, 'createCaseComment', res);
+
+        if (!theCase) {
+          debug('createCaseComment(), the case of id: %s not found.', caseId);
+          return res.status(404).json(utils.jsonResult(new Error('not found')));
+        }
+
+        newComment.creator = {id: opUser.id, name: opUser.name, role: role};
+        theCase.comments.push(newComment);
+        theCase.save(function (err) {
+          if (err) return handleError(err, 'createCaseComment', res);
+          res.json(utils.jsonResult(theCase));
+        });
+      });
+    }
   };
 
   /**
-   * DELETE 'api/patients/:id/case/:caseId/comments/commentId'
+   * DELETE 'api/patients/:id/cases/:caseId/comments/:commentId'
    * @param req
    * @param res
    */
   var deleteCaseComment = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var patientId = req.params.id;
+    var caseId = req.params.caseId;
+    var commentId = req.params.commentId;
 
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+      if (arguments.length === 1) {
+        res.status(500).json(utils.jsonResult(err));
+      } else {
+        deleteComment(opUser);
+      }
+    });
+
+    var deleteComment = function (opUser) {
+      CaseHistory.findById(caseId, function (err, theCase) {
+        if (err) return handleError(err, 'deleteCaseComment', res);
+
+        if (!theCase) {
+          debug('deleteCaseComment(), the case of id: %s not found.', caseId);
+          return res.status(404).json(utils.jsonResult(new Error('not found')));
+        }
+
+        var comment = theCase.comments.id(commentId);
+        if (comment.creator.id != opUser.id) {
+          debug('deleteCaseComment(), cannot delete comment created by others. comment creator: %s, opUser: %s', comment.creator.id, opUser.id);
+          return res.status(403).json(utils.jsonResult(new Error('no privilege')));
+        }
+
+        comment.remove();
+        theCase.save(function (err) {
+          if (err) return handleError(err, 'deleteCaseComment', res);
+          res.json(utils.jsonResult(theCase));
+        });
+      });
+    }
+  };
+
+  /**
+   * Get operate user by given 'openid' and 'role', then check the user (maybe doctor or patient) with the
+   * target patient, is his self? is patient friend? or is doctor who has orders?
+   *
+   * And system error occurred, will trigger callback with only one parameter 'err'. Otherwise, will trigger
+   * callback with all the flags of relationships.
+   * @param patientId
+   * @param operatorOpenId
+   * @param operatorRole
+   * @param callback
+   */
+  var checkRelationshipWithPatient = function (patientId, operatorOpenId, operatorRole, callback) {
+    var isSelf = false;
+    var isFriend = false;
+    var hasOrder = false;
+    var error = null;
+    var operationUser;
+    getUserByOpenid(operatorOpenId, operatorRole)
+      .then(function (user) {
+        if (!user) {
+          debug('checkRelationship(), user not found openid: %s, role: %s', operatorOpenId, operatorRole);
+          error = new Error('user not found');
+        } else {
+          operationUser = user;
+          if (operatorRole == app.consts.role.doctor) {
+            // doctor, check order relationship.
+            debug('checkRelationship(), operator is doctor, check if they have order relationship.');
+            return getOrdersBetweenDoctorAndPatient(user.id, patientId);
+          } else if (operatorRole == app.consts.role.patient) {
+            if (user.id == patientId) {
+              // patient self
+              debug('checkRelationship(), operator is patient self.');
+              isSelf = true;
+            } else {
+              return getPatientFriendRelations(user.id, patientId);
+            }
+          } else {
+            // wrong role
+            debug('checkRelationship(), invalid role: %s', operatorRole);
+            error = new Error('Invalid role');
+          }
+        }
+      }).then(function (data) {
+        if (data instanceof Array) {
+          if (operatorRole == app.consts.role.doctor) {
+            // orders
+            if (data.length > 0) {
+              debug('checkRelationship(), doctor and patient has order relationship.');
+              hasOrder = true;
+            } else {
+              debug('checkRelationship(), doctor: %s, openid: %s has no orders with patient: %s.', operationUser.id, operatorOpenId, patientId);
+              error = new Error('No privilege');
+            }
+          } else {
+            if (data.length > 0) {
+              debug('checkRelationship(), patient and patient has friend relationship.');
+              isFriend = true;
+            } else {
+              debug('checkRelationship(), patient: %s, openid: %s has no orders with patient: %s.', operationUser.id, operatorOpenId, patientId);
+              error = new Error('No privilege');
+            }
+          }
+        }
+        callback(error, isSelf, isFriend, hasOrder, operationUser);
+      }).then(null, function (err) {
+        if (err) {
+          debug('checkRelationship(), get error: %o', err);
+          callback(err);
+        }
+      });
   };
 
   var getUserByOpenid = function (openid, role, callback) {
@@ -545,7 +667,7 @@ module.exports = function (app) {
     } else if (role == app.consts.role.patient) {
       var queryPromise = Patient.findOne({'wechat.openid': openid}).exec();
     } else {
-      debug('createCase(), invalid role: %s', role);
+      debug('getUserByOpenid(), invalid role: %s', role);
       callback(new Error('Invalid role'));
     }
     if (callback) {
@@ -600,6 +722,11 @@ module.exports = function (app) {
     delete ret.wechat.unionid;
     delete ret.wechat.groupid;
     return ret;
+  };
+
+  var handleError = function (err, method, res) {
+    debug('%s(), get error: %o', method, err);
+    return res.status(500).json(utils.jsonResult(err));
   };
 
   return {
