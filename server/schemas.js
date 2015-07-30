@@ -88,6 +88,7 @@ module.exports = function () {
     creator: {
       id: String,
       name: String,
+      avatar: String,
       role: String // doctor, patient
     },
     comment: String,
@@ -181,6 +182,7 @@ module.exports = function () {
     creator: {
       id: String,
       name: String,
+      avatar: String,
       role: String // doctor, patient
     },
     comments: [commentSchema],

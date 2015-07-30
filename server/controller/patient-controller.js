@@ -417,7 +417,7 @@ module.exports = function (app) {
     });
 
     var createCase = function (creatorUser) {
-      newCase.creator = {id: creatorUser.id, name: creatorUser.name, role: role};
+      newCase.creator = {id: creatorUser.id, name: creatorUser.name, avatar: creatorUser.wechat.headimgurl, role: role};
       newCase.patientId = patientId;
       CaseHistory.create(newCase, function (err, created) {
         if (err) {
@@ -583,7 +583,7 @@ module.exports = function (app) {
           return res.status(404).json(utils.jsonResult(new Error('not found')));
         }
 
-        newComment.creator = {id: opUser.id, name: opUser.name, role: role};
+        newComment.creator = {id: opUser.id, name: opUser.name, creator: opUser.wechat.headimgurl, role: role};
         theCase.comments.push(newComment);
         theCase.save(function (err) {
           if (err) return handleError(err, 'createCaseComment', res);
