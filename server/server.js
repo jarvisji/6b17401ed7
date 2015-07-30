@@ -5,7 +5,6 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var wechatApi = require('wechat-api');
-var OAuth = require('wechat-oauth');
 var debug = require('debug')('ylb.app');
 var conf = require('./conf');
 
@@ -34,18 +33,18 @@ var registerModels = function () {
   if (!app.models) {
     debug('Resister models...');
     app.models = require('./models');
+    app.consts = require('./utils/consts');
   }
 };
 
 var registerRoutes = function () {
   debug('Register routes...');
   var api = new wechatApi(conf.wechat.appid, conf.wechat.appsecret);
-  var oauth = new OAuth(conf.wechat.appid, conf.wechat.appsecret);
   var wxproxyDoctor = require('./middleware/wxproxy-doctor')(app, api);
   var wxproxyPatient = require('./middleware/wxproxy-patient')(app, api);
   var doctorCtrl = require('./controller/doctor-controller')(app);
   var patientCtrl = require('./controller/patient-controller')(app);
-  var wechatCtrl = require('./controller/wechat-controller')(app, api, oauth);
+  var wechatCtrl = require('./controller/wechat-controller')(app, api);
 
   // TODO: add authentication for following APIs.
   app.use('/wxproxy', wxproxyDoctor); // TODO: delete this.
@@ -115,6 +114,16 @@ var registerRoutes = function () {
    */
   app.get('/api/patients/:id/follows/:doctorId', patientCtrl.isFollowed);
   app.delete('/api/patients/:id/follows/:doctorId', patientCtrl.deleteFollow);
+
+  /* -- Patient APIs - Cases ------------------------------------------------------------------------------*/
+  app.post('/api/patients/:id/cases', patientCtrl.createCase);
+  /**
+   * Response array of caseHistorySchema.Each case contains all it's comments.
+   */
+  app.get('/api/patients/:id/cases', patientCtrl.getCases);
+  app.delete('/api/patients/:id/cases/:caseId', patientCtrl.deleteCase);
+  app.post('/api/patients/:id/case/:caseId/comments', patientCtrl.createCaseComment);
+  app.delete('/api/patients/:id/case/:caseId/comments/commentId', patientCtrl.deleteCaseComment);
 };
 
 var startServer = function () {

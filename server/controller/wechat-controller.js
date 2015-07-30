@@ -6,6 +6,7 @@ var utils = require('../middleware/utils');
 var debug = require('debug')('ylb.wechatCtrl');
 
 module.exports = function (app, api, oauth) {
+  var authUtils = require('../utils/auth-utils')(app);
   return {
     createMenu: function (req, res) {
       //TODO: need authorization before update menu
@@ -41,6 +42,7 @@ module.exports = function (app, api, oauth) {
         return res.status(400).json(utils.jsonResult(new Error('Invalid parameters.')));
       }
       // TODO: enable verify access_token.
+
       //oauth._verifyToken(openid, access_token, function (err, data) {
       //  if (err) {
       //    debug('Verify openid: %s, access_token: %s failed: %o', openid, access_token, err);

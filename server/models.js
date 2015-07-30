@@ -14,6 +14,7 @@ module.exports = {
   Patient: mongoose.model('Patient', schemas.patientSchema),
   PatientFriend: mongoose.model('PatientFriend', schemas.patientFriendSchema),
   CaseHistory: mongoose.model('CaseHistory', schemas.caseHistorySchema),
+  WechatOAuth: mongoose.model('WechatOAuth', schemas.wechatOAuthSchema),
   doctorExcludeFields: '-password -salt', // we don't want to show these fields in output result.
   patientExcludeFields: '-password -salt'
 };

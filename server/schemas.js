@@ -193,6 +193,25 @@ module.exports = function () {
   caseHistorySchema.index({patientId: 1, created: -1});
 
 
+  var wechatOAuthSchema = new Schema({
+    access_token: String,
+    expires_in: Number,
+    refresh_token: String,
+    openid: {type: String, index: true, unique: true},
+    scope: String,
+    unionid: String,
+    created: {type: Date, default: Date.now},
+    lastModified: {type: Date, default: Date.now}
+  });
+  wechatOAuthSchema.pre('update', function () {
+    this.update({}, {$set: {lastModified: new Date()}});
+  });
+  wechatOAuthSchema.pre('findOneAndUpdate', function () {
+    this.update({}, {$set: {lastModified: new Date()}});
+  });
+  wechatOAuthSchema.index({openid: 1, access_token: 1});
+
+
   return {
     doctorSchema: doctorSchema,
     doctorFriendSchema: doctorFriendSchema,
@@ -202,6 +221,7 @@ module.exports = function () {
     commentSchema: commentSchema,
     patientSchema: patientSchema,
     patientFriendSchema: patientFriendSchema,
-    caseHistorySchema: caseHistorySchema
+    caseHistorySchema: caseHistorySchema,
+    wechatOAuthSchema: wechatOAuthSchema
   };
 };
