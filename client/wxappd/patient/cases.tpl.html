@@ -1,0 +1,43 @@
+<section>
+  <div class="row" ng-if="hasPostPrivilege">
+    <div class="col-xs-12">
+      <form>
+        <textarea class="form-control" rows="3"></textarea>
+
+        <p></p>
+
+        <div class="btn-group pull-right" role="group">
+          <button type="button" class="btn btn-default">插入链接</button>
+          <button type="button" class="btn btn-success" ng-click="createCase()">发布</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="row" ng-if="cases">
+    <div class="col-xs-12 media" ng-repeat="case in cases">
+      <div class="media-left">
+        <a href="#">
+          <img class="media-object" ng-src="{{case.creator.avatar}}">
+        </a>
+      </div>
+      <div class="media-body">
+        <h4 class="media-heading">{{case.creator.name}}</h4>
+        {{case.content}}
+        <div>
+          {{case.created}}
+          <span class="pull-right">
+            <a href="" ng-click="deleteCase($index)">删除</a> | <a href="" ng-click="createComment($index)">评论</a>
+          </span>
+        </div>
+        <ul class="list-group">
+          <li class="list-group-item" ng-repeat="comment in case.comments">
+            {{comment.creator.name}}：{{comment.comment}}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

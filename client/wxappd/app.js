@@ -1,7 +1,7 @@
 /**
  * Created by Ting on 2015/6/19.
  */
-angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'mgcrea.ngStrap'])
+angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'ngSanitize', 'mgcrea.ngStrap'])
   .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
     $stateProvider.state('testDoctorIndex', {
       url: '/doctor/index',
@@ -57,6 +57,8 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'm
       templateUrl: 'wxappd/search/search-patient-result.tpl.html',
       controller: 'wxSearchPatientResultCtrl'
     });
+
+    /* -- patient -------------------------------------------------------------------- */
     $stateProvider.state('patient-my-doctors', {
       url: '/patient/doctors',
       templateUrl: 'wxappd/patient/my-doctors.tpl.html',
@@ -67,6 +69,14 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'm
       templateUrl: 'wxappd/patient/my-friends.tpl.html',
       controller: 'wxPatientFriendsCtrl'
     });
+    $stateProvider.state('patient-cases', {
+      url: '/patient/cases/:id',
+      templateUrl: 'wxappd/patient/cases.tpl.html',
+      controller: 'wxPatientCasesCtrl'
+    });
+
+
+    /* -- doctor -------------------------------------------------------------------- */
     $stateProvider.state('doctor-my-friends', {
       url: '/doctor/friends',
       templateUrl: 'wxappd/doctor/my-friends.tpl.html',
@@ -102,7 +112,17 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'm
         .success(function (resp) {
           // save user verification info to session.
           $cookies.putObject('currentUser', resp.data);
-          $rootScope.currentUser = resp.data;
+          var currentUser = $rootScope.currentUser = resp.data;
+
+          // set default headers for $http service.
+          var authorizationStr = 'wechatOAuth openid="' + currentUser.openid + '" access_token="' + currentUser.access_token + '"';
+          if (currentUser.doctor) {
+            authorizationStr += ' role="doctor"';
+          } else if (currentUser.patient) {
+            authorizationStr += ' role="patient"';
+          }
+          $http.defaults.headers.common.Authorization = authorizationStr;
+
           // User must activate before start to use any functions.
           if (resp.data.doctor && !resp.data.doctor.name) {
             $state.go('profile-edit', {openid: openid, firstTime: true});
