@@ -104,7 +104,16 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       var openid = $stateParams.openid;
       var access_token = $stateParams.token;
       var redirect = $stateParams.redirect;
+      var cookie = $cookies.getObject('currentUser');
       if (!openid || !access_token) {
+        if (cookie) {
+          $log.debug('read from session');
+          openid = cookie.openid;
+          access_token = cookie.access_token;
+        }
+      }
+      if (!openid || !access_token) {
+        $log.debug('invalid openid or access_token');
         return;
       }
 
