@@ -7,6 +7,7 @@ var mongoose = require('mongoose');
 var wechatApi = require('wechat-api');
 var debug = require('debug')('ylb.app');
 var conf = require('./conf');
+var wechatOAuth = require('./middleware/wechat-oauth');
 
 var app = express();
 app.use(express.static('client'));
@@ -55,6 +56,8 @@ var registerRoutes = function () {
   app.get('/wechat/jssdkconfig', wechatCtrl.getJsSdkConfig);
   app.get('/api/verify', wechatCtrl.verifyAccessToken); // verify openid and access_token, then return registered user information.
 
+  app.use(wechatOAuth);
+  /* -- The following APIs need 'Authorization' header--------------------------------------------------------*/
   app.post('/api/doctors', doctorCtrl.createDoctor);
   app.get('/api/doctors', doctorCtrl.findDoctors);
   app.put('/api/doctors/:id', doctorCtrl.saveDoctor);

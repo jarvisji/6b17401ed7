@@ -654,6 +654,11 @@ module.exports = function (app) {
     var hasOrder = false;
     var error = null;
     var operationUser;
+    if (operatorRole != app.consts.role.doctor && operatorRole != app.consts.role.patient) {
+      // wrong role
+      debug('checkRelationship(), invalid role: %s', operatorRole);
+      return callback(new Error('Invalid role'));
+    }
     getUserByOpenid(operatorOpenId, operatorRole)
       .then(function (user) {
         if (!user) {
@@ -673,10 +678,6 @@ module.exports = function (app) {
             } else {
               return getPatientFriendRelations(user.id, patientId);
             }
-          } else {
-            // wrong role
-            debug('checkRelationship(), invalid role: %s', operatorRole);
-            error = new Error('Invalid role');
           }
         }
       }).then(function (data) {
@@ -712,11 +713,8 @@ module.exports = function (app) {
   var getUserByOpenid = function (openid, role, callback) {
     if (role == app.consts.role.doctor) {
       var queryPromise = Doctor.findOne({'wechat.openid': openid}).exec();
-    } else if (role == app.consts.role.patient) {
-      var queryPromise = Patient.findOne({'wechat.openid': openid}).exec();
     } else {
-      debug('getUserByOpenid(), invalid role: %s', role);
-      callback(new Error('Invalid role'));
+      var queryPromise = Patient.findOne({'wechat.openid': openid}).exec();
     }
     if (callback) {
       queryPromise.then(function (user) {
