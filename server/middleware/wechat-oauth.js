@@ -15,34 +15,36 @@
 var utils = require('./utils');
 var debug = require('debug')('ylb.oauth');
 module.exports = function (req, res, next) {
-  var authorizationStr = req.get('Authorization');
-  debug('Received request: %s, Authorization: %s', req.originalUrl, authorizationStr);
+  if (req.originalUrl.indexOf('/api/') == 0) {
+    var authorizationStr = req.get('Authorization');
+    debug('Received request: %s, Authorization: %s', req.originalUrl, authorizationStr);
 
-  var auth = {};
-  // expect Authorization : wechatOAuth openid="" access_token="" role="doctor|patient"
-  if (!authorizationStr) {
-    debug('Invalid authorization string: %s', authorizationStr);
-    return res.status(401).json(utils.jsonResult(new Error('Invalid authorization string')));
-  }
+    var auth = {};
+    // expect Authorization : wechatOAuth openid="" access_token="" role="doctor|patient"
+    if (!authorizationStr) {
+      debug('Invalid authorization string: %s', authorizationStr);
+      return res.status(401).json(utils.jsonResult(new Error('Invalid authorization string')));
+    }
 
-  var authArr = authorizationStr.split(' ');
-  if (authArr[0] != 'wechatOAuth') {
-    debug('Unsupported authorization method: %s', authArr[0]);
-    return res.status(401).json(utils.jsonResult(new Error('Unsupported authorization method')));
-  }
+    var authArr = authorizationStr.split(' ');
+    if (authArr[0] != 'wechatOAuth') {
+      debug('Unsupported authorization method: %s', authArr[0]);
+      return res.status(401).json(utils.jsonResult(new Error('Unsupported authorization method')));
+    }
 
-  //if (authArr.length !== 4) {
-  //  debug('Invalid authorization string: %s', authorizationStr);
-  //  return res.status(401).json(utils.jsonResult(new Error('Invalid authorization string')));
-  //}
+    //if (authArr.length !== 4) {
+    //  debug('Invalid authorization string: %s', authorizationStr);
+    //  return res.status(401).json(utils.jsonResult(new Error('Invalid authorization string')));
+    //}
 
-  for (var i = 1; i < authArr.length; i++) {
-    var tmpArr = authArr[i].split('="');
-    if (tmpArr.length = 2) {
-      //auth[tmpArr[0]] = tmpArr[1].substr(0, tmpArr[1].length - 1);
-      req.query[tmpArr[0]] = tmpArr[1].substr(0, tmpArr[1].length - 1);
-    } else {
-      debug('Invalid value of authorization string: %s', authArr[i]);
+    for (var i = 1; i < authArr.length; i++) {
+      var tmpArr = authArr[i].split('="');
+      if (tmpArr.length = 2) {
+        //auth[tmpArr[0]] = tmpArr[1].substr(0, tmpArr[1].length - 1);
+        req.query[tmpArr[0]] = tmpArr[1].substr(0, tmpArr[1].length - 1);
+      } else {
+        debug('Invalid value of authorization string: %s', authArr[i]);
+      }
     }
   }
   next();
