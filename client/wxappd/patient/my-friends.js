@@ -67,4 +67,8 @@ angular.module('ylbWxApp')
     $scope.showDetails = function (idx) {
       $scope.showDetailIndex = idx;
     };
+
+    $scope.showCases = function (patientId) {
+      $state.go('patient-cases', {id: patientId});
+    }
   }]);

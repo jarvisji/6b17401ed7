@@ -200,20 +200,20 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
      * Common method to alert error.
      * @param err
      */
-    $rootScope.alertError = function (_title, content, status) {
-      var title = generateAlertTitle('错误 ', _title);
+    $rootScope.alertError = function (_title, content, status, duration) {
+      var title = generateAlertTitle('错误 ', _title, status);
       $alert({
         title: title,
         content: content,
         placement: 'top',
         type: 'danger',
-        duration: 5,
+        duration: duration != undefined ? duration : 5,
         animation: 'am-fade-and-slide-top'
       });
     };
 
     $rootScope.alertWarn = function (_title, content, status) {
-      var title = generateAlertTitle('警告 ', _title);
+      var title = generateAlertTitle('警告 ', _title, status);
       $alert({
         title: title,
         content: content,
@@ -225,7 +225,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
     };
 
     $rootScope.alertSuccess = function (_title, content, status) {
-      var title = generateAlertTitle('成功', _title);
+      var title = generateAlertTitle('成功', _title, status);
       $alert({
         title: title,
         content: content,
@@ -236,7 +236,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       });
     };
 
-    var generateAlertTitle = function (title, _title) {
+    var generateAlertTitle = function (title, _title, status) {
       if (_title !== undefined && _title !== null)
         title = _title;
 
