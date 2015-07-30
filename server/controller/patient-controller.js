@@ -430,12 +430,27 @@ module.exports = function (app) {
   };
 
   /**
-   *
+   * GET '/api/patients/:id/cases/postPrivilege'
+   * Check current user (openid) has privilege to create case for the patient or not.
+   * Response: 403, 200
    * @param req
    * @param res
    */
-  var getCasesPostPrivilege = function(req, res) {
-
+  var getCasesPostPrivilege = function (req, res) {
+    var openid = req.query.openid; // creator
+    var role = req.query.role; // creator
+    var patientId = req.params.id;
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+      if (arguments.length === 1) {
+        res.status(500).json(utils.jsonResult(err));
+      } else {
+        if (isSelf || isFriend || hasOrder) {
+          res.json('ok');
+        } else {
+          res.status(403).json(utils.jsonResult(err));
+        }
+      }
+    });
   };
 
   /**
