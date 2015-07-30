@@ -437,8 +437,32 @@ module.exports = function (app) {
    * @param res
    */
   var getCasesPostPrivilege = function (req, res) {
-    var openid = req.query.openid; // creator
-    var role = req.query.role; // creator
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var patientId = req.params.id;
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+      if (arguments.length === 1) {
+        res.status(500).json(utils.jsonResult(err));
+      } else {
+        if (isSelf || hasOrder) {
+          res.json('ok');
+        } else {
+          res.status(403).json(utils.jsonResult(err));
+        }
+      }
+    });
+  };
+
+  /**
+   * GET '/api/patients/:id/cases/viewPrivilege'
+   * Check current user (openid) has privilege to view cases for the patient or not.
+   * Response: 403, 200
+   * @param req
+   * @param res
+   */
+  var getCasesViewPrivilege = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
     var patientId = req.params.id;
     checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
       if (arguments.length === 1) {
@@ -768,11 +792,12 @@ module.exports = function (app) {
     getFriendsRequestsStatus: getFriendsRequestsBetween2Patients,
     getFriends: getFriends,
     createCase: createCase,
-    getCasesPostPrivilege: getCasesPostPrivilege,
     getCases: getCases,
     deleteCase: deleteCase,
     createCaseComment: createCaseComment,
-    deleteCaseComment: deleteCaseComment
+    deleteCaseComment: deleteCaseComment,
+    getCasesPostPrivilege: getCasesPostPrivilege,
+    getCasesViewPrivilege: getCasesViewPrivilege
   };
 };
 

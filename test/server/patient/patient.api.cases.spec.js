@@ -328,13 +328,13 @@ describe.only('Tests for APIs of patient cases.', function () {
     util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege' + '?openid=' + testPatient.wechat.openid + '&role=' + util.app.consts.role.patient)
       .expect(200, done);
   });
-  it('Check case post privilege will success because patient is friend.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege' + '?openid=' + testPatient2.wechat.openid + '&role=' + util.app.consts.role.patient)
-      .expect(200, done);
-  });
   it('Check case post privilege will success because doctor has orders.', function (done) {
     util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege' + '?openid=' + testDoctor.wechat.openid + '&role=' + util.app.consts.role.doctor)
       .expect(200, done);
+  });
+  it('Check case post privilege will fail because patient is friend.', function (done) {
+    util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege' + '?openid=' + testPatient2.wechat.openid + '&role=' + util.app.consts.role.patient)
+      .expect(403, done);
   });
   it('Check case post privilege will fail because patient is not friend.', function (done) {
     util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege' + '?openid=' + testPatient3.wechat.openid + '&role=' + util.app.consts.role.patient)
@@ -342,6 +342,27 @@ describe.only('Tests for APIs of patient cases.', function () {
   });
   it('Check case post privilege will fail because doctor has no orders.', function (done) {
     util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege' + '?openid=' + testDoctor2.wechat.openid + '&role=' + util.app.consts.role.doctor)
+      .expect(403, done);
+  });
+  /* --- check view case privilege ----------------------------------------------------------------*/
+  it('Check case view privilege will success because is patient self.', function (done) {
+    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege' + '?openid=' + testPatient.wechat.openid + '&role=' + util.app.consts.role.patient)
+      .expect(200, done);
+  });
+  it('Check case view privilege will success because doctor has orders.', function (done) {
+    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege' + '?openid=' + testDoctor.wechat.openid + '&role=' + util.app.consts.role.doctor)
+      .expect(200, done);
+  });
+  it('Check case view privilege will success because patient is friend.', function (done) {
+    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege' + '?openid=' + testPatient2.wechat.openid + '&role=' + util.app.consts.role.patient)
+      .expect(200, done);
+  });
+  it('Check case view privilege will fail because patient is not friend.', function (done) {
+    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege' + '?openid=' + testPatient3.wechat.openid + '&role=' + util.app.consts.role.patient)
+      .expect(403, done);
+  });
+  it('Check case view privilege will fail because doctor has no orders.', function (done) {
+    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege' + '?openid=' + testDoctor2.wechat.openid + '&role=' + util.app.consts.role.doctor)
       .expect(403, done);
   });
 });

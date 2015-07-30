@@ -121,10 +121,11 @@ var registerRoutes = function () {
    * Response array of caseHistorySchema.Each case contains all it's comments.
    */
   app.get('/api/patients/:id/cases', patientCtrl.getCases);
-  app.get('/api/patients/:id/cases/postPrivilege', patientCtrl.getCasesPostPrivilege);
   app.delete('/api/patients/:id/cases/:caseId', patientCtrl.deleteCase);
   app.post('/api/patients/:id/cases/:caseId/comments', patientCtrl.createCaseComment);
   app.delete('/api/patients/:id/cases/:caseId/comments/:commentId', patientCtrl.deleteCaseComment);
+  app.get('/api/patients/:id/cases/postPrivilege', patientCtrl.getCasesPostPrivilege);
+  app.get('/api/patients/:id/cases/viewPrivilege', patientCtrl.getCasesViewPrivilege);
 };
 
 var startServer = function () {
