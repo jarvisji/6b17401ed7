@@ -8,9 +8,12 @@ var utils = require('../middleware/utils');
 var stringUtils = require('../utils/string-utils');
 
 module.exports = function (app) {
+  var authUtils = require('../utils/auth-utils')(app);
   var Patient = app.models.Patient;
   var PatientFriend = app.models.PatientFriend;
   var Doctor = app.models.Doctor;
+  var CaseHistory = app.models.CaseHistory;
+  var ServiceOrder = app.models.ServiceOrder;
   var doctorExcludeFields = app.models.doctorExcludeFields;
   var patientExcludeFields = app.models.patientExcludeFields;
 
@@ -278,7 +281,7 @@ module.exports = function (app) {
    */
   var acceptFriendsRequests = function (req, res) {
     var reqId = req.params.reqId;
-    PatientFriend.findByIdAndUpdate(reqId, {status: 'accepted'}, function (err, ret) {
+    PatientFriend.findByIdAndUpdate(reqId, {status: app.consts.friendStatus.accepted}, function (err, ret) {
       if (err) {
         debug('acceptFriendsRequests(), error:%o', err);
         return res.status(500).json(utils.jsonResult(err));
@@ -294,7 +297,7 @@ module.exports = function (app) {
    */
   var rejectFriendsRequests = function (req, res) {
     var reqId = req.params.reqId;
-    PatientFriend.findByIdAndUpdate(reqId, {status: 'rejected'}, function (err, ret) {
+    PatientFriend.findByIdAndUpdate(reqId, {status: app.consts.friendStatus.rejected}, function (err, ret) {
       if (err) {
         debug('rejectFriendsRequests(), error:%o', err);
         return res.status(500).json(utils.jsonResult(err));
@@ -378,6 +381,213 @@ module.exports = function (app) {
     })
   };
 
+  /**
+   * POST '/api/patients/:id/cases'
+   * @param req
+   * @param res
+   */
+  var createCase = function (req, res) {
+    var openid = req.query.openid; // creator
+    var role = req.query.role; // creator
+    var patientId = req.params.id;
+    var newCase = req.body;
+    debug('createCase(), creating case for patient: %s', patientId);
+
+    if (newCase.link && newCase.link.type && app.consts.caseLinkTypes.indexOf(newCase.link.type) == -1) {
+      debug('createCase(), invalid link type: %s', newCase.link.type);
+      return res.status(400).json(utils.jsonResult(new Error('Invalid link type')));
+    }
+
+    if (!newCase.content) {
+      debug('createCase(), invalid content: %s', newCase.content);
+      return res.status(400).json(utils.jsonResult(new Error('Invalid content')));
+    }
+
+
+
+    // Get creator by passed in openid
+    var creatorUser;
+    getUserByOpenid(openid, role, function (err, user) {
+      if (err) {
+        debug('createCase(), get user error: %o', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      creatorUser = user;
+      // check creator have privilege to create case or not.
+      if (role == app.consts.role.doctor) {
+        // doctor create case, check order relationship.
+        debug('createCase(), creator is doctor, check if they have order relationship.');
+        getOrdersBetweenDoctorAndPatient(user.id, patientId, function (err, orders) {
+          if (err) {
+            debug('createCase(), get order relationship error:%o', err);
+            return res.status(500).json(utils.jsonResult(err));
+          }
+          if (orders.length > 0) {
+            debug('createCase(), doctor and patient has order relationship, create case.');
+            createCase();
+          } else {
+            debug('createCase(), doctor: %s, openid: %s has no privilege to create case for patient: %s.', user.id, openid, patientId);
+            res.status(403).json(utils.jsonResult(new Error('No privilege')));
+          }
+        });
+      } else if (user.id == patientId) {
+        // patient self
+        debug('createCase(), creator is patient self, create case.');
+        createCase();
+      } else {
+        // no privilege.
+        debug('createCase(), user: %s, openid: %s has no privilege to create case for patient: %s.', user.id, openid, patientId);
+        res.status(403).json(utils.jsonResult(new Error('No privilege')));
+      }
+    });
+
+    var createCase = function () {
+      newCase.creator = {id: creatorUser.id, name: creatorUser.name, role: role};
+      newCase.patientId = patientId;
+      CaseHistory.create(newCase, function (err, created) {
+        if (err) {
+          debug('createCase(), create case error: %o', err);
+          return res.status(500).json(utils.jsonResult(err));
+        }
+        res.json(utils.jsonResult(created));
+      });
+    };
+  };
+
+  /**
+   * GET '/api/patients/:id/cases'
+   * @param req
+   * @param res
+   */
+  var getCases = function (req, res) {
+    var openid = req.query.openid; // creator
+    var role = req.query.role; // creator
+    var patientId = req.params.id;
+    getUserByOpenid(openid, role, function (err, user) {
+      if (err) {
+        debug('getCases(), get user error: %o', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      if (user.id == patientId) {
+        getCasesData();
+      } else if (role == app.consts.role.doctor) {
+        getOrdersBetweenDoctorAndPatient(user.id, patientId, function (err, orders) {
+          if (err) {
+            debug('getCases(), get order relationship error: %o', err);
+            return res.status(500).json(utils.jsonResult(err));
+          }
+          if (orders.length > 0) {
+            debug('getCases(), doctor and patient has order relationship, get case.');
+            getCasesData();
+          } else {
+            debug('getCases(), doctor: %s, openid: %s has no privilege to get case for patient: %s.', user.id, openid, patientId);
+            res.status(403).json(utils.jsonResult(new Error('No privilege')));
+          }
+        })
+      } else if (role == app.consts.role.patient) {
+        getPatientFriendRelations(user.id, patientId, function (err, friends) {
+          if (err) {
+            debug('getCases(), get friend relationship error: %o', err);
+            return res.status(500).json(utils.jsonResult(err));
+          }
+          if (friends.length > 0) {
+            debug('getCases(), patient and patient has friend relationship, get case.');
+            getCasesData();
+          } else {
+            debug('getCases(), patient: %s, openid: %s has no privilege to get case for patient: %s.', user.id, openid, patientId);
+            res.status(403).json(utils.jsonResult(new Error('No privilege')));
+          }
+        });
+      }
+    });
+
+    var getCasesData = function () {
+      CaseHistory.find({patientId: patientId}, function (err, cases) {
+        if (err) {
+          debug('getCases(), get cases error: %o', err);
+          return res.status(500).json(utils.jsonResult(err));
+        }
+        res.json(utils.jsonResult(cases));
+      });
+    }
+  };
+
+  /**
+   * DELETE '/api/patients/:id/cases/:caseId'
+   * @param req
+   * @param res
+   */
+  var deleteCase = function (req, res) {
+
+  };
+
+  /**
+   * POST '/api/patients/:id/case/:caseId/comments'
+   * @param req
+   * @param res
+   */
+  var createCaseComment = function (req, res) {
+
+  };
+
+  /**
+   * DELETE 'api/patients/:id/case/:caseId/comments/commentId'
+   * @param req
+   * @param res
+   */
+  var deleteCaseComment = function (req, res) {
+
+  };
+
+  var getUserByOpenid = function (openid, role, callback) {
+    if (role == app.consts.role.doctor) {
+      var queryPromise = Doctor.findOne({'wechat.openid': openid}).exec();
+    } else if (role == app.consts.role.patient) {
+      var queryPromise = Patient.findOne({'wechat.openid': openid}).exec();
+    } else {
+      debug('createCase(), invalid role: %s', role);
+      callback(new Error('Invalid role'));
+    }
+    if (callback) {
+      queryPromise.then(function (user) {
+        callback(null, user);
+      }, function (err) {
+        callback(err);
+      })
+    } else {
+      return queryPromise;
+    }
+  };
+
+  var getOrdersBetweenDoctorAndPatient = function (doctorId, patientId, callback) {
+    var query = ServiceOrder.find({doctorId: doctorId, patientId: patientId});
+    if (callback) {
+      query.exec(callback);
+    } else {
+      // return a promise.
+      return query.exec();
+    }
+  };
+
+  var getPatientFriendRelations = function (patientId, patientId2, callback) {
+    var PatientFriend = app.models.PatientFriend;
+    var query = PatientFriend.find({
+      "$or": [{
+        from: patientId,
+        to: patientId2,
+        status: app.consts.friendStatus.accepted
+      }, {
+        from: patientId2,
+        to: patientId,
+        status: app.consts.friendStatus.accepted
+      }]
+    });
+    if (callback) {
+      query.exec(callback);
+    } else {
+      return query.exec();
+    }
+  };
 
   /**
    * Remove some data not tend to expose to user.
@@ -405,7 +615,12 @@ module.exports = function (app) {
     rejectFriendsRequests: rejectFriendsRequests,
     deleteFriendsRequests: deleteFriendsRequests,
     getFriendsRequestsStatus: getFriendsRequestsBetween2Patients,
-    getFriends: getFriends
+    getFriends: getFriends,
+    createCase: createCase,
+    getCases: getCases,
+    deleteCase: deleteCase,
+    createCaseComment: createCaseComment,
+    deleteCaseComment: deleteCaseComment
   };
 };
 

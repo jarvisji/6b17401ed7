@@ -6,7 +6,7 @@ var mongoose = require('mongoose');
 var should = require('should');
 var util = require('../testUtils');
 
-describe.only('Test patient APIs.', function () {
+describe('Test patient APIs.', function () {
   var ts = new Date().getTime();
   var mockMobile = 'test-' + ts;
   var mockOpenid = util.conf.patientOpenId;
