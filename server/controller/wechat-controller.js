@@ -21,7 +21,7 @@ module.exports = function (app, api, oauth) {
     getJsSdkConfig: function (req, res) {
       var param = {
         debug: true,
-        jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage'],
+        jsApiList: ['chooseImage', 'previewImage', 'uploadImage', 'downloadImage'],
         url: 'http://www.utime.info/wxindex.html'
       };
       api.getJsConfig(param, function (err, config) {

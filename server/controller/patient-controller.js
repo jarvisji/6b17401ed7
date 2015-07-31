@@ -383,6 +383,53 @@ module.exports = function (app) {
   };
 
   /**
+   * GET '/api/patients/:id/doctors'
+   * Get the doctors those have orders with the given patient.
+   * @param req
+   * @param res
+   */
+  var getDoctors = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var patientId = req.params.id;
+
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+      if (arguments.length === 1) {
+        res.status(500).json(utils.jsonResult(err));
+      } else {
+        if (isSelf) {
+          doGetDoctors();
+        } else {
+          res.status(403).json(utils.jsonResult(err));
+        }
+      }
+    });
+
+    var doGetDoctors = function () {
+      ServiceOrder.find({patientId: patientId}).select('doctorId status').exec()
+        .then(function (orders) {
+          var doctorIds = [];
+          for (var idx in orders) {
+            if (doctorIds.indexOf(orders[idx].id) == -1)
+              doctorIds.push(orders[idx].id);
+          }
+          debug('getDoctors(), get doctors in: %o', doctorIds);
+          return Doctor.find({'_id': {'$in': doctorIds}}).select(doctorExcludeFields).exec();
+        }).then(function (doctors) {
+
+        })
+
+
+        .then(null, function (err) {
+
+          debug('getDoctors(), get ServiceOrder error: %o', err);
+          return res.status(500).json(utils.jsonResult(err));
+
+        });
+    }
+  };
+
+  /**
    * POST '/api/patients/:id/cases'
    * @param req
    * @param res
@@ -789,6 +836,7 @@ module.exports = function (app) {
     deleteFriendsRequests: deleteFriendsRequests,
     getFriendsRequestsStatus: getFriendsRequestsBetween2Patients,
     getFriends: getFriends,
+    getDoctors: getDoctors,
     createCase: createCase,
     getCases: getCases,
     deleteCase: deleteCase,

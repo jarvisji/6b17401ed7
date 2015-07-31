@@ -99,6 +99,11 @@ var registerRoutes = function () {
    */
   app.get('/api/patients/friends/:id1/:id2', patientCtrl.getFriendsRequestsStatus);
   app.get('/api/patients/:id/friends', patientCtrl.getFriends);
+  /**
+   * Get the doctors those have orders with the given patient.
+   * Response: List of doctors.
+   */
+  app.get('/api/patients/:id/doctors', patientCtrl.getDoctors);
 
   /**
    * GET '/api/patients/:id/follows?[expand=true]'

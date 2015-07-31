@@ -14,7 +14,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       controller: 'rootCtrl'
     });
     $stateProvider.state('entry', {
-      url: '/?openid&token&redirect',
+      url: '/entry?openid&token&redirect',
       controller: 'rootCtrl'
     });
     $stateProvider.state('profile', {
@@ -98,6 +98,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
      * }
      * }
      */
+      console.log($stateParams);
     var verifyAndGetUserInfo = function () {
       $log.info('rootCtrl:verifyAndGetUserInfo()');
       var setDefaultHeader = function () {
@@ -118,6 +119,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
         } else if ($rootScope.currentUser.patient && !$rootScope.currentUser.patient.name) {
           $state.go('profile-patient-edit', {openid: openid, firstTime: true});
         } else if (redirect) {
+          $log.debug('redirect: %s', redirect);
           $state.go(redirect, {openid: openid});
         }
       };
@@ -130,6 +132,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
             $rootScope.currentUser = resp.data;
             setDefaultHeader();
             checkUserFirstTime();
+            initWxJsSdk();
           }).error(function (resp, status) {
             $cookies.remove('currentUser');
             if (status == 404) {
@@ -141,11 +144,26 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           });
       };
 
+      var initWxJsSdk = function () {
+        $http.get('/wechat/jssdkconfig')
+          .success(function (resp) {
+            wx.config(resp.data);
+            wx.ready(function () {
+              console.log('wx.ready. ', wx);
+
+            });
+            wx.error(function () {
+              console.log('wx.error.', arguments);
+            })
+          });
+      };
+
       //$cookies.remove('currentUser');
       var openid = $stateParams.openid;
       var access_token = $stateParams.token;
       var redirect = $stateParams.redirect;
       var sessionUser = $cookies.getObject('currentUser');
+      $log.debug('init page. openid: %s, access_token: %s, redirect: %s, sessionUser: %o', openid, access_token, redirect, sessionUser);
       if (!openid || !access_token) {
         if (sessionUser) {
           $log.debug('read user from session');
@@ -154,6 +172,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           $rootScope.currentUser = sessionUser;
           setDefaultHeader();
           checkUserFirstTime();
+          initWxJsSdk();
         } else {
           $log.debug('invalid openid or access_token');
           $rootScope.alertError('', 'invalid openid or access_token');

@@ -11,5 +11,12 @@ module.exports = {
     requested: 'requested',
     accepted: 'accepted',
     rejected: 'rejected'
+  },
+  serviceOrderStatus: {
+    init: 'init',
+    payed: 'payed',
+    confirmed: 'confirmed',
+    finished: 'finished',
+    expired: 'expired'
   }
 };

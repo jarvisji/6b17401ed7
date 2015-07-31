@@ -170,7 +170,22 @@ angular.module('ylbWxApp')
     $scope.onLinkTypeSelected = function (linkType) {
       var modalData = {type: linkType, title: '', data: []};
       if (linkType == resources.linkTypes.image.value) {
-
+        // refer to: http://mp.weixin.qq.com/wiki/7/aaa137b55fb2e0456bf8dd9148dd613f.html#.E9.A2.84.E8.A7.88.E5.9B.BE.E7.89.87.E6.8E.A5.E5.8F.A3
+        wx.chooseImage({
+          count: 1, // 默认9
+          sizeType: ['original', 'compressed'], // 可以指定是原图还是压缩图，默认二者都有
+          sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+          success: function (res) {
+            $scope.res = res;
+            var localIds = res.localIds; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+          },
+          fail: function () {
+            $scope.fail = arguments;
+          },
+          complete: function () {
+            $scope.complete = arguments;
+          }
+        });
       }
       if (linkType == resources.linkTypes.patient.value) {
         modalData.title = '选择患者';
