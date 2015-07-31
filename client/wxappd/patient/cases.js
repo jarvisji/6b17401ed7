@@ -178,7 +178,7 @@ angular.module('ylbWxApp')
           success: function (res) {
             $scope.res = res;
             var localId = res.localIds[0]; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
-            $scope.newCase = {linkType: linkType, avatar: localId, title: '', target: ''};
+            $scope.newCase.link = {linkType: linkType, avatar: localId, title: '', target: ''};
           },
           fail: function () {
             $scope.fail = arguments;
