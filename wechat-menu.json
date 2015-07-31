@@ -1,0 +1,54 @@
+{
+  "button": [
+    {
+      "name": "医生端",
+      "sub_button": [
+        {
+          "type": "view",
+          "name": "个人设置",
+          "url": "http://www.utime.info/wxindex.html#/profile/doctor/oWTqJs8SEbDON98vMor20rnXh9UQ"
+        },
+        {
+          "type": "view",
+          "name": "查找医生",
+          "url": "http://www.utime.info/wxindex.html#/search/doctor"
+        }
+      ]
+    },
+    {
+      "name": "患者端",
+      "sub_button": [
+        {
+          "type": "view",
+          "name": "个人设置",
+          "url": "http://www.utime.info/wxindex.html#/profile/patient/oWTqJs_isFdwO0vesXACDsELhiLI"
+        },
+        {
+          "type": "view",
+          "name": "查找医生",
+          "url": "http://www.utime.info/wxindex.html#/search/doctor"
+        },
+        {
+          "type": "view",
+          "name": "我的医生",
+          "url": "http://www.utime.info/wxindex.html#/patient/doctors"
+        }
+      ]
+    },
+    {
+      "name": "切换",
+      "sub_button": [
+        {
+          "type": "view",
+          "name": "切换为患者",
+          "url": "http://www.utime.info/wxindex.html#/?openid=oWTqJs_isFdwO0vesXACDsELhiLI&token=bbb&redirect=profile-patient"
+        },
+        {
+          "type": "view",
+          "name": "切换为医生",
+          "url": "http://www.utime.info/wxindex.html#/?openid=oWTqJs8SEbDON98vMor20rnXh9UQ&token=bbb&redirect=profile"
+        }
+      ]
+    }
+  ]
+}
