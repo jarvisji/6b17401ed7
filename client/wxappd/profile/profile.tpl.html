@@ -1,78 +1,79 @@
-<section class="profile-section" ng-show="doctor">
-  <div id="alert"></div>
-  <div class="row">
-    <div class="col-xs-6">
-      <img ng-src="{{doctor.wechat.headimgurl}}" class="img-rounded" style="width:100%">
-    </div>
-    <div class="col-xs-6">
-      <div class="row">
-        <div class="col-xs-12">
-          <div class="profile-usertitle-name">{{doctor.name}}</div>
-          <div class="profile-usertitle-job">{{doctor.title}}</div>
+<div ng-show="doctor">
+  <section class="profile-section">
+    <div id="alert"></div>
+    <div class="row">
+      <div class="col-xs-6">
+        <img ng-src="{{doctor.wechat.headimgurl}}" class="img-rounded" style="width:100%">
+      </div>
+      <div class="col-xs-6">
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="profile-usertitle-name">{{doctor.name}}</div>
+            <div class="profile-usertitle-job">{{doctor.title}}</div>
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="profile-desc-title">{{doctor.department}}</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <div class="profile-desc-title">{{doctor.hospital}}</div>
+          </div>
         </div>
       </div>
-      <hr>
-      <div class="row">
-        <div class="col-xs-12">
-          <div class="profile-desc-title">{{doctor.department}}</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-xs-12">
-          <div class="profile-desc-title">{{doctor.hospital}}</div>
-        </div>
+    </div>
+    <p></p>
+
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="profile-desc-title">医联邦ID：{{doctor.number}}</div>
       </div>
     </div>
-  </div>
-  <p></p>
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="profile-desc-title">级别：{{doctor.displayLevel}}</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="profile-desc-title">年龄：{{doctor.age}}</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="profile-desc-title">性别：{{doctor.displaySex}}</div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12 profile-desc-text">
+        {{doctor.introduction}}
+      </div>
+    </div>
 
-  <div class="row">
-    <div class="col-xs-12">
-      <div class="profile-desc-title">医联邦ID：{{doctor.number}}</div>
+    <div class="profile-section-action-button profile-action-button" ng-show="isSelf">
+      <a ui-sref="profile-edit({ openid: doctor.wechat.openid })"><i class="fa fa-pencil-square-o"></i></a>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-12">
-      <div class="profile-desc-title">级别：{{doctor.displayLevel}}</div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-12">
-      <div class="profile-desc-title">年龄：{{doctor.age}}</div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-12">
-      <div class="profile-desc-title">性别：{{doctor.displaySex}}</div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xs-12 profile-desc-text">
-      {{doctor.introduction}}
-    </div>
-  </div>
+  </section>
 
-  <div class="profile-section-action-button profile-action-button" ng-show="isSelf">
-    <a ui-sref="profile-edit({ openid: doctor.wechat.openid })"><i class="fa fa-pencil-square-o"></i></a>
-  </div>
-</section>
-
-<section>
-  测试选项：
-  <ul>
-    <li><a href="" ng-click="disableServicePrivilege=false">提升医生等级</a></li>
-    <li><a href="" ng-click="disableServicePrivilege=true">降低医生等级</a></li>
-  </ul>
-</section>
-<section class="profile-section" ng-show="doctor">
-  <div class="alert alert-warning" role="alert" ng-show="disableServicePrivilege">
-    添加5个好友升级为正式用户，即可设置服务价格。
-  </div>
-  <div class="input-group input-group-lg">
-    <span class="input-group-addon">加号</span>
-    <input type='number' class="form-control text-right" placeholder="0" ng-model="jiahao.price"
-           ng-disabled="!editingJiahao">
-    <span class="input-group-addon">元/次</span>
+  <section>
+    测试选项：
+    <ul>
+      <li><a href="" ng-click="disableServicePrivilege=false">提升医生等级</a></li>
+      <li><a href="" ng-click="disableServicePrivilege=true">降低医生等级</a></li>
+    </ul>
+  </section>
+  <section class="profile-section">
+    <div class="alert alert-warning" role="alert" ng-show="disableServicePrivilege">
+      添加5个好友升级为正式用户，即可设置服务价格。
+    </div>
+    <div class="input-group input-group-lg">
+      <span class="input-group-addon">加号</span>
+      <input type='number' class="form-control text-right" placeholder="0" ng-model="jiahao.price"
+             ng-disabled="!editingJiahao">
+      <span class="input-group-addon">元/次</span>
     <span class="input-group-btn">
       <button class="btn btn-default" type="button" ng-if="isSelf" ng-click="editJiahao()"
               ng-disabled="disableServicePrivilege">
@@ -83,26 +84,26 @@
         <i class="fa fa-check-square-o profile-action-button"> 购买</i>
       </button>
     </span>
-  </div>
-  <p></p>
+    </div>
+    <p></p>
 
-  <div id="editJiahao" class="panel panel-default" ng-show="editingJiahao">
-    <div class="panel-heading">设置每日加号数量</div>
-    <div class="panel-body">
-      <div class="input-group input-group-lg" ng-repeat="(day, number) in jiahao.weekQuantity">
-        <span class="input-group-addon">{{days[day]}}</span>
-        <input type='number' class="form-control text-right" placeholder="0" ng-model="jiahao.weekQuantity[day]">
-        <span class="input-group-addon">个</span>
+    <div id="editJiahao" class="panel panel-default" ng-show="editingJiahao">
+      <div class="panel-heading">设置每日加号数量</div>
+      <div class="panel-body">
+        <div class="input-group input-group-lg" ng-repeat="(day, number) in jiahao.weekQuantity">
+          <span class="input-group-addon">{{days[day]}}</span>
+          <input type='number' class="form-control text-right" placeholder="0" ng-model="jiahao.weekQuantity[day]">
+          <span class="input-group-addon">个</span>
+        </div>
       </div>
     </div>
-  </div>
 
 
-  <div class="input-group input-group-lg">
-    <span class="input-group-addon">随诊</span>
-    <input type='number' class="form-control text-right" placeholder="0" ng-model="suizhen.price"
-           ng-disabled="!editingSuizhen">
-    <span class="input-group-addon">元/月</span>
+    <div class="input-group input-group-lg">
+      <span class="input-group-addon">随诊</span>
+      <input type='number' class="form-control text-right" placeholder="0" ng-model="suizhen.price"
+             ng-disabled="!editingSuizhen">
+      <span class="input-group-addon">元/月</span>
     <span class="input-group-btn">
       <button class="btn btn-default" type="button" ng-if="isSelf" ng-click="editSuizhen()"
               ng-disabled="disableServicePrivilege">
@@ -113,14 +114,14 @@
         <i class="fa fa-check-square-o profile-action-button"> 购买</i>
       </button>
     </span>
-  </div>
-  <p></p>
+    </div>
+    <p></p>
 
-  <div class="input-group input-group-lg">
-    <span class="input-group-addon bg-danger">会诊</span>
-    <input type='number' class="form-control text-right" placeholder="0" ng-model="huizhen.price"
-           ng-disabled="!editingHuizhen">
-    <span class="input-group-addon">元/次</span>
+    <div class="input-group input-group-lg">
+      <span class="input-group-addon bg-danger">会诊</span>
+      <input type='number' class="form-control text-right" placeholder="0" ng-model="huizhen.price"
+             ng-disabled="!editingHuizhen">
+      <span class="input-group-addon">元/次</span>
     <span class="input-group-btn">
       <button class="btn btn-default" type="button" ng-if="isSelf" ng-click="editHuizhen()"
               ng-disabled="disableServicePrivilege">
@@ -131,34 +132,35 @@
         <i class="fa fa-check-square-o profile-action-button"> 购买</i>
       </button>
     </span>
-  </div>
-</section>
+    </div>
+  </section>
 
-<section>
-  <div class="follow-buttons" ng-hide="isSelf">
-    <button type="button" class="btn btn-primary btn-block btn-lg" ng-show="currentUser.isPatient && !isFollowed"
-            ng-click="followDoctor()">关注医生
-    </button>
-    <button type="button" class="btn btn-danger btn-block btn-lg" ng-show="currentUser.isPatient && isFollowed"
-            ng-click="unfollowDoctor()">取消关注
-    </button>
-    <button type="button" class="btn btn-primary btn-block btn-lg"
-            ng-show="!friendStatus" ng-click="showAddFriendModal()">加为好友
-    </button>
-    <button type="button" class="btn btn-danger btn-block btn-lg"
-            ng-show="friendStatus.status=='accepted'" ng-click="deleteFriend(friendStatus._id)">删除好友
-    </button>
-    <button type="button" class="btn btn-warning btn-block btn-lg"
-            ng-show="friendStatus.isFromMe && friendStatus.status=='requested'" disabled>已发送好友请求，等待对方响应
-    </button>
-    <button type="button" class="btn btn-warning btn-block btn-lg"
-            ng-show="friendStatus.isFromMe && friendStatus.status=='rejected'" disabled>对方已拒绝你的好友请求
-    </button>
-    <button type="button" class="btn btn-warning btn-block btn-lg"
-            ng-show="friendStatus.isToMe && friendStatus.status=='rejected'" disabled>你已拒绝对方的好友请求
-    </button>
-    <button type="button" class="btn btn-warning btn-block btn-lg"
-            ng-show="friendStatus.isToMe && friendStatus.status=='requested'" disabled>对方请求加你为好友
-    </button>
-  </div>
-</section>
+  <section>
+    <div class="follow-buttons" ng-show="!isSelf">
+      <button type="button" class="btn btn-primary btn-block btn-lg" ng-show="currentUser.isPatient && !isFollowed"
+              ng-click="followDoctor()">关注医生
+      </button>
+      <button type="button" class="btn btn-danger btn-block btn-lg" ng-show="currentUser.isPatient && isFollowed"
+              ng-click="unfollowDoctor()">取消关注
+      </button>
+      <button type="button" class="btn btn-primary btn-block btn-lg"
+              ng-show="currentUser.isDoctor && !friendStatus" ng-click="showAddFriendModal()">加为好友
+      </button>
+      <button type="button" class="btn btn-danger btn-block btn-lg"
+              ng-show="friendStatus.status=='accepted'" ng-click="deleteFriend(friendStatus._id)">删除好友
+      </button>
+      <button type="button" class="btn btn-warning btn-block btn-lg"
+              ng-show="friendStatus.isFromMe && friendStatus.status=='requested'" disabled>已发送好友请求，等待对方响应
+      </button>
+      <button type="button" class="btn btn-warning btn-block btn-lg"
+              ng-show="friendStatus.isFromMe && friendStatus.status=='rejected'" disabled>对方已拒绝你的好友请求
+      </button>
+      <button type="button" class="btn btn-warning btn-block btn-lg"
+              ng-show="friendStatus.isToMe && friendStatus.status=='rejected'" disabled>你已拒绝对方的好友请求
+      </button>
+      <button type="button" class="btn btn-warning btn-block btn-lg"
+              ng-show="friendStatus.isToMe && friendStatus.status=='requested'" disabled>对方请求加你为好友
+      </button>
+    </div>
+  </section>
+</div>
