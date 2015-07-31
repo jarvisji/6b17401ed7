@@ -21,6 +21,17 @@ angular.module('ylbWxApp')
       huizhen: {type: 'huizhen'},
       suizhen: {type: 'suizhen'}
     },
+    linkTypes: {
+      image: {value: 'image', label: '图片', forPatient: true, forDoctor: true},
+      doctor: {value: 'doctor', label: '医生', forPatient: true, forDoctor: true},
+      patient: {value: 'patient', label: '患者', forPatient: true, forDoctor: true},
+      shop: {value: 'shop', label: '商城', forPatient: true, forDoctor: true},
+      medicalImaging: {value: 'medicalImaging', label: '影像', forPatient: false, forDoctor: true},
+      serviceJiahao: {value: 'serviceJiahao', label: '加号', forPatient: false, forDoctor: true},
+      serviceSuizhen: {value: 'serviceSuizhen', label: '随诊', forPatient: false, forDoctor: true},
+      serviceHuizhen: {value: 'serviceHuizhen', label: '会诊', forPatient: false, forDoctor: true}
+    },
+    defaultAvatar: '/assets/image/avatar-64.jpg',
     days: {
       d0: '周日',
       d1: '周一',

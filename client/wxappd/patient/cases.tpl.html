@@ -6,17 +6,32 @@
 
         <p></p>
 
+        <div class="general-item-list pull-left" ng-show="newCase.link">
+          <div class="item">
+            <div class="item-head">
+              <div class="item-details">
+                <img class="item-pic" ng-src="{{newCase.link.avatar}}">
+                <span class="item-name">{{newCase.link.title}}</span>
+              </div>
+              <span class="item-status"></span>
+            </div>
+          </div>
+        </div>
+
         <div class="btn-group pull-right" role="group">
-          <button type="button" class="btn btn-default">插入链接</button>
+          <button type="button" class="btn btn-default" id="links" name="links" bs-dropdown="ddLinkTypes">
+            {{selectedLink.label}} <span class="caret"></span>
+          </button>
           <button type="button" class="btn btn-success" ng-click="createCase()">发布</button>
         </div>
       </form>
     </div>
   </div>
 </section>
+<hr>
 
-<section>
-  <div class="row" ng-if="cases && cases.length > 0">
+<section ng-if="cases">
+  <div class="row" ng-show="cases.length > 0">
     <div class="col-xs-12 media" ng-repeat="case in cases">
       <div class="media-left">
         <a href="#">
@@ -37,6 +52,18 @@
         </div>
         <p></p>
 
+        <div class="general-item-list" ng-if="case.link" ng-click="showLinkTarget(case.link.target)">
+          <div class="item">
+            <div class="item-head">
+              <div class="item-details">
+                <img class="item-pic" ng-src="{{case.link.avatar}}">
+                <span class="item-name">{{case.link.title}}</span>
+              </div>
+              <span class="item-status"></span>
+            </div>
+          </div>
+        </div>
+
         <div class="input-group" ng-show="case.isShowCommentInput">
           <input type="text" class="form-control" placeholder="评论..." ng-model="newComment.comment">
           <span class="input-group-btn">
@@ -54,7 +81,7 @@
       </div>
     </div>
   </div>
-  <div class="row" ng-if="!cases || cases.length == 0">
+  <div class="row" ng-show="cases.length == 0">
     <h4 class="text-center">暂无病历</h4>
   </div>
 </section>

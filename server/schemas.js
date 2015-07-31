@@ -3,6 +3,7 @@
  */
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var Mixed = mongoose.Schema.Types.Mixed;
 
 module.exports = function () {
   var serviceSchema = new Schema({
@@ -175,15 +176,17 @@ module.exports = function () {
   var caseHistorySchema = new Schema({
     patientId: String,
     content: String,
-    link: {
-      type: String, // image, doctor, patient, shop, medicalImaging, serviceJiahao, serviceSuizhen, serviceHuizhen
-      target: String
-    },
     creator: {
       id: String,
       name: String,
       avatar: String,
       role: String // doctor, patient
+    },
+    link:{
+      linkType: String, // image, doctor, patient, shop, medicalImaging, serviceJiahao, serviceSuizhen, serviceHuizhen
+      title: String,
+      avatar: String,
+      target: Mixed
     },
     comments: [commentSchema],
     created: {type: Date, default: Date.now},

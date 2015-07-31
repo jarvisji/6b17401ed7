@@ -394,8 +394,8 @@ module.exports = function (app) {
     var newCase = req.body;
     debug('createCase(), creating case for patient: %s', patientId);
 
-    if (newCase.link && newCase.link.type && app.consts.caseLinkTypes.indexOf(newCase.link.type) == -1) {
-      debug('createCase(), invalid link type: %s', newCase.link.type);
+    if (newCase.link && newCase.link.linkType && app.consts.caseLinkTypes.indexOf(newCase.link.linkType) == -1) {
+      debug('createCase(), invalid link type: %s', newCase.link.linkType);
       return res.status(400).json(utils.jsonResult(new Error('Invalid link type')));
     }
 
