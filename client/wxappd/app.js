@@ -217,7 +217,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       var title = generateAlertTitle('错误 ', _title, status);
       $alert({
         title: title,
-        content: content,
+        content: parseContent(content),
         placement: 'top',
         type: 'danger',
         duration: duration != undefined ? duration : 5,
@@ -229,7 +229,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       var title = generateAlertTitle('警告 ', _title, status);
       $alert({
         title: title,
-        content: content,
+        content: parseContent(content),
         placement: 'top',
         type: 'warning',
         duration: 3,
@@ -241,12 +241,28 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       var title = generateAlertTitle('成功', _title, status);
       $alert({
         title: title,
-        content: content,
+        content: parseContent(content),
         placement: 'top',
         type: 'success',
         duration: 3,
         animation: 'am-fade-and-slide-top'
       });
+    };
+
+    var parseContent = function (content) {
+      if (typeof(content) === 'string') {
+        return content;
+      } else if (typeof(content) === 'object') {
+        if (content.message) {
+          return content.message;
+        }
+        if (content.error && content.error.message) {
+          return content.error.message;
+        }
+        return content.toString();
+      } else {
+        return content.toString();
+      }
     };
 
     var generateAlertTitle = function (title, _title, status) {
