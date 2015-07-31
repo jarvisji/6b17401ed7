@@ -4,7 +4,7 @@
  */
 angular.module('ylbWxApp')
   .controller('wxSearchDoctorCtrl', ['$scope', '$rootScope', '$http', '$state', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, resources, commonUtils) {
-    $rootScope.checkUserVerified();
+    var currentUser = $rootScope.checkUserVerified();
 
     $scope.search = {};
     $scope.ddProvince = commonUtils.getDdProvince();
@@ -50,6 +50,16 @@ angular.module('ylbWxApp')
       $http.get('/api/doctors', {params: params})
         .success(function (resp) {
           if (resp.count > 0) {
+            // remove current user from search list.
+            if (currentUser.isDoctor) {
+              for (var i = 0; i < resp.data.length; i++) {
+                if (resp.data[i]._id == currentUser.doctor._id) {
+                  resp.data.splice(i, 1);
+                  break;
+                }
+              }
+            }
+
             $rootScope.searchDoctorParams = params;
             $rootScope.searchDoctorResult = resp.data;
             $state.go('search-doctor-result');
