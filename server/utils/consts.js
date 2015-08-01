@@ -2,7 +2,16 @@
  * Created by Ting on 2015/7/29.
  */
 module.exports = {
-  caseLinkTypes: ['image', 'doctor', 'patient', 'shop', 'medicalImaging', 'serviceJiahao', 'serviceSuizhen', 'serviceHuizhen'],
+  caseLinkTypes: {
+    image: 'image',
+    doctor: 'doctor',
+    patient: 'patient',
+    shop: 'shop',
+    medicalImaging: 'medicalImaging',
+    serviceJiahao: 'serviceJiahao',
+    serviceSuizhen: 'serviceSuizhen',
+    serviceHuizhen: 'serviceHuizhen'
+  },
   role: {
     doctor: 'doctor',
     patient: 'patient'

@@ -2,7 +2,7 @@
  * Created by Ting on 2015/7/30.
  */
 angular.module('ylbWxApp')
-  .controller('wxPatientCasesCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$modal', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $state, $stateParams, $http, $modal, resources, commonUtils) {
+  .controller('wxPatientCasesCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$location', '$http', '$timeout', '$modal', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $state, $stateParams, $location, $http, $timeout, $modal, resources, commonUtils) {
     var currentUser = $rootScope.checkUserVerified();
     var patientId = $stateParams.id ? $stateParams.id : currentUser.isPatient ? currentUser.patient._id : undefined;
     if (!patientId) {
@@ -79,15 +79,39 @@ angular.module('ylbWxApp')
 
 
     $scope.createCase = function () {
-      $http.post('/api/patients/' + patientId + '/cases', $scope.newCase)
-        .success(function (resp) {
-          $scope.newCase = {};
-          var createdCase = resp.data;
-          createdCase.canDelete = true;
-          $scope.cases.unshift(createdCase);
-        }).error(function (resp, status) {
-          $rootScope.alertError(null, resp, status);
+      // upload loacl image to wechat server before create case.
+      if ($scope.newCase.link && $scope.newCase.link.linkType == resources.linkTypes.image.value) {
+        wx.uploadImage({
+          localId: $scope.newCase.link.avatar, // 需要上传的图片的本地ID，由chooseImage接口获得
+          isShowProgressTips: 1, // 默认为1，显示进度提示
+          success: function (res) {
+            $scope.res = res;
+            var serverId = res.serverId; // 返回图片的服务器端ID
+            $timeout(function () {
+              // use target to save serverId, in our server side, will download and replace it.
+              $scope.newCase.link.target = serverId;
+              callCreateApi();
+            }, 100);
+          },
+          fail: function (res) {
+            $scope.fail = arguments;
+            $rootScope.alertError('', res.errMsg);
+          }
         });
+      } else {
+        callCreateApi();
+      }
+      var callCreateApi = function () {
+        $http.post('/api/patients/' + patientId + '/cases', $scope.newCase)
+          .success(function (resp) {
+            $scope.newCase = {};
+            var createdCase = resp.data;
+            createdCase.canDelete = true;
+            $scope.cases.unshift(createdCase);
+          }).error(function (resp, status) {
+            $rootScope.alertError(null, resp, status);
+          });
+      }
     };
 
     $scope.showCommentInput = function (index) {
@@ -142,6 +166,11 @@ angular.module('ylbWxApp')
       addLinkModal.$promise.then(addLinkModal.show);
     };
 
+    /**
+     * When user select item on the dialog of add link, we generate target data.
+     * @param linkType
+     * @param item
+     */
     $scope.onLinkItemSelected = function (linkType, item) {
       var target;
       var newLink = {linkType: linkType, avatar: item.avatar, title: item.name};
@@ -178,10 +207,14 @@ angular.module('ylbWxApp')
           success: function (res) {
             $scope.res = res;
             var localId = res.localIds[0]; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
-            $scope.newCase.link = {linkType: linkType, avatar: localId, title: '', target: ''};
+            $timeout(function () {
+              // for some reason of wechat api, we need delay 100ms to update variable.
+              $scope.newCase.link = {linkType: linkType, avatar: localId, title: '照片', target: ''};
+            }, 100);
           },
-          fail: function () {
+          fail: function (res) {
             $scope.fail = arguments;
+            $rootScope.alertError('', res.errMsg);
           }
         });
       }
@@ -256,10 +289,22 @@ angular.module('ylbWxApp')
     };
 
     $scope.showLinkTarget = function (target) {
+      $scope.test = {target: 'true'};
       if (target) {
-        if (target.targetType == 'state') {
+        if (typeof(target) === 'string') {
+          var port = $location.port();
+          var link = $location.protocol() + '://' + $location.host();
+          if (port) {
+            link = link + ':' + port;
+          }
+          wx.previewImage({
+            current: link + target, // 当前显示图片的http链接
+            urls: [link + target] // 需要预览的图片http链接列表
+          });
+        } else if (target.targetType == 'state') {
           $state.go(target.name, target.params);
         }
+
       }
     };
   }]);

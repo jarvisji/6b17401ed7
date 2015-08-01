@@ -2,12 +2,13 @@
  * Created by Ting on 2015/7/23.
  */
 
-var sha512 = require('crypto-js/sha512');
 var debug = require('debug')('ylb.patientCtrl');
 var utils = require('../middleware/utils');
 var stringUtils = require('../utils/string-utils');
+var fs = require('fs');
+var mkdirp = require('mkdirp');
 
-module.exports = function (app) {
+module.exports = function (app, api) {
   var authUtils = require('../utils/auth-utils')(app);
   var Patient = app.models.Patient;
   var PatientFriend = app.models.PatientFriend;
@@ -441,7 +442,8 @@ module.exports = function (app) {
     var newCase = req.body;
     debug('createCase(), creating case for patient: %s', patientId);
 
-    if (newCase.link && newCase.link.linkType && app.consts.caseLinkTypes.indexOf(newCase.link.linkType) == -1) {
+    var validTypes = Object.keys(app.consts.caseLinkTypes);
+    if (newCase.link && newCase.link.linkType && validTypes.indexOf(newCase.link.linkType) == -1) {
       debug('createCase(), invalid link type: %s', newCase.link.linkType);
       return res.status(400).json(utils.jsonResult(new Error('Invalid link type')));
     }
@@ -466,13 +468,67 @@ module.exports = function (app) {
     var createCase = function (creatorUser) {
       newCase.creator = {id: creatorUser.id, name: creatorUser.name, avatar: creatorUser.wechat.headimgurl, role: role};
       newCase.patientId = patientId;
+      var createdCaseId;
       CaseHistory.create(newCase, function (err, created) {
         if (err) {
           debug('createCase(), create case error: %o', err);
           return res.status(500).json(utils.jsonResult(err));
         }
+        createdCaseId = created.id;
         res.json(utils.jsonResult(created));
       });
+      // download image from wechat server and replace link.
+      if (newCase.link && newCase.link.linkType == app.consts.caseLinkTypes.image) {
+        var mediaId = newCase.link.target;
+        debug('createCase(), downloading image from wechat server, mediaId: %s', mediaId);
+        api.getMedia(mediaId, function (err, result, header) {
+          if (err) {
+            debug('createCase(), get media from wechat server error: %o', err);
+            //TODO: if do not throw this error to user, need consider retry or error handler.
+            return;
+          }
+          // generate local file name.
+          var fileName;
+          if (header.headers['content-disposition']) {
+            var tmpArr = header.headers['content-disposition'].split('filename="');
+            if (tmpArr.length > 1) {
+              fileName = tmpArr[1].substr(0, tmpArr[1].length - 1);
+            }
+          } else {
+            var tmpArr = header.headers['content-type'].split('/');
+            fileName = mediaId + '.' + tmpArr[1];
+          }
+          var fileLink = '/upload/' + creatorUser.id + '/';
+          var path = __dirname + '/../..' + fileLink;
+          fs.exists(path, function (exist) {
+            if (!exist) {
+              mkdirp.sync(path);
+            }
+
+            var filePath = path + fileName;
+            fileLink += fileName;
+            debug('createCase(), writing download file to %s', filePath);
+            fs.writeFile(filePath, result, function (err) {
+              if (err) {
+                debug('createCase(), save media file error: %o', err);
+                //TODO: error handler
+                return;
+              }
+              debug('createCase(), updating case data.');
+              CaseHistory.findOneAndUpdate({'_id': createdCaseId}, {
+                'link.target': fileLink,
+                'link.avatar': fileLink
+              }, function (err, result) {
+                if (err) {
+                  debug('createCase(), update image link failed: %o', err);
+                  return;
+                }
+                debug('createCase(), update image link success: %o', result);
+              });
+            });
+          });
+        });
+      }
     };
   };
 

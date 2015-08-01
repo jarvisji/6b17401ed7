@@ -20,7 +20,7 @@ module.exports = function (app, api, oauth) {
     },
     getJsSdkConfig: function (req, res) {
       var param = {
-        debug: true,
+        debug: false,
         jsApiList: ['chooseImage', 'previewImage', 'uploadImage', 'downloadImage'],
         url: 'http://www.utime.info/wxindex.html'
       };

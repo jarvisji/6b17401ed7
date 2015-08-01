@@ -11,6 +11,7 @@ var wechatOAuth = require('./middleware/wechat-oauth');
 
 var app = express();
 app.use(express.static('client'));
+app.use('/upload', express.static('upload'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -44,7 +45,7 @@ var registerRoutes = function () {
   var wxproxyDoctor = require('./middleware/wxproxy-doctor')(app, api);
   var wxproxyPatient = require('./middleware/wxproxy-patient')(app, api);
   var doctorCtrl = require('./controller/doctor-controller')(app);
-  var patientCtrl = require('./controller/patient-controller')(app);
+  var patientCtrl = require('./controller/patient-controller')(app, api);
   var wechatCtrl = require('./controller/wechat-controller')(app, api);
 
   // TODO: add authentication for following APIs.
