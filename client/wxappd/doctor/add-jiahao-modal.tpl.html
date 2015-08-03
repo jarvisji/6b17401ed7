@@ -22,6 +22,7 @@
             </div>
           </div>
         </div>
+        <span ng-show="!serviceStock.thisWeek">没有可用加号</span>
 
         <h4>下周</h4>
 
@@ -37,8 +38,7 @@
             </div>
           </div>
         </div>
-
-        <span ng-show="!serviceStock || modalData.length ==0">没有数据</span>
+        <span ng-show="!serviceStock.nextWeek">没有可用加号</span>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" ng-click="$hide()">取消</button>

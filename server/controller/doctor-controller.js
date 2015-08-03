@@ -7,6 +7,7 @@ var debug = require('debug')('ylb.doctorCtrl');
 var utils = require('../middleware/utils');
 var stringUtils = require('../utils/string-utils');
 var dateUtils = require('../utils/date-utils');
+var _ = require('underscore');
 
 module.exports = function (app) {
   var Doctor = app.models.Doctor;
@@ -139,8 +140,12 @@ module.exports = function (app) {
     delete newDoctor.salt;
     delete newDoctor.level;
 
+
+    // we pre-calculated service stock, so if user changed the quantity, we need update stock corresponding.
     Doctor.findById(doctorId, function (err, doctor) {
-      var oldJiahao, newJiahao;
+      var oldJiahao;
+      var newJiahao;
+
       if (doctor && doctor.services) {
         for (var idx in doctor.services) {
           if (doctor.services[idx].type == app.consts.doctorServices.jiahao.type) {
@@ -149,7 +154,8 @@ module.exports = function (app) {
           }
         }
       }
-      if (newDoctor.service) {
+
+      if (newDoctor.services) {
         for (var idx in newDoctor.services) {
           if (newDoctor.services[idx].type == app.consts.doctorServices.jiahao.type) {
             newJiahao = newDoctor.services[idx];
@@ -157,19 +163,79 @@ module.exports = function (app) {
           }
         }
       }
+      debug('saveDoctor(), old Jiahao: %o, new Jiahao: %o', oldJiahao, newJiahao);
 
-      if (oldJiahao.weekQuantity != newJiahao.weekQuantity) {
-        // TODO: update generated this week and next week service stock.
-      }
-    });
+      // create new or update exists doctor.
+      debug('saveDoctor(), updating doctor.');
+      Doctor.findByIdAndUpdate(doctorId, newDoctor, {upsert: true, new: true}, function (err, doctor) {
+        if (err) {
+          debug('Update doctor error: ', err);
+          return res.status(500).json(utils.jsonResult(err));
+        }
+        doctor = removeNoOutputData(doctor);
+        res.json(utils.jsonResult(doctor));
+      });
 
-    Doctor.findByIdAndUpdate(doctorId, newDoctor, {upsert: true, new: true}, function (err, doctor) {
-      if (err) {
-        debug('Update doctor error: ', err);
-        return res.status(500).json(utils.jsonResult(err));
+
+      if (!newJiahao || !oldJiahao) {
+        debug('saveDoctor(), no newJiahao or oldJiahao, needn\'t update service stock.');
+        return;
       }
-      doctor = removeNoOutputData(doctor);
-      res.json(utils.jsonResult(doctor));
+
+      var saveNewStock = function (serviceStock) {
+        if (serviceStock) {
+          var oldQuantity = quantities[serviceStock.serviceId].oldQuantity;
+          var newQuantity = quantities[serviceStock.serviceId].newQuantity;
+          var currentStock = serviceStock.stock;
+          var orderedQuantity = oldQuantity - currentStock;
+          var newStock = newQuantity - orderedQuantity;
+          if (newStock < 0) {
+            newStock = 0;
+          }
+          debug('sveDoctor(), saveNewStock(), updating stock, current: %s, ordered: %s, new: %s of serviceId: %s.', currentStock, orderedQuantity, newStock, serviceStock.id);
+          serviceStock.stock = newStock;
+          serviceStock.save(function (err) {
+            if (err) {
+              debug('saveDoctor(), save service stock error: %o', err);
+            }
+          });
+        } else {
+          debug('saveDoctor(), saveNewStock(), no service stock data found, needn\'t update.');
+        }
+      };
+
+      // check changes of week quantity.
+      var _currentWeekRange = dateUtils.getCurrentWeekWorkingDate();
+      var _nextWeekRange = dateUtils.getNextWeekWorkingDate();
+      var currentWeekDates = dateUtils.getDateInRange(_currentWeekRange.start, _currentWeekRange.end);
+      var nextWeekDates = dateUtils.getDateInRange(_nextWeekRange.start, _nextWeekRange.end);
+      var quantities = {};
+      for (var key in newJiahao.weekQuantity) {
+        var newQuantity = newJiahao.weekQuantity[key];
+        var oldQuantity = oldJiahao.weekQuantity ? oldJiahao.weekQuantity[key] : 0;
+        if (!isNaN(newQuantity) && newQuantity != oldQuantity) {
+          quantities[oldJiahao.id] = {newQuantity: newQuantity, oldQuantity: oldQuantity};
+          debug('saveDoctor(), weekQuantity of %s changes, old: %s, new: %s', key, oldQuantity, newQuantity);
+          // quantity of key changes. key is one of 'd1', 'd2', 'd3', 'd4', 'd5'.
+          var dayOfWeek = key.substr(1, 1) * 1;
+          var dateOfCurrentWeek = currentWeekDates[dayOfWeek - 1];
+          var dateOfNextWeek = nextWeekDates[dayOfWeek - 1];
+          debug('saveDoctor(), retrieve stock data of relative date in current week: %o', dateOfCurrentWeek);
+          ServiceStock.findOne({serviceId: oldJiahao.id, 'date': dateOfCurrentWeek}, function (err, serviceStock) {
+            if (err) {
+              return debug('saveDoctor(), find service stock of current week error: %o', err);
+            }
+            saveNewStock(serviceStock);
+          });
+          debug('saveDoctor(), retrieve stock data of relative date in next week: %o', dateOfNextWeek);
+          ServiceStock.findOne({serviceId: oldJiahao.id, 'date': dateOfNextWeek}, function (err, serviceStock) {
+            if (err) {
+              return debug('saveDoctor(), find service stock of next week error: %o', err);
+            }
+            saveNewStock(serviceStock);
+          });
+        }
+      }
     });
   };
 

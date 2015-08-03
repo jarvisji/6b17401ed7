@@ -76,15 +76,7 @@ angular.module('ylbWxApp')
         $scope.jiahao = resources.doctorServices.jiahao;
         $scope.jiahao.weekQuantity = {d1: '', d2: '', d3: '', d4: '', d5: ''};
       } else {
-        // make sure display order is from d1 to d5.
-        var days = Object.keys($scope.jiahao.weekQuantity);
-        days.sort();
-        var weekQuantity = {};
-        for (var i = 0; i < days.length; i++) {
-          weekQuantity[days[i]] = $scope.jiahao.weekQuantity[days[i]];
-        }
-        $scope.jiahao.weekQuantity = weekQuantity;
-        console.log(weekQuantity);
+        orderJiahaoDays();
       }
       snapshot.jiahao = angular.copy($scope.jiahao);
 
@@ -96,6 +88,17 @@ angular.module('ylbWxApp')
         $scope.huizhen = resources.doctorServices.huizhen;
         snapshot.huizhen = angular.copy($scope.huizhen);
       }
+    };
+
+    // make sure display order is from d1 to d5.
+    var orderJiahaoDays = function() {
+      var days = Object.keys($scope.jiahao.weekQuantity);
+      days.sort();
+      var weekQuantity = {};
+      for (var i = 0; i < days.length; i++) {
+        weekQuantity[days[i]] = $scope.jiahao.weekQuantity[days[i]];
+      }
+      $scope.jiahao.weekQuantity = weekQuantity;
     };
 
     var preparePageData = function () {
@@ -161,9 +164,9 @@ angular.module('ylbWxApp')
         .success(function (resp) {
           var updatedServices = resp.data.services;
           for (var i = 0; i < updatedServices.length; i++) {
-            $scope[updatedServices[i].type] = updatedServices [i];
+            $scope[updatedServices[i].type] = updatedServices[i];
           }
-
+          orderJiahaoDays();
         }).error(function (err) {
           $rootScope.alertError(null, err, status);
         });
