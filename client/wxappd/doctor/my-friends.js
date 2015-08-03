@@ -10,6 +10,7 @@ angular.module('ylbWxApp')
       var currentUserId = currentUser.doctor._id;
       $http.get('/api/doctors/' + currentUserId + '/friends')
         .success(function (resp) {
+          commonUtils.checkDoctorVIcon(resp.data);
           $scope.friends = resp.data;
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);

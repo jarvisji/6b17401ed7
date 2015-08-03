@@ -10,6 +10,7 @@ angular.module('ylbWxApp')
     var getFollowedDoctors = function () {
       $http.get('/api/patients/' + currentUser.patient._id + '/follows?expand=true')
         .success(function (resp) {
+          commonUtils.checkDoctorVIcon(resp.data);
           $scope.doctors = $scope.doctorFollowed = resp.data;
         });
     };
