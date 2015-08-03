@@ -59,7 +59,7 @@ angular.module('ylbWxApp')
                 }
               }
             }
-
+            commonUtils.checkDoctorVIcon(resp.data);
             $rootScope.searchDoctorParams = params;
             $rootScope.searchDoctorResult = resp.data;
             $state.go('search-doctor-result');

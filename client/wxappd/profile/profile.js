@@ -94,6 +94,7 @@ angular.module('ylbWxApp')
       if ($scope.doctor.level == 1) {
         $scope.disableServicePrivilege = true;
       }
+      commonUtils.checkDoctorVIcon($scope.doctor);
     };
 
     /**

@@ -64,6 +64,24 @@ angular.module('ylbWxApp')
           scopeVar.push({'text': value, 'click': 'onCitySelected("' + key + '")'});
         });
         return scopeVar;
+      },
+
+      /**
+       * If doctor's level is 3 (real name), should display 'v' icon on his avatar.
+       * @param doctors
+       */
+      checkDoctorVIcon: function (doctors) {
+        if (doctors instanceof Array) {
+          angular.forEach(doctors, function (doctor) {
+            if (doctor.level == 3) {
+              doctor.isShowVIcon = true;
+            }
+          });
+        } else if (typeof(doctors) == 'object') {
+          if (doctors.level == 3) {
+            doctors.isShowVIcon = true;
+          }
+        }
       }
     };
   }]);

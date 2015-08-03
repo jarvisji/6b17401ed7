@@ -3,7 +3,14 @@
     <div id="alert"></div>
     <div class="row">
       <div class="col-xs-6">
-        <img ng-src="{{doctor.wechat.headimgurl}}" class="img-rounded" style="width:100%">
+        <div class="profile-avatar-container">
+          <img ng-src="{{doctor.wechat.headimgurl}}" class="img-rounded" style="width:100%">
+
+          <div class="profile-avatar-triangle"></div>
+          <span class="profile-avatar-v-icon" ng-show="doctor.isShowVIcon">
+            <i class="fa fa-vimeo-square"></i>
+          </span>
+        </div>
       </div>
       <div class="col-xs-6">
         <div class="row">

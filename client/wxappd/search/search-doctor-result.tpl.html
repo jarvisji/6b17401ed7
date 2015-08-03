@@ -3,7 +3,10 @@
     <div class="item" ng-repeat="doctor in searchDoctorResult" ng-click="showDetails($index)">
       <div class="item-head">
         <div class="item-details">
-          <img class="item-pic" ng-src="{{doctor.wechat.headimgurl}}">
+          <div class="item-pic-container">
+            <img class="item-pic" ng-src="{{doctor.wechat.headimgurl}}">
+            <span class="item-pic-v-icon" ng-show="doctor.isShowVIcon"><i class="fa fa-vimeo-square"></i></span>
+          </div>
           <span class="item-name">{{doctor.name}}</span>
           <span class="item-label"></span>
         </div>
