@@ -88,7 +88,78 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
     //$urlRouterProvider.otherwise('entry');
   }])
   .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$q', '$http', '$cookies', '$log', '$timeout', '$alert', function ($scope, $rootScope, $state, $stateParams, $q, $http, $cookies, $log, $timeout, $alert) {
+    $rootScope.verify = function (openid, access_token, redirect) {
+      $http.get('/api/verify', {params: {openid: openid, access_token: access_token}})
+        .success(function (resp) {
+          // save user verification info to session.
+          $cookies.putObject('currentUser', resp.data);
+          $rootScope.currentUser = resp.data;
+          $rootScope.setDefaultHeader();
+          $rootScope.checkUserFirstTime(redirect);
+          $rootScope.initWxJsSdk();
+        }).error(function (resp, status) {
+          $cookies.remove('currentUser');
+          if (status == 404) {
+            // user not registered
+            $rootScope.alertError('', 'Äú»¹Î´¹Ø×¢ÎÒÃÇµÄ¹«ÖÚºÅ¡£');
+          } else {
+            $rootScope.alertError(null, resp.error.message, status);
+          }
+        });
+    };
 
+    $rootScope.setDefaultHeader = function () {
+      // set default headers for $http service.
+      var authorizationStr = 'wechatOAuth openid="' + $scope.currentUser.openid + '" access_token="' + $scope.currentUser.access_token + '"';
+      if ($scope.currentUser.doctor) {
+        authorizationStr += ' role="doctor"';
+      } else if ($scope.currentUser.patient) {
+        authorizationStr += ' role="patient"';
+      }
+      $http.defaults.headers.common.Authorization = authorizationStr;
+    };
+
+    $rootScope.checkUserFirstTime = function (redirect) {
+      // User must activate before start to use any functions.
+      if ($rootScope.currentUser.doctor && !$rootScope.currentUser.doctor.name) {
+        $state.go('profile-edit', {openid: $scope.currentUser.openid, firstTime: true});
+      } else if ($rootScope.currentUser.patient && !$rootScope.currentUser.patient.name) {
+        $state.go('profile-patient-edit', {openid: $scope.currentUser.openid, firstTime: true});
+      } else if (redirect) {
+        $log.debug('redirect: %s', redirect);
+        $state.go(redirect, {openid: $scope.currentUser.openid});
+      }
+    };
+
+    $rootScope.initWxJsSdk = function () {
+      $log.debug('init WX JS-SDK.');
+      $http.get('/wechat/jssdkconfig')
+        .success(function (resp) {
+          wx.config(resp.data);
+          wx.ready(function () {
+            $log.debug('wx.ready. ', wx);
+
+          });
+          wx.error(function () {
+            $log.debug('wx.error.', arguments);
+          })
+        });
+    };
+
+    /** -- load page ---------------------------------------------------------------*/
+    var onPageRefresh = function () {
+      var sessionUser = $cookies.getObject('currentUser');
+      if (sessionUser) {
+        $log.debug('read user from session');
+        var openid = sessionUser.openid;
+        var access_token = sessionUser.access_token;
+        $rootScope.currentUser = sessionUser;
+        $rootScope.setDefaultHeader();
+        //$rootScope.checkUserFirstTime();
+        $rootScope.initWxJsSdk();
+      }
+    };
+    onPageRefresh();
 
 
     // Common method for each controller.
@@ -211,7 +282,9 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
         user.wechat.headimgurl = '/assets/image/avatar-64.jpg';
       }
     };
-  }]).controller('entryCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', '$timeout', '$alert', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log, $timeout, $alert) {
+  }
+  ]).
+  controller('entryCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', '$timeout', '$alert', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log, $timeout, $alert) {
     /**
      * Create separate entryCtrl from rootCtrl. Because rootCtrl is loaded by wxindex.html, which is usually before
      * 'entry' route defined in $stateProvider. In page initializing, 'verifyAndGetUserInfo()' method will be executed
@@ -229,85 +302,17 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
      */
     var verifyAndGetUserInfo = function () {
       $log.info('entryCtrl:verifyAndGetUserInfo()');
-      var setDefaultHeader = function () {
-        // set default headers for $http service.
-        var authorizationStr = 'wechatOAuth openid="' + $scope.currentUser.openid + '" access_token="' + $scope.currentUser.access_token + '"';
-        if ($scope.currentUser.doctor) {
-          authorizationStr += ' role="doctor"';
-        } else if ($scope.currentUser.patient) {
-          authorizationStr += ' role="patient"';
-        }
-        $http.defaults.headers.common.Authorization = authorizationStr;
-      };
-
-      var checkUserFirstTime = function () {
-        // User must activate before start to use any functions.
-        if ($rootScope.currentUser.doctor && !$rootScope.currentUser.doctor.name) {
-          $state.go('profile-edit', {openid: openid, firstTime: true});
-        } else if ($rootScope.currentUser.patient && !$rootScope.currentUser.patient.name) {
-          $state.go('profile-patient-edit', {openid: openid, firstTime: true});
-        } else if (redirect) {
-          $log.debug('redirect: %s', redirect);
-          $state.go(redirect, {openid: openid});
-        }
-      };
-
-      var verify = function () {
-        $http.get('/api/verify', {params: {openid: openid, access_token: access_token}})
-          .success(function (resp) {
-            // save user verification info to session.
-            $cookies.putObject('currentUser', resp.data);
-            $rootScope.currentUser = resp.data;
-            setDefaultHeader();
-            checkUserFirstTime();
-            initWxJsSdk();
-          }).error(function (resp, status) {
-            $cookies.remove('currentUser');
-            if (status == 404) {
-              // user not registered
-              $rootScope.alertError('', '您还未关注我们的公众号。');
-            } else {
-              $rootScope.alertError(null, resp.error.message, status);
-            }
-          });
-      };
-
-      var initWxJsSdk = function () {
-        $http.get('/wechat/jssdkconfig')
-          .success(function (resp) {
-            wx.config(resp.data);
-            wx.ready(function () {
-              console.log('wx.ready. ', wx);
-
-            });
-            wx.error(function () {
-              console.log('wx.error.', arguments);
-            })
-          });
-      };
-
       //$cookies.remove('currentUser');
       var openid = $stateParams.openid;
       var access_token = $stateParams.token;
       var redirect = $stateParams.redirect;
-      var sessionUser = $cookies.getObject('currentUser');
-      $log.debug('init page. openid: %s, access_token: %s, redirect: %s, sessionUser: %o', openid, access_token, redirect, sessionUser);
+      $log.debug('init page. openid: %s, access_token: %s, redirect: %s', openid, access_token, redirect);
       if (!openid || !access_token) {
-        if (sessionUser) {
-          $log.debug('read user from session');
-          openid = sessionUser.openid;
-          access_token = sessionUser.access_token;
-          $rootScope.currentUser = sessionUser;
-          setDefaultHeader();
-          checkUserFirstTime();
-          initWxJsSdk();
-        } else {
-          $log.debug('invalid openid or access_token');
-          $rootScope.alertError('', 'invalid openid or access_token');
-          return;
-        }
+        $log.debug('invalid openid or access_token');
+        $rootScope.alertError('', 'invalid openid or access_token');
+        return;
       } else {
-        verify();
+        $rootScope.verify(openid, access_token, redirect);
       }
     };
     verifyAndGetUserInfo();
