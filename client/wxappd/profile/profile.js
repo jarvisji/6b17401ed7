@@ -169,8 +169,23 @@ angular.module('ylbWxApp')
         });
     };
 
-    $scope.buyJiahao = function () {
-
+    // Pre-fetch an external template populated with a custom scope
+    var addJiahaoModal = $modal({scope: $scope, template: 'wxappd/doctor/add-jiahao-modal.tpl.html', show: false});
+    // Show when some event occurs (use $promise property to ensure the template has been loaded)
+    $scope.showAddJiahaoModal = function () {
+      $http.get('/api/doctors/' + $scope.doctor._id + '/serviceStock')
+        .success(function (resp) {
+          $scope.serviceStock = [];
+          if (resp.data.jiahao) {
+            $scope.serviceStock = resp.data.jiahao;
+          }
+          addJiahaoModal.$promise.then(addJiahaoModal.show);
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
+    $scope.buyJiahao = function (item) {
+      console.log(item);
     };
 
     $scope.buyHuizhen = function () {

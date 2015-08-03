@@ -27,5 +27,10 @@ module.exports = {
     confirmed: 'confirmed',
     finished: 'finished',
     expired: 'expired'
+  },
+  doctorServices: {
+    jiahao: {type: 'jiahao'},
+    huizhen: {type: 'huizhen'},
+    suizhen: {type: 'suizhen'}
   }
 };

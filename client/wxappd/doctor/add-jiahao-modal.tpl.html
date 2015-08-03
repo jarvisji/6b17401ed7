@@ -1,0 +1,49 @@
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" ng-click="$hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">选择加号日期</h4>
+      </div>
+      <div class="modal-body">
+        <h4>本周</h4>
+
+        <div class="general-item-list">
+          <div class="item" ng-repeat="item in serviceStock.thisWeek" ng-click="buyJiahao(item);$hide()">
+            <div class="item-head">
+              <div class="item-details">
+                <img class="item-pic">
+                <span class="item-name">日期：{{item.date|date: 'yyyy-MM-dd'}}</span>
+                <span class="item-label">价格：{{serviceStock.price}} 元</span>
+              </div>
+              <span class="item-status">剩余数量：{{item.stock}}</span>
+            </div>
+          </div>
+        </div>
+
+        <h4>下周</h4>
+
+        <div class="general-item-list">
+          <div class="item" ng-repeat="item in serviceStock.nextWeek" ng-click="buyJiahao(item);$hide()">
+            <div class="item-head">
+              <div class="item-details">
+                <img class="item-pic">
+                <span class="item-name">日期：{{item.date|date: 'yyyy-MM-dd'}}</span>
+                <span class="item-label">价格：{{serviceStock.price}} 元</span>
+              </div>
+              <span class="item-status">剩余数量：{{item.stock}}</span>
+            </div>
+          </div>
+        </div>
+
+        <span ng-show="!serviceStock || modalData.length ==0">没有数据</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="$hide()">取消</button>
+        <!--<button type="button" class="btn btn-success" ng-click="addFriend(message);$hide()">发送</button>-->
+      </div>
+    </div>
+  </div>
+</div>

@@ -80,6 +80,12 @@ var registerRoutes = function () {
   app.get('/api/doctors/friends/:id1/:id2', doctorCtrl.getFriendsRequestsStatus);
   app.get('/api/doctors/:id/friends', doctorCtrl.getFriends);
 
+  /**
+   * Get service stock of given doctor.
+   * Response: For 'jiahao', return remain counts of this week and next week.
+   */
+  app.get('/api/doctors/:id/serviceStock', doctorCtrl.getServiceStock);
+
   /* Patient APIs ----------------------------------------------------------------------------------------*/
   app.get('/api/patients', patientCtrl.find);
   app.put('/api/patients/:id', patientCtrl.save);

@@ -6,10 +6,12 @@ var sha512 = require('crypto-js/sha512');
 var debug = require('debug')('ylb.doctorCtrl');
 var utils = require('../middleware/utils');
 var stringUtils = require('../utils/string-utils');
+var dateUtils = require('../utils/date-utils');
 
 module.exports = function (app) {
   var Doctor = app.models.Doctor;
   var DoctorFriend = app.models.DoctorFriend;
+  var ServiceStock = app.models.ServiceStock;
   var excludeFields = app.models.doctorExcludeFields;
 
   var login = function (req, res) {
@@ -125,35 +127,43 @@ module.exports = function (app) {
    * @returns {*}
    */
   var saveDoctor = function (req, res) {
-    var doctor = req.body;
+    var newDoctor = req.body;
     var doctorId = req.params.id;
-    if (!doctor || !doctorId) {
-      debug('Update doctor, invalid id or data: ', doctorId, doctor);
+    if (!newDoctor || !doctorId) {
+      debug('Update doctor, invalid id or data: ', doctorId, newDoctor);
       return res.status(400).json(utils.jsonResult(new Error('Invalid data')));
     }
     // some fields cannot be updated via public api.
-    delete doctor.password;
-    delete doctor.wechat;
-    delete doctor.salt;
-    delete doctor.level;
+    delete newDoctor.password;
+    delete newDoctor.wechat;
+    delete newDoctor.salt;
+    delete newDoctor.level;
 
-    //Doctor.findById(doctorId, function (err, doctor) {
-    //  if (err) {
-    //    debug('Get doctor %s error: %o', doctorId, err);
-    //    return res.status(500).json(utils.jsonResult(err));
-    //  }
-    //  if (!doctor) {
-    //    debug('Get doctor %s not found.', doctorId);
-    //    return res.status(404).json(utils.jsonResult('Doctor not found.'));
-    //  }
-    //
-    //
-    //  doctor.save(function (err) {
-    //    if (err) return handleError(err);
-    //    res.json(utils.jsonResult(doctor));
-    //  });
-    //});
-    Doctor.findByIdAndUpdate(doctorId, doctor, {upsert: true, new: true}, function (err, doctor) {
+    Doctor.findById(doctorId, function (err, doctor) {
+      var oldJiahao, newJiahao;
+      if (doctor && doctor.services) {
+        for (var idx in doctor.services) {
+          if (doctor.services[idx].type == app.consts.doctorServices.jiahao.type) {
+            oldJiahao = doctor.services[idx];
+            break;
+          }
+        }
+      }
+      if (newDoctor.service) {
+        for (var idx in newDoctor.services) {
+          if (newDoctor.services[idx].type == app.consts.doctorServices.jiahao.type) {
+            newJiahao = newDoctor.services[idx];
+            break;
+          }
+        }
+      }
+
+      if (oldJiahao.weekQuantity != newJiahao.weekQuantity) {
+        // TODO: update generated this week and next week service stock.
+      }
+    });
+
+    Doctor.findByIdAndUpdate(doctorId, newDoctor, {upsert: true, new: true}, function (err, doctor) {
       if (err) {
         debug('Update doctor error: ', err);
         return res.status(500).json(utils.jsonResult(err));
@@ -337,6 +347,122 @@ module.exports = function (app) {
   };
 
   /**
+   * GET '/api/doctors/:id/serviceStock'
+   * @param req
+   * @param res
+   * @Return HttpResponse. For 'jiahao', return remain counts of this week and next week.
+   */
+  var getServiceStock = function (req, res) {
+    var id = req.params.id;
+    debug('getServiceStock(), getting service of doctor: %s', id);
+    var _serviceDef, _currentWeekRange, _nextWeekRange;
+    var _retStock = {jiahao: {thisWeek: '', nextWeek: ''}};
+    Doctor.findById(id).exec()
+      .then(function (doctor) {
+        if (!doctor) {
+          debug('getServiceStock(), doctor not found.');
+          throw new Error('doctor not found');
+        }
+
+        //find doctor service
+        var services = doctor.services;
+        for (var idx in services) {
+          if (services[idx].weekQuantity) {
+            _serviceDef = services[idx];
+            break;
+          }
+        }
+        debug('getServiceStock(), found service: %o', _serviceDef);
+        // find service stock for this week and next week.
+        if (!_serviceDef) {
+          debug('getServiceStock() error, no week quantity defined for this doctor.');
+          throw new Error('no service quantity defined');
+        }
+
+        _currentWeekRange = dateUtils.getCurrentWeekWorkingDate();
+        _nextWeekRange = dateUtils.getNextWeekWorkingDate();
+        debug('getServiceStock(), checking stock of current week.');
+        return ServiceStock.find({
+          serviceId: _serviceDef.id,
+          date: {'$gte': _currentWeekRange.start, '$lte': _currentWeekRange.end}
+        }).sort({date: 1}).exec();
+      }).then(function (currentWeekServiceStocks) {
+        debug('getServiceStock(), currentWeekServiceStocks: %o', currentWeekServiceStocks);
+        if (currentWeekServiceStocks.length == 0) {
+          debug('getServiceStock(), No data of service stock of current week, initializing...');
+          var dateArray = dateUtils.getDateInRange(_currentWeekRange.start, _currentWeekRange.end);
+          var newStockData = [];
+          for (var i = 0; i < dateArray.length; i++) {
+            newStockData.push({
+              doctorId: id,
+              serviceId: _serviceDef.id,
+              date: dateArray[i],
+              stock: _serviceDef.weekQuantity['d' + (i + 1)]
+            });
+          }
+          return ServiceStock.create(newStockData);
+        } else {
+          if (currentWeekServiceStocks.length != 5) {
+            // check this log to see if we got data exception. This should not happen, no error handler currently.
+            debug('getServiceStock(), data error, currentWeekServiceStocks should have 5 records: %o', currentWeekServiceStocks);
+          }
+          _retStock.jiahao.thisWeek = currentWeekServiceStocks;
+        }
+      }
+    ).then(function (createdStockData) {
+        if (createdStockData instanceof Array) {
+          debug('getServiceStock(), createdStockData for current week: %o', createdStockData);
+          _retStock.jiahao.thisWeek = createdStockData;
+        }
+
+        debug('getServiceStock(), checking stock of next week.');
+        return ServiceStock.find({
+          serviceId: _serviceDef.id,
+          date: {'$gte': _nextWeekRange.start, '$lte': _nextWeekRange.end}
+        }).sort({date: 1}).exec();
+      }).then(function (nextWeekServiceStocks) {
+        debug('getServiceStock(), nextWeekServiceStocks: %o', nextWeekServiceStocks);
+        if (nextWeekServiceStocks.length == 0) {
+          debug('getServiceStock(), No data of service stock of next week, initializing...');
+          var dateArray = dateUtils.getDateInRange(_nextWeekRange.start, _nextWeekRange.end);
+          var newStockData = [];
+          for (var i = 0; i < dateArray.length; i++) {
+            newStockData.push({
+              doctorId: id,
+              serviceId: _serviceDef.id,
+              date: dateArray[i],
+              stock: _serviceDef.weekQuantity['d' + (i + 1)]
+            });
+          }
+          return ServiceStock.create(newStockData);
+        } else {
+          if (nextWeekServiceStocks.length != 5) {
+            // check this log to see if we got data exception. This should not happen, no error handler currently.
+            debug('getServiceStock(), data error, nextWeekServiceStocks should have 5 records: %o', nextWeekServiceStocks);
+          }
+          _retStock.jiahao.nextWeek = nextWeekServiceStocks;
+        }
+      }).then(function (createdStockData) {
+        if (createdStockData instanceof Array) {
+          debug('getServiceStock(), createdStockData for next week: %o', createdStockData);
+          _retStock.jiahao.nextWeek = createdStockData;
+        }
+        _retStock.jiahao.price = _serviceDef.price;
+        debug('getServiceStock(), done.');
+        res.json(utils.jsonResult(_retStock));
+      }).then(null, function (err) {
+        if (err) {
+          debug('getServiceStock(), error: %o', err);
+          if (err.message == 'no service quantity defined') {
+            res.json(utils.jsonResult([]));
+          } else {
+            res.status(500).json(utils.jsonResult(err));
+          }
+        }
+      })
+  };
+
+  /**
    * Remove some data not tend to expose to user.
    * @param doctor
    */
@@ -360,7 +486,8 @@ module.exports = function (app) {
     rejectFriendsRequests: rejectFriendsRequests,
     deleteFriendsRequests: deleteFriendsRequests,
     getFriendsRequestsStatus: getFriendsRequestsBetween2Doctors,
-    getFriends: getFriends
+    getFriends: getFriends,
+    getServiceStock: getServiceStock
   };
 };
 

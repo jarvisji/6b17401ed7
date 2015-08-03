@@ -77,12 +77,12 @@ module.exports = function () {
 
 
   var serviceStockSchema = new Schema({
-    doctorId: String,
+    doctorId: {type: String, index: true},
     serviceId: String,
     date: Date,
     stock: Number
   });
-  serviceStockSchema.index({doctorId: 1, date: -1, serviceId: 1});
+  serviceStockSchema.index({serviceId: 1, date: -1});
 
 
   var commentSchema = new Schema({
@@ -148,6 +148,8 @@ module.exports = function () {
       groupid: Number
     },
     doctorFollowed: [String], // doctorId
+    doctorInService: [String], // doctorId
+    doctorPast: [String], // doctorId
     //patientFriends: [String], // patientId
     created: {type: Date, default: Date.now},
     lastModified: {type: Date, default: Date.now}
@@ -182,7 +184,7 @@ module.exports = function () {
       avatar: String,
       role: String // doctor, patient
     },
-    link:{
+    link: {
       linkType: String, // image, doctor, patient, shop, medicalImaging, serviceJiahao, serviceSuizhen, serviceHuizhen
       title: String,
       avatar: String,
