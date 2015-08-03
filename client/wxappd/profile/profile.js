@@ -71,11 +71,23 @@ angular.module('ylbWxApp')
         $scope[doctor.services[i].type] = doctor.services[i];
         snapshot[doctor.services[i].type] = angular.copy(doctor.services[i]);
       }
+
       if (!$scope.jiahao) {
         $scope.jiahao = resources.doctorServices.jiahao;
         $scope.jiahao.weekQuantity = {d1: '', d2: '', d3: '', d4: '', d5: ''};
-        snapshot.jiahao = angular.copy($scope.jiahao);
+      } else {
+        // make sure display order is from d1 to d5.
+        var days = Object.keys($scope.jiahao.weekQuantity);
+        days.sort();
+        var weekQuantity = {};
+        for (var i = 0; i < days.length; i++) {
+          weekQuantity[days[i]] = $scope.jiahao.weekQuantity[days[i]];
+        }
+        $scope.jiahao.weekQuantity = weekQuantity;
+        console.log(weekQuantity);
       }
+      snapshot.jiahao = angular.copy($scope.jiahao);
+
       if (!$scope.suizhen) {
         $scope.suizhen = resources.doctorServices.suizhen;
         snapshot.suizhen = angular.copy($scope.suizhen);
