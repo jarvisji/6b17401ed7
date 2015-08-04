@@ -150,8 +150,8 @@ var registerRoutes = function () {
   app.put('/api/orders/:id/status/:status', orderCtrl.updateOrderStatus);
   app.get('/api/orders/my', orderCtrl.getOrders);
   app.get('/api/orders/:id', orderCtrl.getOrderDetail);
-  app.post('/api/order/:id/comments', orderCtrl.createComment);
-  app.delete('/api/order/:id/comments/:commentId', orderCtrl.deleteComment);
+  app.post('/api/orders/:id/comments', orderCtrl.createComment);
+  app.delete('/api/orders/:id/comments/:commentId', orderCtrl.deleteComment);
 };
 
 var startServer = function () {

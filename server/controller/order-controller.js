@@ -11,6 +11,7 @@ module.exports = function (app) {
   var ServiceOrder = app.models.ServiceOrder;
   var ServiceStock = app.models.ServiceStock;
   var Patient = app.models.Patient;
+  var Doctor = app.models.Doctor;
   /**
    * POST '/api/orders'
    * Create service order. Check service stock before create, update service stock after created.
@@ -25,29 +26,55 @@ module.exports = function (app) {
       return res.status(400).json(utils.jsonResult(new Error('Invalid data')));
     }
 
-    var date = dateUtils.getTodayStartDate();
-    debug('createOrder(), checking service stock, serviceId: %s, date: %s', newOrder.serviceId, date.toISOString());
-    var serviceStockQuery = {serviceId: newOrder.serviceId, date: date};
-    ServiceStock.find(serviceStockQuery).exec()
-      .then(function (serviceStock) {
-        // check service stock.
-        if (!serviceStock) {
-          throw new Error('service stock unavailable');
-        }
-        if (serviceStock.stock <= 0) {
-          throw new Error('service sold out');
-        }
+    // get doctor, check what type of service is going to create.
+    Doctor.findById(newOrder.doctorId, function (err, doctor) {
+      if (err) return utils.handleError(err, 'createOrder()', debug, res);
 
-        // create new order
-        return ServiceOrder.create(newOrder);
-      }).then(function (createdOrder) {
-        res.json(utils.jsonResult(createdOrder));
+      if (!doctor) return utils.handleError(new Error('doctor not found'), 'createOrder()', debug, res, 404);
 
-        // update service stock.
-        return ServiceStock.update(serviceStockQuery, {'$inc': {stock: -1}}).exec();
-      }).then(null, function (err) {
-        if (err) return utils.handleError(err, 'createOrder()', debug, res);
-      });
+      var services = doctor.services;
+      var serviceType;
+      for (var idx in services) {
+        if (newOrder.serviceId == services[idx].id) {
+          serviceType = services[idx].type;
+          break;
+        }
+      }
+      if (serviceType == app.consts.doctorServices.jiahao.type) {
+        createJiahao();
+      } else {
+        ServiceOrder.create(newOrder, function (err, createdOrder) {
+          if (err) return utils.handleError(err, 'createOrder()', debug, res);
+          res.json(createdOrder);
+        });
+      }
+    });
+
+    var createJiahao = function () {
+      var date = dateUtils.getTodayStartDate();
+      debug('createOrder(), createJiahao(), checking service stock, serviceId: %s, date: %s', newOrder.serviceId, date.toISOString());
+      var serviceStockQuery = {serviceId: newOrder.serviceId, date: date};
+      ServiceStock.find(serviceStockQuery).exec()
+        .then(function (serviceStock) {
+          // check service stock.
+          if (!serviceStock) {
+            throw new Error('service stock unavailable');
+          }
+          if (serviceStock.stock <= 0) {
+            throw new Error('service sold out');
+          }
+
+          // create new order
+          return ServiceOrder.create(newOrder);
+        }).then(function (createdOrder) {
+          res.json(utils.jsonResult(createdOrder));
+
+          // update service stock.
+          return ServiceStock.update(serviceStockQuery, {'$inc': {stock: -1}}).exec();
+        }).then(null, function (err) {
+          if (err) return utils.handleError(err, 'createOrder()', debug, res);
+        });
+    }
   };
   /**
    * PUT '/api/orders/:id'
@@ -96,12 +123,13 @@ module.exports = function (app) {
     var newStatus = req.params.status;
     var role = req.query.role; // operator
     var openid = req.query.openid; // operator
-    debug('updateOrderStatus(), user role: %s, openid: %s, is updating order: %s status to: %s', role, openid, orderId, newStatus);
+    debug('updateOrderStatus(), new status: %s, user role: %s, openid: %s, updating order: %s', newStatus, role, openid, orderId);
     var validStatus = Object.keys(app.consts.orderStatus);
     if (validStatus.indexOf(newStatus) == -1) {
       debug('updateOrderStatus(), invalid status.');
       return res.status(400).json(utils.jsonResult(new Error('invalid status')));
     }
+    var orderStatus = app.consts.orderStatus;
 
     getUserByOpenid(openid, role, res, function (user) {
       var currentUserId = user.id;
@@ -114,22 +142,39 @@ module.exports = function (app) {
           if (currentUserId != order.doctorId && currentUserId != order.patientId) {
             throw new Error('no privilege');
           }
+          if (order.status == newStatus) {
+            debug('updateOrderStatus(), newStatus is same to current status: %s, do not change anything.', newStatus);
+            return res.json('success');
+          } else {
+            if (order.status == orderStatus.confirmed && newStatus == orderStatus.cancelled) {
+              debug('updateOrderStatus(), confirmed order cannot be cancelled.');
+              return res.status(400).json(utils.jsonResult(new Error('order already confirmed')));
+            }
+            var finalStatus = [orderStatus.rejected, orderStatus.finished, orderStatus.expired, orderStatus.cancelled];
+            if (finalStatus.indexOf(order.status) != -1) {
+              debug('updateOrderStatus(), order status is final, cannot change again.');
+              return res.status(400).json(utils.jsonResult(new Error('order status is final')));
+            }
+          }
           order.status = newStatus;
           order.save(function (err) {
             if (err) return utils.handleError(err, 'updateOrderStatus()', debug, res);
+            res.json('success');
 
             // after order status changed.
             updateServiceStock(order.serviceId);
             updatePatientDoctorRelation(order.patientId, order.doctorId);
           });
-        })
+        }).then(null, function (err) {
+          utils.handleError(err, 'updateOrderStatus()', debug, res);
+        });
     });
 
     var updateServiceStock = function (serviceId) {
-      var orderStatus = app.consts.orderStatus;
       if (newStatus == orderStatus.cancelled) {
         // increase stock
         var date = dateUtils.getTodayStartDate();
+        debug('updateOrderStatus(), updateServiceStock(), new status is %s, increase stock for %s', newStatus, date.toISOString());
         ServiceStock.update({
           serviceId: serviceId,
           date: date
@@ -140,8 +185,8 @@ module.exports = function (app) {
     };
 
     var updatePatientDoctorRelation = function (patientId, doctorId) {
-      var orderStatus = app.consts.orderStatus;
       if (newStatus == orderStatus.confirmed) {
+        debug('updateOrderStatus(), updatePatientDoctorRelation(), new status is %s, add doctorId %s to doctorInService', newStatus, doctorId);
         // add doctorId to 'doctorInService'
         Patient.findByIdAndUpdate(patientId, {'$addToSet': {doctorInService: doctorId}}, function (err) {
           if (err) debug('updatePatientDoctorRelation(), error: %o', err);
@@ -151,12 +196,13 @@ module.exports = function (app) {
         ServiceOrder.count({
           doctorId: doctorId,
           patientId: patientId,
-          status: app.consts.status.confirmed
+          status: orderStatus.confirmed
         }, function (err, count) {
           if (err)  return debug('updatePatientDoctorRelation(), get order count error: %o', err);
-
+          debug('>>>>>>>>>updateOrderStatus(), updatePatientDoctorRelation(), new status is %s, check order count is: %d', newStatus, count);
           // if no other orders between this patient and doctor, remove doctorId from 'doctorInService'.
           if (count == 0) {
+            debug('updateOrderStatus(), updatePatientDoctorRelation(), no more orders, move doctorId: %s from doctorInService to doctorPast.', doctorId);
             Patient.findById(patientId, function (err, patient) {
               if (err)  return debug('updatePatientDoctorRelation(), get patient error: %o', err);
               if (patient) {
@@ -247,7 +293,7 @@ module.exports = function (app) {
       });
   };
   /**
-   * POST '/api/order/:id/comments'
+   * POST '/api/orders/:id/comments'
    * @param req
    * @param res
    */
@@ -268,8 +314,10 @@ module.exports = function (app) {
           if (currentUserId != order.doctorId && currentUserId != order.patientId) {
             throw new Error('no privilege');
           }
-          createComment(user);
-        })
+          createComment(order, user);
+        }).then(null, function (err) {
+          utils.handleError(err, 'createOrderComment()', debug, res);
+        });
     });
 
     var createComment = function (order, opUser) {
@@ -284,7 +332,7 @@ module.exports = function (app) {
 
 
   /**
-   * DELETE '/api/order/:id/comments/:commentId'
+   * DELETE '/api/orders/:id/comments/:commentId'
    * @param req
    * @param res
    */
@@ -293,7 +341,6 @@ module.exports = function (app) {
     var commentId = req.params.commentId;
     var role = req.query.role; // operator
     var openid = req.query.openid; // operator
-
     getUserByOpenid(openid, role, res, function (user) {
       var currentUserId = user.id;
       debug('deleteOrderComment(), find order: %s', orderId);
@@ -302,8 +349,10 @@ module.exports = function (app) {
           if (!order) {
             throw new Error('order not found');
           }
-          deleteComment(user);
-        })
+          deleteComment(order, user);
+        }).then(null, function (err) {
+          utils.handleError(err, 'deleteOrderComment()', debug, res);
+        });
     });
 
     var deleteComment = function (order, opUser) {
@@ -322,7 +371,6 @@ module.exports = function (app) {
   };
 
   var getUserByOpenid = function (openid, role, res, callback) {
-    debug('orderCtrl.getUserByOpenid(), find user by openid: %s, role: %s', openid, role);
     utils.getUserByOpenid(openid, role, function (err, user) {
       if (err) return utils.handleError(err, 'orderCtrl.getUserByOpenid()', debug, res);
       if (!user) {

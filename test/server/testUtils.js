@@ -8,12 +8,9 @@ var conf = require('./testConfig');
 module.exports = {
   req: {
     json: function (verb, url, openid, role) {
-      var request = request(conf.serverUrl)[verb](url);
-      request = request.set('Accept', 'application/json');
-      if (openid && role) {
-        request = request.set('Authorization', 'wechatOAuth openid="' + openid + '" role="' + role + '"');
-      }
-      return request;
+      return request(conf.serverUrl)[verb](url)
+        .set('Accept', 'application/json')
+        .set('Authorization', 'wechatOAuth openid="' + openid + '" role="' + role + '"');
       //.expect('Content-Type', /json/);
     },
     xml: function (verb, url) {

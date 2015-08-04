@@ -21,13 +21,6 @@ module.exports = {
     accepted: 'accepted',
     rejected: 'rejected'
   },
-  serviceOrderStatus: {
-    init: 'init',
-    payed: 'payed',
-    confirmed: 'confirmed',
-    finished: 'finished',
-    expired: 'expired'
-  },
   doctorServices: {
     jiahao: {type: 'jiahao'},
     huizhen: {type: 'huizhen'},

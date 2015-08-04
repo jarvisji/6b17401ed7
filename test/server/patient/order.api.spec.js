@@ -1,11 +1,23 @@
 /**
  * Test order APIs. Also verify service stock changes.
+ *
+ * In this suite, we created 3 orders:
+ * 1. to verify patient and doctor relationship:
+ *    a) Updated 2 orders status to 'confirmed', so the doctorId should in patient' 'doctorInService'.
+ *    b) Update one of 'confirmed' order status to 'finished', because there is another order is 'confirmed', so the 'doctorInService' and 'doctorPast' will not be changed.
+ *    c) Update the other order status to 'finished', the doctorId should be moved from 'doctorInService' to 'doctorPast'.
+ *
+ * 2. To verify service stock:
+ *    a) recode the service stock at test start.
+ *    b) 3 orders created, the service stock should be drop 3.
+ *    c) 1 order cancelled, the service stock will add back 1.
+ *    d) At end of the tests, new service stock should be 2 less than before.
  * Created by Ting on 2015/8/4.
  */
 var should = require('should');
 var test = require('../testUtils');
 var dateUtil = require('../../../server/utils/date-utils');
-describe.only('Test order APIs. ', function () {
+describe('Test order APIs. ', function () {
   var testPatient = test.conf.testData.patients[0];
   var testDoctor = test.conf.testData.doctors[0];
   var testPatient2 = test.conf.testData.patients[1];  // no relation to order
@@ -22,11 +34,11 @@ describe.only('Test order APIs. ', function () {
   var ServiceOrder = test.app.models.ServiceOrder;
   var ServiceStock = test.app.models.ServiceStock;
 
-  var doctorId, patientId, previousServiceStock, servicePrice, orderId, orderId2, doctorCommentId, patientCommentId, mockOrder;
+  var doctorId, patientId, previousServiceStock, servicePrice, orderId, orderId2, orderId3, doctorCommentId, patientCommentId, mockOrder;
 
   before(function (done) {
     // make sure doctor defined service quantity, and service stock generated.
-    Doctor.find({'wechat.openid': testDoctorOpenid}).exec()
+    Doctor.findOne({'wechat.openid': testDoctorOpenid}).exec()
       .then(function (doctor) {
         doctorId = doctor.id;
         if (doctor.services.length == 0) {
@@ -34,9 +46,13 @@ describe.only('Test order APIs. ', function () {
           return doctor.save();
         }
       }).then(function (savedDoctor) {
-        return Patient.find({'wechat.openid': patientOpenId}).exec();
+        return Patient.findOne({'wechat.openid': testPatientOpenid}).exec();
       }).then(function (patient) {
         patientId = patient.id;
+        //clear 'doctorInService' and 'doctorPast' of patient, because the following cases assertion depends on it.
+        patient.doctorInService = [];
+        patient.doctorPast = [];
+        return patient.save();
       }).then(function () {
         // get stock data.
         test.req.json('get', '/api/doctors/' + doctorId + '/serviceStock', testPatientOpenid, patientRole)
@@ -44,7 +60,7 @@ describe.only('Test order APIs. ', function () {
           .end(function (err, res) {
             if (err) return done(err);
             var data = res.body.data;
-            servicePrice = data.price;
+            servicePrice = data.jiahao.price;
             should(data.jiahao.thisWeek.length).equal(5);
             should(data.jiahao.nextWeek.length).equal(5);
             previousServiceStock = getTodayStock(data);
@@ -61,7 +77,7 @@ describe.only('Test order APIs. ', function () {
             done();
           });
       }, function (err) {
-        if (err) done(err);
+        done(err);
       });
   });
 
@@ -69,7 +85,7 @@ describe.only('Test order APIs. ', function () {
     var today = dateUtil.getTodayStartDate();
     var week = stockRespData.jiahao.thisWeek;
     for (var idx in week) {
-      if (week[idx].date == today) {
+      if (week[idx].date == today.toISOString()) {
         return week[idx];
       }
     }
@@ -99,17 +115,18 @@ describe.only('Test order APIs. ', function () {
       });
   });
 
-  it('Check testPatient doctorInService, should contains testDoctor', function (done) {
-    test.req.json('get', '/api/patients', testPatientOpenid, patientRole)
-      .query({filter: JSON.stringify({'wechat.openid': testPatientOpenid})})
-      .expect(200)
-      .end(function (err, res) {
-        if (err) return done(err);
-        var patient = res.body.data;
-        should(patient.doctorInService.indexOf(doctorId)).greaterThan(0);
-        done();
-      });
-  });
+  //it('Check testPatient doctorInService, should contains testDoctor', function (done) {
+  //  test.req.json('get', '/api/patients', testPatientOpenid, patientRole)
+  //    .query({filter: JSON.stringify({'wechat.openid': testPatientOpenid})})
+  //    .expect(200)
+  //    .end(function (err, res) {
+  //      if (err) return done(err);
+  //      console.log(res.body.data[0]);
+  //      var patient = res.body.data[0];
+  //      should(patient.doctorInService.indexOf(doctorId)).not.equal(-1);
+  //      done();
+  //    });
+  //});
 
   it('Check my orders of testDoctor, the first should be the one just created.', function (done) {
     test.req.json('get', '/api/orders/my', testDoctorOpenid, doctorRole)
@@ -171,10 +188,11 @@ describe.only('Test order APIs. ', function () {
       .expect(200)
       .end(function (err, res) {
         if (err) return done(err);
-        var comment = res.body.data;
+        var comment = res.body.data.comments[0];
         should(comment.creator.id).equal(doctorId);
         should(comment.comment).equal('doctor comment');
         doctorCommentId = comment._id;
+        //console.log('orderId: %s, doctorCommentId: %s, patientCommentId: %s', orderId, doctorCommentId, patientCommentId);
         done();
       });
   });
@@ -185,7 +203,7 @@ describe.only('Test order APIs. ', function () {
       .expect(200)
       .end(function (err, res) {
         if (err) return done(err);
-        var comment = res.body.data;
+        var comment = res.body.data.comments[1];
         should(comment.creator.id).equal(patientId);
         should(comment.comment).equal('patient comment');
         patientCommentId = comment._id;
@@ -221,7 +239,7 @@ describe.only('Test order APIs. ', function () {
   });
 
   it('Delete comment by testPatient2 fail', function (done) {
-    test.req.json('post', '/api/orders/' + orderId + '/comments/' + patientCommentId, testPatient2Openid, patientRole)
+    test.req.json('delete', '/api/orders/' + orderId + '/comments/' + patientCommentId, testPatient2Openid, patientRole)
       .expect(403, done)
   });
 
@@ -231,7 +249,7 @@ describe.only('Test order APIs. ', function () {
   });
 
   it('Delete comment by testPatient success', function (done) {
-    test.req.json('post', '/api/orders/' + orderId + '/comments/' + patientCommentId, testPatientOpenid, patientRole)
+    test.req.json('delete', '/api/orders/' + orderId + '/comments/' + patientCommentId, testPatientOpenid, patientRole)
       .expect(200, done)
   });
 
@@ -256,12 +274,25 @@ describe.only('Test order APIs. ', function () {
       });
   });
 
-  it('Update status to "confirmed" of order success.', function (done) {
-    test.req.json('put', '/api/orders/' + orderId + '/status/confirmed', testDoctorOpenid, doctorRole)
+  it('Check service stock should decrease 2.', function (done) {
+    test.req.json('get', '/api/doctors/' + doctorId + '/serviceStock', testPatientOpenid, patientRole)
+      .expect(200)
+      .end(function (err, res) {
+        if (err) return done(err);
+        var data = res.body.data;
+        should(data.jiahao.thisWeek.length).equal(5);
+        var currentStock = getTodayStock(data);
+        should(previousServiceStock.stock - currentStock.stock).equal(2);
+        done();
+      });
+  });
+
+  it('Update order2 status to "confirmed" should success.', function (done) {
+    test.req.json('put', '/api/orders/' + orderId2 + '/status/confirmed', testDoctorOpenid, doctorRole)
       .expect(200)
       .end(function (err, resp) {
         if (err) return done(err);
-        ServiceOrder.findById(orderId, function (err, order) {
+        ServiceOrder.findById(orderId2, function (err, order) {
           if (err) return done(err);
           should(order.status).equal('confirmed');
           done();
@@ -269,15 +300,31 @@ describe.only('Test order APIs. ', function () {
       });
   });
 
-  it('Check "doctorInService" of testPatient, should contains testDoctor.', function (done) {
+  it('Create order3 and set status to "confirmed"', function (done) {
+    test.req.json('post', '/api/orders', testPatientOpenid, patientRole)
+      .send(mockOrder)
+      .expect(200)
+      .end(function (err, res) {
+        if (err) return done(err);
+        orderId3 = res.body.data._id;
+        test.req.json('put', '/api/orders/' + orderId3 + '/status/confirmed', testDoctorOpenid, doctorRole)
+          .expect(200)
+          .end(function(err, resp){
+            // after update status returns, server still need time to update relationship.
+            setTimeout(done, 100);
+          })
+      });
+  });
+
+  it('Check "doctorInService" of testPatient, should contains testDoctor', function (done) {
     Patient.findById(patientId, function (err, patient) {
       if (err) return done(err);
-      should(patient.doctorInService.indexOf(doctorId)).greaterThan(0);
+      should(patient.doctorInService.indexOf(doctorId)).not.equal(-1);
       done();
     })
   });
 
-  it('Update status to "finish" of order2 success.', function (done) {
+  it('Update order2 status to "finish" should success.', function (done) {
     test.req.json('put', '/api/orders/' + orderId2 + '/status/finished', testDoctorOpenid, doctorRole)
       .expect(200)
       .end(function (err, resp) {
@@ -285,16 +332,39 @@ describe.only('Test order APIs. ', function () {
         ServiceOrder.findById(orderId2, function (err, order) {
           if (err) return done(err);
           should(order.status).equal('finished');
-          done();
+          setTimeout(done, 100);
         })
       });
   });
 
-  it('Check "doctorPast" of testPatient not contains testDoctor, because there is another "confirmed" order.', function (done) {
+
+  it('Check "doctorPast" of testPatient not contains testDoctor, because there is another "confirmed" order "order3".', function (done) {
     Patient.findById(patientId, function (err, patient) {
       if (err) return done(err);
-      should(patient.doctorInService.indexOf(doctorId)).greaterThan(0);
+      should(patient.doctorInService.indexOf(doctorId)).not.equal(-1);
       should(patient.doctorPast.indexOf(doctorId)).equal(-1);
+      done();
+    })
+  });
+
+  it('Update status to "finish" of order3 success', function (done) {
+    test.req.json('put', '/api/orders/' + orderId3 + '/status/finished', testDoctorOpenid, doctorRole)
+      .expect(200)
+      .end(function (err, resp) {
+        if (err) return done(err);
+        ServiceOrder.findById(orderId3, function (err, order) {
+          if (err) return done(err);
+          should(order.status).equal('finished');
+          setTimeout(done, 100);
+        })
+      });
+  });
+
+  it('Check "doctorPast" of testPatient contains testDoctor, "doctorInService" not', function (done) {
+    Patient.findById(patientId, function (err, patient) {
+      if (err) return done(err);
+      should(patient.doctorInService.indexOf(doctorId)).equal(-1);
+      should(patient.doctorPast.indexOf(doctorId)).not.equal(-1);
       done();
     })
   });
@@ -335,15 +405,6 @@ describe.only('Test order APIs. ', function () {
       .expect(403, done);
   });
 
-  it('Check testPatient "doctorPast" contains testDoctor, "doctorInService" not.', function (done) {
-    Patient.findById(patientId, function (err, patient) {
-      if (err) return done(err);
-      should(patient.doctorInService.indexOf(doctorId)).equal(-1);
-      should(patient.doctorPast.indexOf(doctorId)).greaterThan(0);
-      done();
-    })
-  });
-
   it('Service stock increase 1 after order cancelled (even cancelled twice)', function (done) {
     test.req.json('get', '/api/doctors/' + doctorId + '/serviceStock', testPatientOpenid, patientRole)
       .expect(200)
@@ -352,7 +413,8 @@ describe.only('Test order APIs. ', function () {
         var data = res.body.data;
         should(data.jiahao.thisWeek.length).equal(5);
         var currentStock = getTodayStock(data);
-        should(previousServiceStock.stock - currentStock.stock).equal(0);
+        // should equal 2 because created 3 orders and cancelled 1.
+        should(previousServiceStock.stock - currentStock.stock).equal(2);
         done();
       });
   });
