@@ -686,7 +686,7 @@ module.exports = function (app, api) {
           return res.status(404).json(utils.jsonResult(new Error('not found')));
         }
 
-        newComment.creator = {id: opUser.id, name: opUser.name, creator: opUser.wechat.headimgurl, role: role};
+        newComment.creator = {id: opUser.id, name: opUser.name, avatar: opUser.wechat.headimgurl, role: role};
         theCase.comments.push(newComment);
         theCase.save(function (err) {
           if (err) return handleError(err, 'createCaseComment', res);
@@ -762,7 +762,7 @@ module.exports = function (app, api) {
       debug('checkRelationship(), invalid role: %s', operatorRole);
       return callback(new Error('Invalid role'));
     }
-    getUserByOpenid(operatorOpenId, operatorRole)
+    utils.getUserByOpenid(operatorOpenId, operatorRole)
       .then(function (user) {
         if (!user) {
           debug('checkRelationship(), user not found openid: %s, role: %s', operatorOpenId, operatorRole);
@@ -811,23 +811,6 @@ module.exports = function (app, api) {
           callback(err);
         }
       });
-  };
-
-  var getUserByOpenid = function (openid, role, callback) {
-    if (role == app.consts.role.doctor) {
-      var queryPromise = Doctor.findOne({'wechat.openid': openid}).exec();
-    } else {
-      var queryPromise = Patient.findOne({'wechat.openid': openid}).exec();
-    }
-    if (callback) {
-      queryPromise.then(function (user) {
-        callback(null, user);
-      }, function (err) {
-        callback(err);
-      })
-    } else {
-      return queryPromise;
-    }
   };
 
   var getOrdersBetweenDoctorAndPatient = function (doctorId, patientId, callback) {

@@ -7,7 +7,6 @@ var debug = require('debug')('ylb.doctorCtrl');
 var utils = require('../middleware/utils');
 var stringUtils = require('../utils/string-utils');
 var dateUtils = require('../utils/date-utils');
-var _ = require('underscore');
 
 module.exports = function (app) {
   var Doctor = app.models.Doctor;
@@ -141,7 +140,8 @@ module.exports = function (app) {
     delete newDoctor.level;
 
 
-    // we pre-calculated service stock, so if user changed the quantity, we need update stock corresponding.
+    // We pre-calculated service stock, so if user changed the quantity, we need update stock corresponding.
+    // Compare to current service quantity and update service stock information.
     Doctor.findById(doctorId, function (err, doctor) {
       var oldJiahao;
       var newJiahao;

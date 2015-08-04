@@ -32,5 +32,15 @@ module.exports = {
     jiahao: {type: 'jiahao'},
     huizhen: {type: 'huizhen'},
     suizhen: {type: 'suizhen'}
+  },
+  orderStatus: {
+    init: 'init',
+    payed: 'paid',
+    confirmed: 'confirmed', // doctor confirmed
+    rejected: 'rejected',   //doctor rejected
+    doctorFinished: 'doctorFinished',
+    finished: 'finished',   // patient accept 'doctorFinished' status.
+    expired: 'expired',
+    cancelled: 'cancelled'  // only can be cancel before 'confirmed'.
   }
 };

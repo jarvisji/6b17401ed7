@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var should = require('should');
 var util = require('../testUtils');
 
-describe.only('Tests for APIs of patient cases.', function () {
+describe('Tests for APIs of patient cases.', function () {
   var testPatient = util.conf.testData.patients[0];
   var testPatient2 = util.conf.testData.patients[1]; // friend with testPatient
   var testPatient3 = util.conf.testData.patients[2]; // not friend with testPatient
@@ -89,7 +89,13 @@ describe.only('Tests for APIs of patient cases.', function () {
       }).then(function (orders) {
         // make sure doctor and patient has orders
         if (orders.length == 0) {
-          ServiceOrder.create({doctorId: doctorId, patientId: patientId}, function (err) {
+          ServiceOrder.create({
+            serviceId: 'mock',
+            doctorId: doctorId,
+            patientId: patientId,
+            price: 10,
+            quantity: 1
+          }, function (err) {
             if (err) return done(err);
             done();
           });
@@ -139,7 +145,7 @@ describe.only('Tests for APIs of patient cases.', function () {
   it('Create case will fail because wrong link type.', function (done) {
     util.req.json('post', '/api/patients/' + patientId + '/cases')
       .set('Authorization', 'wechatOAuth openid="' + testPatient.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
-      .send({content: 'test case', link: {type: 'wrongType'}})
+      .send({content: 'test case', link: {linkType: 'wrongType'}})
       .expect(400, done);
   });
 

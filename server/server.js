@@ -10,6 +10,7 @@ var conf = require('./conf');
 var wechatOAuth = require('./middleware/wechat-oauth');
 
 var app = express();
+gApp = app; // global
 app.use(express.static('client'));
 app.use('/upload', express.static('upload'));
 app.use(bodyParser.json());
@@ -46,6 +47,7 @@ var registerRoutes = function () {
   var wxproxyPatient = require('./middleware/wxproxy-patient')(app, api);
   var doctorCtrl = require('./controller/doctor-controller')(app);
   var patientCtrl = require('./controller/patient-controller')(app, api);
+  var orderCtrl = require('./controller/order-controller')(app);
   var wechatCtrl = require('./controller/wechat-controller')(app, api);
 
   // TODO: add authentication for following APIs.
@@ -141,6 +143,15 @@ var registerRoutes = function () {
   app.delete('/api/patients/:id/cases/:caseId/comments/:commentId', patientCtrl.deleteCaseComment);
   app.get('/api/patients/:id/cases/postPrivilege', patientCtrl.getCasesPostPrivilege);
   app.get('/api/patients/:id/cases/viewPrivilege', patientCtrl.getCasesViewPrivilege);
+
+  /* -- Order APIs ------------------------------------------------------------------------------*/
+  app.post('/api/orders', orderCtrl.createOrder);
+  app.put('/api/orders/:id', orderCtrl.updateOrder);
+  app.put('/api/orders/:id/status/:status', orderCtrl.updateOrderStatus);
+  app.get('/api/orders/my', orderCtrl.getOrders);
+  app.get('/api/orders/:id', orderCtrl.getOrderDetail);
+  app.post('/api/order/:id/comments', orderCtrl.createComment);
+  app.delete('/api/order/:id/comments/:commentId', orderCtrl.deleteComment);
 };
 
 var startServer = function () {

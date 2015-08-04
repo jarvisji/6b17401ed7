@@ -99,12 +99,13 @@ module.exports = function () {
 
 
   var serviceOrderSchema = new Schema({
-    serviceId: {type: String, index: true},
-    doctorId: [{type: String, index: true}],
-    patientId: {type: String, index: true},
-    quantity: Number,
+    serviceId: {type: String, index: true, required: true},
+    doctorId: [{type: String, required: true}],
+    patientId: {type: String, required: true},
+    price: {type: Number, required: true},
+    quantity: {type: Number, required: true},
     bookingTime: Date,
-    status: String, // 1-init, 2-payed, 3-confirmed, 4-finished, 5-expired
+    status: {type: String, default: 'init'}, // check consts.orderStatus
     referee: {
       id: String,
       name: String,
@@ -118,6 +119,7 @@ module.exports = function () {
   serviceOrderSchema.pre('update', function () {
     this.update({}, {$set: {lastModified: new Date()}});
   });
+  serviceOrderSchema.index({doctorId: 1, patientId: 1, lastModified: -1, status: 1});
 
 
   var patientSchema = new Schema({

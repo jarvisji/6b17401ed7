@@ -57,9 +57,21 @@ module.exports = {
     var ret = [];
     for (var i = 0; i < daysInRange; i++) {
       var tmpDate = new Date(start);
-      tmpDate.setDate(tmpDate.getDate() + i)
+      tmpDate.setDate(tmpDate.getDate() + i);
       ret.push(tmpDate);
     }
     return ret;
+  },
+
+  /**
+   * This is corresponding function to getCurrentWeekWorkingDate() and getDateInRange().
+   * We generated date in week which has special value points to the start of a day,
+   * so we need this method to get start of today.
+   * @returns {Date}
+   */
+  getTodayStartDate: function () {
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
   }
 };

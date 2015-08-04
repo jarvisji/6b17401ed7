@@ -5,7 +5,7 @@ var stringUtils = require('../../../server/utils/string-utils');
 var dateUtils = require('../../../server/utils/date-utils');
 var should = require('should');
 
-describe.only('Test utility functions.', function () {
+describe('Test utility functions.', function () {
   it('Test stringUtils.startWith().', function () {
     should(stringUtils.startWith('abc', 'a')).equal(true);
     should(stringUtils.startWith('abc', 'b')).equal(false);
