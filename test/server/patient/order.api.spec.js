@@ -68,6 +68,7 @@ describe.only('Test order APIs. ', function () {
 
             mockOrder = {
               serviceId: previousServiceStock.serviceId,
+              serviceType: test.app.consts.doctorServices.jiahao.type,
               doctorId: doctorId,
               patientId: patientId,
               price: servicePrice,
@@ -130,7 +131,7 @@ describe.only('Test order APIs. ', function () {
   //});
 
   it('Check my orders of testDoctor, the first should be the one just created.', function (done) {
-    test.req.json('get', '/api/orders/my', testDoctorOpenid, doctorRole)
+    test.req.json('get', '/api/orders/my/', testDoctorOpenid, doctorRole)
       .expect(200)
       .end(function (err, res) {
         if (err) return done(err);
@@ -142,7 +143,7 @@ describe.only('Test order APIs. ', function () {
   });
 
   it('Check my orders of testPatient, the first should be the one just created.', function (done) {
-    test.req.json('get', '/api/orders/my', testPatientOpenid, patientRole)
+    test.req.json('get', '/api/orders/my/', testPatientOpenid, patientRole)
       .expect(200)
       .end(function (err, res) {
         if (err) return done(err);

@@ -23,6 +23,12 @@
   <li class="list-group-item">
     <a ui-sref="patient-cases">我的病历</a>
   </li>
+  <li class="list-group-item">
+    <a ui-sref="patient-orders({type:''})">我的预约</a>
+  </li>
+  <li class="list-group-item">
+    <a ui-sref="patient-orders({type:'history'})">我的订单</a>
+  </li>
 </ul>
 
 {{currentUser|json}}

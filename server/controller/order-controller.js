@@ -24,34 +24,57 @@ module.exports = function (app) {
   var createOrder = function (req, res) {
     var newOrder = req.body;
     debug('createOrder(), receive new order data: %o', newOrder);
-    if (!newOrder || !newOrder.serviceId || !newOrder.doctorId || !newOrder.patientId || newOrder.price == undefined || newOrder.quantity == undefined || newOrder.bookingTime == undefined) {
+    if (!newOrder || !newOrder.serviceId || !newOrder.doctorId || !newOrder.patientId || newOrder.price == undefined || newOrder.quantity == undefined || !newOrder.serviceType) {
       debug('createOrder(), invalid data.');
-      return res.status(400).json(utils.jsonResult(new Error('Invalid data')));
+      return res.status(400).json(utils.jsonResult(new Error('invalid data')));
     }
 
-    // get doctor, check what type of service is going to create.
-    Doctor.findById(newOrder.doctorId, function (err, doctor) {
-      if (err) return utils.handleError(err, 'createOrder()', debug, res);
+    var validServiceTypes = [app.consts.doctorServices.jiahao.type, app.consts.doctorServices.suizhen.type, app.consts.doctorServices.huizhen.type];
+    if (validServiceTypes.indexOf(newOrder.serviceType) == -1) {
+      debug('createOrder(), invalid service type.');
+      return res.status(400).json(utils.jsonResult(new Error('invalid data')));
+    }
 
-      if (!doctor) return utils.handleError(new Error('doctor not found'), 'createOrder()', debug, res, 404);
+    if (newOrder.serviceType == app.consts.doctorServices.jiahao.type && !newOrder.bookingTime) {
+      debug('createOrder(), missed bookingTime for jiahao service.');
+      return res.status(400).json(utils.jsonResult(new Error('invalid data')));
+    }
 
-      var services = doctor.services;
-      var serviceType;
-      for (var idx in services) {
-        if (newOrder.serviceId == services[idx].id) {
-          serviceType = services[idx].type;
-          break;
+    // fill doctor/patient information to order.
+    if (typeof(newOrder.doctorId) === 'string') {
+      newOrder.doctorId = [newOrder.doctorId];
+    }
+    debug('createOrder(), fill doctor information for ids: %o', newOrder.doctorId);
+    Doctor.find({_id: {'$in': newOrder.doctorId}}).exec()
+      .then(function (doctors) {
+        if (doctors.length != newOrder.doctorId.length) {
+          throw new Error('doctor not found');
         }
-      }
-      if (serviceType == app.consts.doctorServices.jiahao.type) {
-        createJiahao();
-      } else {
-        ServiceOrder.create(newOrder, function (err, createdOrder) {
-          if (err) return utils.handleError(err, 'createOrder()', debug, res);
-          res.json(createdOrder);
-        });
-      }
-    });
+        var orderDoctors = [];
+        for (var i = 0; i < doctors.length; i++) {
+          var tmpDoctor = doctors[i];
+          orderDoctors.push({id: tmpDoctor.id, name: tmpDoctor.name, avatar: tmpDoctor.wechat.headimgurl});
+        }
+        newOrder.doctors = orderDoctors;
+        return Patient.findById(newOrder.patientId).exec();
+      }).then(function (patient) {
+        if (!patient) {
+          throw new Error('patient not found');
+        }
+        newOrder.patient = {id: patient.id, name: patient.name, avatar: patient.wechat.headimgurl};
+
+        if (newOrder.serviceType == app.consts.doctorServices.jiahao.type) {
+          createJiahao();
+        } else {
+          ServiceOrder.create(newOrder, function (err, createdOrder) {
+            if (err) return utils.handleError(err, 'createOrder()', debug, res);
+            res.json(createdOrder);
+          });
+        }
+      }).then(null, function (err) {
+        utils.handleError(err, 'createOrder()', debug, res);
+      });
+
 
     var createJiahao = function () {
       var date = newOrder.bookingTime;
@@ -77,7 +100,27 @@ module.exports = function (app) {
         }).then(null, function (err) {
           if (err) return utils.handleError(err, 'createOrder()', debug, res);
         });
-    }
+    };
+
+
+    //// get doctor, check what type of service is going to create.
+    //Doctor.findById(newOrder.doctorId, function (err, doctor) {
+    //  if (err) return utils.handleError(err, 'createOrder()', debug, res);
+    //
+    //  if (!doctor) return utils.handleError(new Error('doctor not found'), 'createOrder()', debug, res, 404);
+    //
+    //  var services = doctor.services;
+    //  var serviceType;
+    //  for (var idx in services) {
+    //    if (newOrder.serviceId == services[idx].id) {
+    //      serviceType = services[idx].type;
+    //      break;
+    //    }
+    //  }
+    //
+    //});
+
+
   };
   /**
    * PUT '/api/orders/:id'
@@ -103,7 +146,7 @@ module.exports = function (app) {
         if (!order) {
           throw new Error('order not found');
         }
-        if (order.doctorId.indexOf(currentUserId) == -1 && order.patientId != currentUserId) {
+        if (_getOrderDoctorIds(order).indexOf(currentUserId) == -1 && order.patientId != currentUserId) {
           debug('updateOrder(), user: %s hasn\'t privilege to update order: %s', currentUserId, orderId);
           throw new Error('no privilege');
         }
@@ -141,7 +184,7 @@ module.exports = function (app) {
           if (!order) {
             throw new Error('order not found');
           }
-          if (currentUserId != order.doctorId && currentUserId != order.patientId) {
+          if (_getOrderDoctorIds(order).indexOf(currentUserId) == -1 && currentUserId != order.patient.id) {
             throw new Error('no privilege');
           }
           if (order.status == newStatus) {
@@ -164,7 +207,7 @@ module.exports = function (app) {
 
             // after order status changed.
             updateServiceStock(order.serviceId);
-            updatePatientDoctorRelation(order.patientId, order.doctorId);
+            updatePatientDoctorRelation(order);
           });
         }).then(null, function (err) {
           utils.handleError(err, 'updateOrderStatus()', debug, res);
@@ -185,7 +228,9 @@ module.exports = function (app) {
       }
     };
 
-    var updatePatientDoctorRelation = function (patientId, doctorId) {
+    var updatePatientDoctorRelation = function (order) {
+      var patientId = order.patient.id;
+      var doctorIds = _getOrderDoctorIds(order);
       if (newStatus == orderStatus.confirmed) {
         debug('updateOrderStatus(), updatePatientDoctorRelation(), new status is %s, add doctorId %s to doctorInService', newStatus, doctorId);
         // add doctorId to 'doctorInService'
@@ -194,35 +239,38 @@ module.exports = function (app) {
         })
       }
       if (newStatus == orderStatus.finished || newStatus == orderStatus.expired) {
-        ServiceOrder.count({
-          doctorId: doctorId,
-          patientId: patientId,
-          status: orderStatus.confirmed
-        }, function (err, count) {
-          if (err)  return debug('updatePatientDoctorRelation(), get order count error: %o', err);
-          debug('>>>>>>>>>updateOrderStatus(), updatePatientDoctorRelation(), new status is %s, check order count is: %d', newStatus, count);
-          // if no other orders between this patient and doctor, remove doctorId from 'doctorInService'.
-          if (count == 0) {
-            debug('updateOrderStatus(), updatePatientDoctorRelation(), no more orders, move doctorId: %s from doctorInService to doctorPast.', doctorId);
-            Patient.findById(patientId, function (err, patient) {
-              if (err)  return debug('updatePatientDoctorRelation(), get patient error: %o', err);
-              if (patient) {
-                // remove from 'doctorInService'
-                var idx = patient.doctorInService.indexOf(doctorId);
-                patient.doctorInService.splice(idx, 1);
+        for (var idx in doctorIds) {
+          var doctorId = doctorIds[idx];
+          ServiceOrder.count({
+            'doctors.id': doctorId,
+            'patient.id': patientId,
+            status: orderStatus.confirmed
+          }, function (err, count) {
+            if (err)  return debug('updatePatientDoctorRelation(), get order count error: %o', err);
+            debug('updateOrderStatus(), updatePatientDoctorRelation(), new status is %s, check order count is: %d', newStatus, count);
+            // if no other orders between this patient and doctor, remove doctorId from 'doctorInService'.
+            if (count == 0) {
+              debug('updateOrderStatus(), updatePatientDoctorRelation(), no more orders, move doctorId: %s from doctorInService to doctorPast.', doctorId);
+              Patient.findById(patientId, function (err, patient) {
+                if (err)  return debug('updatePatientDoctorRelation(), get patient error: %o', err);
+                if (patient) {
+                  // remove from 'doctorInService'
+                  var idx = patient.doctorInService.indexOf(doctorId);
+                  patient.doctorInService.splice(idx, 1);
 
-                // add doctorId to 'doctorPast'
-                if (patient.doctorPast.indexOf(doctorId) == -1) {
-                  patient.doctorPast.push(doctorId);
+                  // add doctorId to 'doctorPast'
+                  if (patient.doctorPast.indexOf(doctorId) == -1) {
+                    patient.doctorPast.push(doctorId);
+                  }
+
+                  patient.save(function (err) {
+                    if (err)  return debug('updatePatientDoctorRelation(), save patient error: %o', err);
+                  })
                 }
-
-                patient.save(function (err) {
-                  if (err)  return debug('updatePatientDoctorRelation(), save patient error: %o', err);
-                })
-              }
-            });
-          }
-        });
+              });
+            }
+          });
+        }
 
         //// add doctorId to 'doctorPast'
         //Patient.findByIdAndUpdate(patientId, {'$addToSet': {doctorPast: doctorId}}, function (err) {
@@ -238,11 +286,16 @@ module.exports = function (app) {
    * @param res
    */
   var getOrders = function (req, res) {
+    var role = req.query.role; // operator
     _getCommonQueryOfOrder(req, function (err, query) {
       if (err) return utils.handleError(err, 'getOrders()', debug, res);
       query.nin('status', finalStatus).exec()
         .then(function (orders) {
           debug('getOrders(), found %d orders.', orders.length);
+          //_appendOrderUsers(role, orders, function (err, newOrders) {
+          //  if (err) throw err;
+          //  res.json(utils.jsonResult(newOrders));
+          //});
           res.json(utils.jsonResult(orders));
         }).then(null, function (err) {
           utils.handleError(err, 'getOrders()', debug, res);
@@ -251,11 +304,16 @@ module.exports = function (app) {
   };
 
   var getHistoryOrders = function (req, res) {
+    var role = req.query.role; // operator
     _getCommonQueryOfOrder(req, function (err, query) {
       if (err) return utils.handleError(err, 'getHistoryOrders()', debug, res);
       query.in('status', finalStatus).exec()
         .then(function (orders) {
           debug('getHistoryOrders(), found %d orders.', orders.length);
+          //_appendOrderUsers(role, orders, function (err, newOrders) {
+          //  if (err) throw err;
+          //  res.json(utils.jsonResult(newOrders));
+          //});
           res.json(utils.jsonResult(orders));
         }).then(null, function (err) {
           utils.handleError(err, 'getHistoryOrders()', debug, res);
@@ -264,15 +322,79 @@ module.exports = function (app) {
   };
 
   var getAllOrders = function (req, res) {
+    var role = req.query.role; // operator
     _getCommonQueryOfOrder(req, function (err, query) {
       if (err) return utils.handleError(err, 'getAllOrders()', debug, res);
       query.exec().then(function (orders) {
         debug('getAllOrders(), found %d orders.', orders.length);
+        //_appendOrderUsers(role, orders, function (err, newOrders) {
+        //  if (err) throw err;
+        //  res.json(utils.jsonResult(newOrders));
+        //});
         res.json(utils.jsonResult(orders));
       }).then(null, function (err) {
         utils.handleError(err, 'getAllOrders()', debug, res);
       });
     });
+  };
+
+  /**
+   * Append doctor/patient information (name) to each order in list.
+   * @param role
+   * @param orders
+   * @param callback
+   * @private
+   */
+  var _appendOrderUsers = function (role, orders, callback) {
+    if (role == app.consts.role.doctor) {
+      var patientIds = [];
+      // get unique patient ids from orders
+      for (var i = 0; i < orders.length; i++) {
+        if (patientIds.indexOf(orders[i].patientId) == -1) {
+          patientIds.push(orders[i].patientId);
+        }
+      }
+      debug('_appendOrderUsers(), find patients in %o', patientIds);
+      Patient.find({_id: {'$in': patientIds}}, 'name', function (err, patients) {
+        var p = {};
+        for (var i = 0; i < patients.length; i++) {
+          p[patients[i].id] = patients[i].name;
+        }
+        var retOrders = [];
+        for (var j = 0; j < orders.length; j++) {
+          var newOrder = orders[j].toObject();
+          newOrder.patientName = p[newOrder.patientId];
+          retOrders.push(newOrder);
+        }
+
+        callback(err, retOrders);
+      });
+    } else {
+      var doctorIds = [];
+      // get unique doctor ids from orders
+      for (var i = 0; i < orders.length; i++) {
+        for (var j = 0; j < orders[i].doctorId.length; j++) {
+          if (doctorIds.indexOf(orders[i].doctorId[j]) == -1) {
+            doctorIds.push(orders[i].doctorId[j]);
+          }
+        }
+      }
+      debug('_appendOrderUsers(), find doctors in %o', doctorIds);
+      Doctor.find({_id: {'$in': doctorIds}}, 'name', function (err, doctors) {
+        var d = {};
+        for (var i = 0; i < doctors.length; i++) {
+          d[doctors[i].id] = doctors[i].name;
+        }
+        var retOrders = [];
+        for (var j = 0; j < orders.length; j++) {
+          var newOrder = orders[j].toObject();
+          // TODO: may have more than one doctor.
+          newOrder.doctorName = p[newOrder.doctorId];
+          retOrders.push(newOrder);
+        }
+        callback(err, retOrders);
+      });
+    }
   };
 
   var _getCommonQueryOfOrder = function (req, callback) {
@@ -289,9 +411,9 @@ module.exports = function (app) {
         debug('_getCommonOrderQuery(), find service orders of user: %s', currentUserId);
         var query;
         if (role == app.consts.role.doctor) {
-          query = ServiceOrder.find({doctorId: currentUserId}).sort({lastModified: -1});
+          query = ServiceOrder.find({'doctors.id': currentUserId}).sort({lastModified: -1});
         } else {
-          query = ServiceOrder.find({patientId: currentUserId}).sort({lastModified: -1});
+          query = ServiceOrder.find({'patient.id': currentUserId}).sort({lastModified: -1});
         }
         callback(null, query);
       }).then(null, function (err) {
@@ -322,7 +444,8 @@ module.exports = function (app) {
         if (!order) {
           throw new Error('order not found');
         }
-        if (currentUserId != order.doctorId && currentUserId != order.patientId) {
+
+        if (_getOrderDoctorIds(order).indexOf(currentUserId) == -1 && currentUserId != order.patient.id) {
           throw new Error('no privilege');
         }
         res.json(utils.jsonResult(order));
@@ -330,6 +453,7 @@ module.exports = function (app) {
         utils.handleError(err, 'getOrderDetail()', debug, res);
       });
   };
+
   /**
    * POST '/api/orders/:id/comments'
    * @param req
@@ -349,7 +473,7 @@ module.exports = function (app) {
           if (!order) {
             throw new Error('order not found');
           }
-          if (currentUserId != order.doctorId && currentUserId != order.patientId) {
+          if (_getOrderDoctorIds(order).indexOf(currentUserId) == -1 && currentUserId != order.patient.id) {
             throw new Error('no privilege');
           }
           createComment(order, user);
@@ -417,6 +541,14 @@ module.exports = function (app) {
       }
       callback(user);
     })
+  };
+
+  var _getOrderDoctorIds = function (order) {
+    var retIds = [];
+    for (var i = 0; i < order.doctors.length; i++) {
+      retIds.push(order.doctors[i].id);
+    }
+    return retIds;
   };
 
   return {

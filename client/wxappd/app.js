@@ -74,6 +74,11 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       templateUrl: 'wxappd/patient/cases.tpl.html',
       controller: 'wxPatientCasesCtrl'
     });
+    $stateProvider.state('patient-orders', {
+      url: '/patient/orders/:type',
+      templateUrl: 'wxappd/common/my-orders.tpl.html',
+      controller: 'wxOrdersCtrl'
+    });
 
 
     /* -- doctor -------------------------------------------------------------------- */
@@ -81,6 +86,18 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       url: '/doctor/friends',
       templateUrl: 'wxappd/doctor/my-friends.tpl.html',
       controller: 'wxDoctorFriendsCtrl'
+    });
+    $stateProvider.state('doctor-orders', {
+      url: '/doctor/orders/:type',
+      templateUrl: 'wxappd/common/my-orders.tpl.html',
+      controller: 'wxOrdersCtrl'
+    });
+
+    /* -- common -------------------------------------------------------------------- */
+    $stateProvider.state('order-detail', {
+      url: '/order/detail',
+      templateUrl: 'wxappd/common/order-detail.tpl.html',
+      controller: 'wxOrderDetailCtrl'
     });
     $stateProvider.state('error-not-from-wechat', {
       template: '<div class="alert alert-danger" role="alert">请从微信访问此页面。</div>'

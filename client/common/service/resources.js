@@ -17,9 +17,19 @@ angular.module('ylbWxApp')
       2: '正式'
     },
     doctorServices: {
-      jiahao: {type: 'jiahao'},
-      huizhen: {type: 'huizhen'},
-      suizhen: {type: 'suizhen'}
+      jiahao: {type: 'jiahao', label: "加号"},
+      huizhen: {type: 'huizhen', label: "会诊"},
+      suizhen: {type: 'suizhen', label: "随诊"}
+    },
+    orderStatus: {
+      init: {value: 'init', label: '已生成'},
+      payed: {value: 'paid', label: '已支付'},
+      confirmed: {value: 'confirmed', label: '已确认'}, // doctor confirmed
+      rejected: {value: 'rejected', label: '已拒绝'},   //doctor rejected
+      doctorFinished: {value: 'doctorFinished', label: '医生已完成'},
+      finished: {value: 'finished', label: '已完成'},   // patient accept 'doctorFinished' status.
+      expired: {value: 'expired', label: '已过期'},
+      cancelled: {value: 'cancelled', label: '已取消'}
     },
     linkTypes: {
       image: {value: 'image', label: '图片', forPatient: true, forDoctor: true},

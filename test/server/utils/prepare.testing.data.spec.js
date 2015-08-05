@@ -38,6 +38,7 @@ before(function (done) {
         console.log('max number of doctors is: %d', maxNumber);
         // set number.
         for (var i = 0; i < mockDoctors.length; i++) {
+          mockDoctors[i].services = util.conf.testData.doctorService;
           mockDoctors[i].number = maxNumber + i + 1;
         }
 

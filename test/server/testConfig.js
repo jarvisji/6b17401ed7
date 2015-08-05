@@ -10,6 +10,23 @@ module.exports = {
   doctorOpenId: 'oWTqJs8SEbDON98vMor20rnXh9UQ',
   patientOpenId: 'oWTqJs_isFdwO0vesXACDsELhiLI',
   testData: {
+    doctorService: [{
+      "type": "jiahao",
+      "price": 8,
+      "weekQuantity": {
+        "d5": 7,
+        "d4": 6,
+        "d3": 5,
+        "d2": 4,
+        "d1": 2
+      }
+    }, {
+      "type": "huizhen",
+      "price": 496
+    }, {
+      "type": "suizhen",
+      "price": 93
+    }],
     doctors: [{
       "name": "test1 doctor",
       "mobile": "testDoctor1",
@@ -17,7 +34,7 @@ module.exports = {
       "province": "北京",
       "city": "朝阳区",
       "password": "NotInUseNowJustForTest",
-      "services": this.doctorService,
+      "services": [],
       "doctorFriends": [],
       "wechat": {
         "openid": "openid_testDoctor1",
@@ -30,7 +47,7 @@ module.exports = {
       "province": "北京",
       "city": "朝阳区",
       "password": "NotInUseNowJustForTest",
-      "services": this.doctorService,
+      "services": [],
       "doctorFriends": [],
       "wechat": {
         "openid": "openid_testDoctor2",
@@ -43,7 +60,7 @@ module.exports = {
       "province": "北京",
       "city": "朝阳区",
       "password": "NotInUseNowJustForTest",
-      "services": this.doctorService,
+      "services": [],
       "doctorFriends": [],
       "wechat": {
         "openid": "openid_testDoctor3",
@@ -75,23 +92,6 @@ module.exports = {
         "openid": "openid_testDoctor5",
         "headimgurl": "/assets/image/avatar-64.jpg"
       }
-    }],
-    doctorService: [{
-      "type": "jiahao",
-      "price": 8,
-      "weekQuantity": {
-        "d5": 7,
-        "d4": 6,
-        "d3": 5,
-        "d2": 4,
-        "d1": 2
-      }
-    }, {
-      "type": "huizhen",
-      "price": 496
-    }, {
-      "type": "suizhen",
-      "price": 93
     }],
     patients: [{
       "name": "test1 patient",

@@ -101,8 +101,17 @@ module.exports = function () {
   var serviceOrderSchema = new Schema({
     serviceId: {type: String, index: true, required: true},
     serviceType: String, //jiahao, huizhen, suizhen
-    doctorId: [{type: String, required: true}],
-    patientId: {type: String, required: true},
+    doctors: [{
+      id: {type: String, required: true},
+      name: String,
+      avatar: String,
+      confirmed: {type: Boolean, default: false}
+    }],
+    patient: {
+      id: {type: String, required: true},
+      name: String,
+      avatar: String
+    },
     price: {type: Number, required: true},
     quantity: {type: Number, required: true},
     bookingTime: Date,
@@ -120,7 +129,7 @@ module.exports = function () {
   serviceOrderSchema.pre('update', function () {
     this.update({}, {$set: {lastModified: new Date()}});
   });
-  serviceOrderSchema.index({doctorId: 1, patientId: 1, lastModified: -1, status: 1});
+  serviceOrderSchema.index({'doctors.id': 1, 'patient.id': 1, lastModified: -1, status: 1});
 
 
   var patientSchema = new Schema({
