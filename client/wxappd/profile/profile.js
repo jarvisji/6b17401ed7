@@ -240,8 +240,7 @@ angular.module('ylbWxApp')
         doctorId: $scope.doctor._id,
         patientId: currentUser.patient._id,
         price: $scope.modalData.price,
-        quantity: $scope.modalData.quantity,
-        bookingTime: new Date()
+        quantity: $scope.modalData.quantity
       };
       $http.post('/api/orders', newOrder)
         .success(function (resp) {

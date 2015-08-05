@@ -25,7 +25,7 @@ module.exports = function (app) {
     var newOrder = req.body;
     debug('createOrder(), receive new order data: %o', newOrder);
     if (!newOrder || !newOrder.serviceId || !newOrder.doctorId || !newOrder.patientId || newOrder.price == undefined || newOrder.quantity == undefined || !newOrder.serviceType) {
-      debug('createOrder(), invalid data.');
+      debug('createOrder(), invalid data. serviceId: %s, serviceType: %s, doctorId: %s, patientId: %s, price: %s, quantity: %s.', !newOrder.serviceId, !newOrder.serviceType, !newOrder.doctorId, !newOrder.patientId, newOrder.price == undefined, newOrder.quantity == undefined);
       return res.status(400).json(utils.jsonResult(new Error('invalid data')));
     }
 

@@ -87,7 +87,7 @@
         <i class="fa fa-pencil-square-o profile-action-button" ng-hide="editingJiahao"> 修改</i>
         <i class="fa fa-check profile-action-button" ng-show="editingJiahao"> 保存</i>
       </button>
-      <button class="btn btn-default" type="button" ng-if="currentUser.isPatient" ng-click="showAddJiahaoModal()">
+      <button class="btn btn-default" type="button" ng-if="currentUser.isPatient" ng-click="showAddJiahaoModal()" ng-disabled="!jiahao.price">
         <i class="fa fa-check-square-o profile-action-button"> 购买</i>
       </button>
     </span>
@@ -117,7 +117,8 @@
         <i class="fa fa-pencil-square-o profile-action-button" ng-hide="editingSuizhen"> 修改</i>
         <i class="fa fa-check profile-action-button" ng-show="editingSuizhen"> 保存</i>
       </button>
-      <button class="btn btn-default" type="button" ng-if="currentUser.isPatient" ng-click="showAddSuizhenModal()">
+      <button class="btn btn-default" type="button" ng-if="currentUser.isPatient" ng-click="showAddSuizhenModal()"
+              ng-disabled="!suizhen.price">
         <i class="fa fa-check-square-o profile-action-button"> 购买</i>
       </button>
     </span>
@@ -135,7 +136,8 @@
         <i class="fa fa-pencil-square-o profile-action-button" ng-hide="editingHuizhen"> 修改</i>
         <i class="fa fa-check profile-action-button" ng-show="editingHuizhen"> 保存</i>
       </button>
-      <button class="btn btn-default" type="button" ng-if="currentUser.isPatient" ng-click="buyHuizhen()">
+      <button class="btn btn-default" type="button" ng-if="currentUser.isPatient" ng-click="buyHuizhen()"
+              ng-disabled="!huizhen.price">
         <i class="fa fa-check-square-o profile-action-button"> 购买</i>
       </button>
     </span>
