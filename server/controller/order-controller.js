@@ -21,7 +21,7 @@ module.exports = function (app) {
   var createOrder = function (req, res) {
     var newOrder = req.body;
     debug('createOrder(), receive new order data: %o', newOrder);
-    if (!newOrder || !newOrder.serviceId || !newOrder.doctorId || !newOrder.patientId || !newOrder.price || !newOrder.quantity || !newOrder.bookingTime) {
+    if (!newOrder || !newOrder.serviceId || !newOrder.doctorId || !newOrder.patientId || newOrder.price == undefined || newOrder.quantity == undefined || newOrder.bookingTime == undefined) {
       debug('createOrder(), invalid data.');
       return res.status(400).json(utils.jsonResult(new Error('Invalid data')));
     }

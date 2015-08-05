@@ -199,7 +199,7 @@ angular.module('ylbWxApp')
       if (item.stock <= 0 || item.isPast) {
         return;
       }
-      var newService = {
+      var newOrder = {
         serviceId: item.serviceId,
         serviceType: resources.doctorServices.jiahao.type,
         doctorId: $scope.doctor._id,
@@ -208,7 +208,7 @@ angular.module('ylbWxApp')
         quantity: 1,
         bookingTime: item.date
       };
-      $http.post('/api/orders', newService)
+      $http.post('/api/orders', newOrder)
         .success(function (resp) {
           addJiahaoModal.$promise.then(addJiahaoModal.hide);
           $rootScope.alertSuccess('', '订单已生成，请查看“我的订单”并尽快支付。');
@@ -217,12 +217,39 @@ angular.module('ylbWxApp')
         });
     };
 
+
     $scope.buyHuizhen = function () {
 
     };
 
+    // Pre-fetch an external template populated with a custom scope
+    var addSuizhenModal = $modal({scope: $scope, template: 'wxappd/doctor/add-suizhen-modal.tpl.html', show: false});
+    // Show when some event occurs (use $promise property to ensure the template has been loaded)
+    $scope.showAddSuizhenModal = function () {
+      $scope.modalData = {price: $scope.suizhen.price, quantity: 1};
+      addSuizhenModal.$promise.then(addSuizhenModal.show);
+    };
     $scope.buySuizhen = function () {
-
+      if ($scope.modalData.quantity < 1 || $scope.modalData.quantity > 12) {
+        $rootScope.alertWarn('', '清输入1-12的数字');
+        return;
+      }
+      var newOrder = {
+        serviceId: $scope.suizhen._id,
+        serviceType: resources.doctorServices.huizhen.type,
+        doctorId: $scope.doctor._id,
+        patientId: currentUser.patient._id,
+        price: $scope.modalData.price,
+        quantity: $scope.modalData.quantity,
+        bookingTime: new Date()
+      };
+      $http.post('/api/orders', newOrder)
+        .success(function (resp) {
+          addSuizhenModal.$promise.then(addSuizhenModal.hide);
+          $rootScope.alertSuccess('', '订单已生成，请查看“我的订单”并尽快支付。');
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
     };
 
     // patient follow profile doctor.

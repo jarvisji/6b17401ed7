@@ -1,0 +1,31 @@
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" ng-click="$hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title">请确认购买随诊服务</h3>
+      </div>
+      <div class="modal-body">
+        <h4>服务价格为每月 {{modalData.price}} 元</h4>
+
+        <div class="row">
+          <div class="col-xs-6">
+            <form class="form-inline">
+              <div class="form-group">
+                <label for="quantity">购买数量（月）：</label>
+
+                <input type="number" class="form-control" id="quantity" name="quantity" ng-model="modalData.quantity">
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" ng-click="$hide()">取消</button>
+          <button type="button" class="btn btn-success" ng-click="buySuizhen()">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

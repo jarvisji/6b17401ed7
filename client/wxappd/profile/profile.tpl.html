@@ -117,7 +117,7 @@
         <i class="fa fa-pencil-square-o profile-action-button" ng-hide="editingSuizhen"> 修改</i>
         <i class="fa fa-check profile-action-button" ng-show="editingSuizhen"> 保存</i>
       </button>
-      <button class="btn btn-default" type="button" ng-if="currentUser.isPatient" ng-click="buySuizhen()">
+      <button class="btn btn-default" type="button" ng-if="currentUser.isPatient" ng-click="showAddSuizhenModal()">
         <i class="fa fa-check-square-o profile-action-button"> 购买</i>
       </button>
     </span>
