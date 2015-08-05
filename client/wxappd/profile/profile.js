@@ -91,7 +91,7 @@ angular.module('ylbWxApp')
     };
 
     // make sure display order is from d1 to d5.
-    var orderJiahaoDays = function() {
+    var orderJiahaoDays = function () {
       var days = Object.keys($scope.jiahao.weekQuantity);
       days.sort();
       var weekQuantity = {};
@@ -180,15 +180,41 @@ angular.module('ylbWxApp')
         .success(function (resp) {
           $scope.serviceStock = [];
           if (resp.data.jiahao) {
+            var today = commonUtils.date.getTodayStartDate();
+            var thisWeek = resp.data.jiahao.thisWeek;
+            for (var i = 0; i < thisWeek.length; i++) {
+              if (new Date(thisWeek[i].date) < today) {
+                thisWeek[i].isPast = true;
+              }
+            }
             $scope.serviceStock = resp.data.jiahao;
           }
+          console.log($scope.serviceStock);
           addJiahaoModal.$promise.then(addJiahaoModal.show);
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });
     };
     $scope.buyJiahao = function (item) {
-      console.log(item);
+      if (item.stock <= 0 || item.isPast) {
+        return;
+      }
+      var newService = {
+        serviceId: item.serviceId,
+        serviceType: resources.doctorServices.jiahao.type,
+        doctorId: $scope.doctor._id,
+        patientId: currentUser.patient._id,
+        price: $scope.serviceStock.price,
+        quantity: 1,
+        bookingTime: item.date
+      };
+      $http.post('/api/orders', newService)
+        .success(function (resp) {
+          addJiahaoModal.$promise.then(addJiahaoModal.hide);
+          $rootScope.alertSuccess('', '订单已生成，请查看“我的订单”并尽快支付。');
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
     };
 
     $scope.buyHuizhen = function () {

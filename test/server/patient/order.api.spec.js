@@ -17,7 +17,7 @@
 var should = require('should');
 var test = require('../testUtils');
 var dateUtil = require('../../../server/utils/date-utils');
-describe('Test order APIs. ', function () {
+describe.only('Test order APIs. ', function () {
   var testPatient = test.conf.testData.patients[0];
   var testDoctor = test.conf.testData.doctors[0];
   var testPatient2 = test.conf.testData.patients[1];  // no relation to order
@@ -41,7 +41,7 @@ describe('Test order APIs. ', function () {
     Doctor.findOne({'wechat.openid': testDoctorOpenid}).exec()
       .then(function (doctor) {
         doctorId = doctor.id;
-        if (doctor.services.length == 0) {
+        if (doctor.services.length != 3) {
           doctor.services = test.conf.testData.doctorService;
           return doctor.save();
         }
@@ -71,7 +71,8 @@ describe('Test order APIs. ', function () {
               doctorId: doctorId,
               patientId: patientId,
               price: servicePrice,
-              quantity: 1
+              quantity: 1,
+              bookingTime: dateUtil.getTodayStartDate()
             };
 
             done();
@@ -309,7 +310,7 @@ describe('Test order APIs. ', function () {
         orderId3 = res.body.data._id;
         test.req.json('put', '/api/orders/' + orderId3 + '/status/confirmed', testDoctorOpenid, doctorRole)
           .expect(200)
-          .end(function(err, resp){
+          .end(function (err, resp) {
             // after update status returns, server still need time to update relationship.
             setTimeout(done, 100);
           })

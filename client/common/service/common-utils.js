@@ -82,6 +82,18 @@ angular.module('ylbWxApp')
             doctors.isShowVIcon = true;
           }
         }
+      },
+      date: {
+        /*
+         * We generated date in service stock which has special value points to the start of a day,
+         * so we need this method to get start of today corresponding.
+         * @returns {Date}
+         */
+        getTodayStartDate: function () {
+          var today = new Date();
+          today.setHours(0, 0, 0, 0);
+          return today;
+        }
       }
     };
   }]);

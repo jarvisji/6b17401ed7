@@ -10,6 +10,9 @@ section {
   cursor: pointer
 }
 
+.bg-disabled {
+  background-color: lightgray;
+}
 .page-content {
   position: relative;
   margin-bottom: 45px;

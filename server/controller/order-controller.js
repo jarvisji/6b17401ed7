@@ -21,7 +21,7 @@ module.exports = function (app) {
   var createOrder = function (req, res) {
     var newOrder = req.body;
     debug('createOrder(), receive new order data: %o', newOrder);
-    if (!newOrder || !newOrder.serviceId || !newOrder.doctorId || !newOrder.patientId || !newOrder.price || !newOrder.quantity) {
+    if (!newOrder || !newOrder.serviceId || !newOrder.doctorId || !newOrder.patientId || !newOrder.price || !newOrder.quantity || !newOrder.bookingTime) {
       debug('createOrder(), invalid data.');
       return res.status(400).json(utils.jsonResult(new Error('Invalid data')));
     }
@@ -51,8 +51,8 @@ module.exports = function (app) {
     });
 
     var createJiahao = function () {
-      var date = dateUtils.getTodayStartDate();
-      debug('createOrder(), createJiahao(), checking service stock, serviceId: %s, date: %s', newOrder.serviceId, date.toISOString());
+      var date = newOrder.bookingTime;
+      debug('createOrder(), createJiahao(), checking service stock, serviceId: %s, date: %s', newOrder.serviceId, date);
       var serviceStockQuery = {serviceId: newOrder.serviceId, date: date};
       ServiceStock.find(serviceStockQuery).exec()
         .then(function (serviceStock) {

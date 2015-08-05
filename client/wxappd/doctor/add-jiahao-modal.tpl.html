@@ -11,7 +11,9 @@
         <h4>本周</h4>
 
         <div class="general-item-list">
-          <div class="item" ng-repeat="item in serviceStock.thisWeek" ng-click="buyJiahao(item);$hide()">
+          <div class="item" ng-class="{'bg-disabled': item.isPast || item.stock==0}"
+               ng-repeat="item in serviceStock.thisWeek"
+               ng-click="buyJiahao(item)">
             <div class="item-head">
               <div class="item-details">
                 <img class="item-pic">
@@ -27,7 +29,7 @@
         <h4>下周</h4>
 
         <div class="general-item-list">
-          <div class="item" ng-repeat="item in serviceStock.nextWeek" ng-click="buyJiahao(item);$hide()">
+          <div class="item" ng-repeat="item in serviceStock.nextWeek" ng-click="buyJiahao(item)">
             <div class="item-head">
               <div class="item-details">
                 <img class="item-pic">

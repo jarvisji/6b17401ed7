@@ -100,6 +100,7 @@ module.exports = function () {
 
   var serviceOrderSchema = new Schema({
     serviceId: {type: String, index: true, required: true},
+    serviceType: String, //jiahao, huizhen, suizhen
     doctorId: [{type: String, required: true}],
     patientId: {type: String, required: true},
     price: {type: Number, required: true},
