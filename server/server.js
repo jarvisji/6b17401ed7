@@ -63,6 +63,7 @@ var registerRoutes = function () {
   /* -- The following APIs need 'Authorization' header--------------------------------------------------------*/
   app.post('/api/doctors', doctorCtrl.createDoctor);
   app.get('/api/doctors', doctorCtrl.findDoctors);
+  app.get('/api/doctors/:id', doctorCtrl.getDoctor);
   app.put('/api/doctors/:id', doctorCtrl.saveDoctor);
   /**
    * POST '/api/doctors/:id/friends/requests'
@@ -90,6 +91,7 @@ var registerRoutes = function () {
 
   /* Patient APIs ----------------------------------------------------------------------------------------*/
   app.get('/api/patients', patientCtrl.find);
+  app.get('/api/patients/:id', patientCtrl.getPatient);
   app.put('/api/patients/:id', patientCtrl.save);
   /**
    * POST '/api/patient/:id/friends/requests'

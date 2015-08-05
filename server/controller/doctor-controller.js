@@ -93,6 +93,22 @@ module.exports = function (app) {
   };
 
   /**
+   * GET '/api/doctors/:id'
+   * @param req
+   * @param res
+   */
+  var getDoctor = function (req, res) {
+    var id = req.params.id;
+    Doctor.findById(id).select(excludeFields).exec(function (err, doctor) {
+      if (err) {
+        debug('Get doctor error: ', err);
+        return res.status(500).json(utils.jsonResult(err));
+      }
+      res.json(utils.jsonResult(doctor));
+    });
+  };
+
+  /**
    * POST /api/doctors
    * @param req
    * @param res
@@ -545,6 +561,7 @@ module.exports = function (app) {
     login: login,
     createDoctor: createDoctor,
     findDoctors: findDoctors,
+    getDoctor: getDoctor,
     saveDoctor: saveDoctor,
     createFriendsRequests: createFriendsRequests,
     getFriendsRequests: getFriendsRequests,
