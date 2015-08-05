@@ -12,6 +12,9 @@ module.exports = function (app) {
   var ServiceStock = app.models.ServiceStock;
   var Patient = app.models.Patient;
   var Doctor = app.models.Doctor;
+
+  var orderStatus = app.consts.orderStatus;
+  var finalStatus = [orderStatus.rejected, orderStatus.finished, orderStatus.expired, orderStatus.cancelled];
   /**
    * POST '/api/orders'
    * Create service order. Check service stock before create, update service stock after created.
@@ -129,7 +132,6 @@ module.exports = function (app) {
       debug('updateOrderStatus(), invalid status.');
       return res.status(400).json(utils.jsonResult(new Error('invalid status')));
     }
-    var orderStatus = app.consts.orderStatus;
 
     getUserByOpenid(openid, role, res, function (user) {
       var currentUserId = user.id;
@@ -150,7 +152,6 @@ module.exports = function (app) {
               debug('updateOrderStatus(), confirmed order cannot be cancelled.');
               return res.status(400).json(utils.jsonResult(new Error('order already confirmed')));
             }
-            var finalStatus = [orderStatus.rejected, orderStatus.finished, orderStatus.expired, orderStatus.cancelled];
             if (finalStatus.indexOf(order.status) != -1) {
               debug('updateOrderStatus(), order status is final, cannot change again.');
               return res.status(400).json(utils.jsonResult(new Error('order status is final')));
@@ -237,9 +238,47 @@ module.exports = function (app) {
    * @param res
    */
   var getOrders = function (req, res) {
+    _getCommonQueryOfOrder(req, function (err, query) {
+      if (err) return utils.handleError(err, 'getOrders()', debug, res);
+      query.nin('status', finalStatus).exec()
+        .then(function (orders) {
+          debug('getOrders(), found %d orders.', orders.length);
+          res.json(utils.jsonResult(orders));
+        }).then(null, function (err) {
+          utils.handleError(err, 'getOrders()', debug, res);
+        });
+    });
+  };
+
+  var getHistoryOrders = function (req, res) {
+    _getCommonQueryOfOrder(req, function (err, query) {
+      if (err) return utils.handleError(err, 'getHistoryOrders()', debug, res);
+      query.in('status', finalStatus).exec()
+        .then(function (orders) {
+          debug('getHistoryOrders(), found %d orders.', orders.length);
+          res.json(utils.jsonResult(orders));
+        }).then(null, function (err) {
+          utils.handleError(err, 'getHistoryOrders()', debug, res);
+        });
+    });
+  };
+
+  var getAllOrders = function (req, res) {
+    _getCommonQueryOfOrder(req, function (err, query) {
+      if (err) return utils.handleError(err, 'getAllOrders()', debug, res);
+      query.exec().then(function (orders) {
+        debug('getAllOrders(), found %d orders.', orders.length);
+        res.json(utils.jsonResult(orders));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getAllOrders()', debug, res);
+      });
+    });
+  };
+
+  var _getCommonQueryOfOrder = function (req, callback) {
     var role = req.query.role; // operator
     var openid = req.query.openid; // operator
-    debug('getOrders(), find user by openid: %s, role: %s', openid, role);
+    debug('_getCommonOrderQuery(), find user by openid: %s, role: %s', openid, role);
     var currentUserId;
     utils.getUserByOpenid(openid, role)
       .then(function (user) {
@@ -247,17 +286,16 @@ module.exports = function (app) {
           throw new Error('user not found');
         }
         currentUserId = user.id;
-        debug('getOrders(), find service orders of user: %s', currentUserId);
+        debug('_getCommonOrderQuery(), find service orders of user: %s', currentUserId);
+        var query;
         if (role == app.consts.role.doctor) {
-          return ServiceOrder.find({doctorId: currentUserId}).sort({lastModified: -1}).exec();
+          query = ServiceOrder.find({doctorId: currentUserId}).sort({lastModified: -1});
         } else {
-          return ServiceOrder.find({patientId: currentUserId}).sort({lastModified: -1}).exec();
+          query = ServiceOrder.find({patientId: currentUserId}).sort({lastModified: -1});
         }
-      }).then(function (orders) {
-        debug('getOrders(), found %d orders.', orders.length);
-        res.json(utils.jsonResult(orders));
+        callback(null, query);
       }).then(null, function (err) {
-        utils.handleError(err, 'getOrders()', debug, res);
+        callback(err);
       });
   };
 
@@ -386,6 +424,8 @@ module.exports = function (app) {
     updateOrder: updateOrder,
     updateOrderStatus: updateOrderStatus,
     getOrders: getOrders,
+    getHistoryOrders: getHistoryOrders,
+    getAllOrders: getAllOrders,
     getOrderDetail: getOrderDetail,
     createComment: createOrderComment,
     deleteComment: deleteOrderComment

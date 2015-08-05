@@ -148,7 +148,9 @@ var registerRoutes = function () {
   app.post('/api/orders', orderCtrl.createOrder);
   app.put('/api/orders/:id', orderCtrl.updateOrder);
   app.put('/api/orders/:id/status/:status', orderCtrl.updateOrderStatus);
-  app.get('/api/orders/my', orderCtrl.getOrders);
+  app.get('/api/orders/my', orderCtrl.getOrders); // all unfinished orders.
+  app.get('/api/orders/my/history', orderCtrl.getHistoryOrders);
+  app.get('/api/orders/my/all', orderCtrl.getAllOrders);
   app.get('/api/orders/:id', orderCtrl.getOrderDetail);
   app.post('/api/orders/:id/comments', orderCtrl.createComment);
   app.delete('/api/orders/:id/comments/:commentId', orderCtrl.deleteComment);
