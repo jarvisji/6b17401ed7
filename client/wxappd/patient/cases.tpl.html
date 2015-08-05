@@ -42,7 +42,7 @@
         <h4 class="media-heading">{{case.creator.name}}</h4>
         {{case.content}}
         <div>
-          {{case.created}}
+          <small>{{case.displayCreated}}</small>
           <span class="pull-right">
             <span ng-show="case.canDelete">
               <a href="" ng-click="deleteCase($index)">删除</a> |

@@ -93,6 +93,44 @@ angular.module('ylbWxApp')
           var today = new Date();
           today.setHours(0, 0, 0, 0);
           return today;
+        },
+        /**
+         * We need display comments created date in special format, like: x秒前， x分前，x小时前
+         * @param comments
+         */
+        convert2FriendlyDate: function (comments) {
+          var convertDate = function (date) {
+            var tDate = date;
+            if (typeof(date) === 'string') {
+              tDate = new Date(date);
+            }
+            var secondsPast = (new Date().getTime() - tDate.getTime()) / 1000;
+            var second = 1;
+            var secondsInMin = 60;
+            var secondsInHour = 3600;
+            var secondsInDay = 24 * 3600;
+            var ret;
+            if (secondsPast < second) {
+              ret = '刚刚';
+            } else if (secondsPast < secondsInMin) {
+              ret = Math.round(secondsPast) + '秒前';
+            } else if (secondsPast < secondsInHour) {
+              ret = Math.round(secondsPast / secondsInMin) + '分钟前';
+            } else if (secondsPast < secondsInDay) {
+              ret = Math.round(secondsPast / secondsInHour) + '小时前';
+            } else {
+              ret = tDate.toLocaleDateString();
+            }
+            return ret;
+          };
+
+          if (comments instanceof Array) {
+            for (var idx in comments) {
+              comments[idx].displayCreated = convertDate(comments[idx].created);
+            }
+          } else {
+            comments.displayCreated = convertDate(comments.created);
+          }
         }
       }
     };

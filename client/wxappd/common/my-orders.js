@@ -22,7 +22,7 @@ angular.module('ylbWxApp')
 
     $scope.showOrderDetail = function(idx) {
       console.log('showOrderDetail');
-      $rootScope.order = $scope.orders[idx];
-      $state.go('order-detail');
+      var orderId = $scope.orders[idx]._id;
+      $state.go('order-detail', {id: orderId});
     };
   }]);

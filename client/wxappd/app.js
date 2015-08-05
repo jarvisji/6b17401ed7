@@ -95,7 +95,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
 
     /* -- common -------------------------------------------------------------------- */
     $stateProvider.state('order-detail', {
-      url: '/order/detail',
+      url: '/order/detail/:id',
       templateUrl: 'wxappd/common/order-detail.tpl.html',
       controller: 'wxOrderDetailCtrl'
     });
@@ -104,7 +104,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
     });
     //$urlRouterProvider.otherwise('entry');
   }])
-  .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$q', '$http', '$cookies', '$log', '$timeout', '$alert', function ($scope, $rootScope, $state, $stateParams, $q, $http, $cookies, $log, $timeout, $alert) {
+  .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', '$timeout', '$alert', 'ylb.resources', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log, $timeout, $alert, resources) {
     $rootScope.verify = function (openid, access_token, redirect) {
       $http.get('/api/verify', {params: {openid: openid, access_token: access_token}})
         .success(function (resp) {
@@ -218,6 +218,11 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       } else {
         verifiedData.isPatient = !!verifiedData.patient;
         verifiedData.isDoctor = !!verifiedData.doctor;
+        if (verifiedData.isPatient) {
+          verifiedData.id = verifiedData.patient._id;
+        } else {
+          verifiedData.id = verifiedData.doctor._id;
+        }
         return verifiedData;
       }
     };
@@ -296,12 +301,26 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
      */
     $rootScope.checkAvatar = function (user) {
       if (!user.wechat.headimgurl) {
-        user.wechat.headimgurl = '/assets/image/avatar-64.jpg';
+        user.wechat.headimgurl = resources.defaultAvatar;
       }
     };
+
+    $rootScope.checkCommentAvatar = function (comment) {
+      if (comment instanceof Array) {
+        for (var idx in comment) {
+          if (!comment[idx].creator.avatar) {
+            comment[idx].creator.avatar = resources.defaultAvatar;
+          }
+        }
+      } else {
+        if (!comment.creator.avatar) {
+          comment.creator.avatar = resources.defaultAvatar;
+        }
+      }
+    }
   }
   ]).
-  controller('entryCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', '$timeout', '$alert', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log, $timeout, $alert) {
+  controller('entryCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log) {
     /**
      * Create separate entryCtrl from rootCtrl. Because rootCtrl is loaded by wxindex.html, which is usually before
      * 'entry' route defined in $stateProvider. In page initializing, 'verifyAndGetUserInfo()' method will be executed

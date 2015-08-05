@@ -29,15 +29,17 @@ angular.module('ylbWxApp')
       $http.get('/api/patients/' + patientId + '/cases')
         .success(function (resp) {
           checkPostCasePrivilege();
-          $scope.cases = resp.data;
-          for (var i = 0; i < $scope.cases.length; i++) {
-            var curCase = $scope.cases[i];
+          var cases = resp.data;
+          for (var i = 0; i < cases.length; i++) {
+            var curCase = cases[i];
             if ((currentUser.doctor && currentUser.doctor._id == curCase.creator.id) ||
               (currentUser.patient && currentUser.patient._id == curCase.creator.id)) {
               curCase.canDelete = true;
             }
             checkCommentDeletable(curCase.comments);
           }
+          commonUtils.date.convert2FriendlyDate(cases);
+          $scope.cases = cases;
         }).error(function (resp, status) {
           if (status == 403) {
             $rootScope.alertError('', '不能查看此患者病历');
@@ -79,6 +81,19 @@ angular.module('ylbWxApp')
 
 
     $scope.createCase = function () {
+      var callCreateApi = function () {
+        $http.post('/api/patients/' + patientId + '/cases', $scope.newCase)
+          .success(function (resp) {
+            $scope.newCase = {};
+            var createdCase = resp.data;
+            createdCase.canDelete = true;
+            commonUtils.date.convert2FriendlyDate(createdCase);
+            $scope.cases.unshift(createdCase);
+          }).error(function (resp, status) {
+            $rootScope.alertError(null, resp, status);
+          });
+      }
+
       // upload loacl image to wechat server before create case.
       if ($scope.newCase.link && $scope.newCase.link.linkType == resources.linkTypes.image.value) {
         wx.uploadImage({
@@ -101,17 +116,6 @@ angular.module('ylbWxApp')
       } else {
         callCreateApi();
       }
-      var callCreateApi = function () {
-        $http.post('/api/patients/' + patientId + '/cases', $scope.newCase)
-          .success(function (resp) {
-            $scope.newCase = {};
-            var createdCase = resp.data;
-            createdCase.canDelete = true;
-            $scope.cases.unshift(createdCase);
-          }).error(function (resp, status) {
-            $rootScope.alertError(null, resp, status);
-          });
-      }
     };
 
     $scope.showCommentInput = function (index) {
@@ -127,6 +131,7 @@ angular.module('ylbWxApp')
         .success(function (resp) {
           // return data is the updated case.
           checkCommentDeletable(resp.data.comments);
+          commonUtils.date.convert2FriendlyDate(resp.data.comments);
           $scope.cases[caseIndex] = resp.data;
           $scope.newComment = {};
         }).error(function (resp, status) {
