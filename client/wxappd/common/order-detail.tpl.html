@@ -50,7 +50,10 @@
           </div>
           <div class="col-xs-3">
             <button type="button" class="btn btn-primary btn-block" ng-click="showCases()">病历</button>
-            <button type="button" class="btn btn-success btn-block" ng-show="order.status=='init'" ng-click="payment()">支付</button>
+            <button type="button" class="btn btn-success btn-block" ng-show="order.status=='init'" ng-click="payment()">
+              支付
+            </button>
+            <button type="button" class="btn btn-default btn-block" ng-show="order.status=='paid'" disabled>已支付</button>
           </div>
         </div>
       </div>

@@ -83,12 +83,18 @@ angular.module('ylbWxApp')
       }
     };
 
-    $scope.showCases = function() {
-
+    $scope.showCases = function () {
+      $state.go('patient-cases', {id: $scope.order.patient.id});
     };
 
-    $scope.payment = function() {
-
+    $scope.payment = function () {
+      //TODO: this will be replace by wechat payment. Currently update status directly.
+      $http.put('/api/orders/' + orderId, {status: resources.orderStatus.paid.value})
+        .success(function (resp) {
+          $scope.order.status = resources.orderStatus.paid.value;
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
     };
 
     var checkCommentCanBeDelete = function (comments) {
