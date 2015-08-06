@@ -1,7 +1,8 @@
 <section id="patientProfile" ng-show="patient">
-  <div>{{order.displayBookingTime}}</div>
-  <div class="alert alert-warning" role="alert" ng-if="!order.displayBookingTime">
-    您还没有预约。
+  <div class="text-center"><h4>{{order.displayBookingTime}}</h4></div>
+
+  <!--patient set booking time-->
+  <div class="alert alert-warning" role="alert" ng-if="uiFlags.isShowBookingButtons">
     <button type="button" class="btn btn-primary btn-sm" ng-show="!isEditingBookingTime"
             ng-click="toggleSetBookingTime()">立即预约
     </button>
@@ -30,6 +31,7 @@
       </div>
     </form>
   </div>
+
   <div class="general-item-list">
     <div class="item">
       <div class="item-head">
@@ -42,21 +44,40 @@
       </div>
       <div class="item-body">
         <div class="row">
-          <div class="col-xs-9">
+          <div class="col-xs-8">
             <span>年龄：{{patient.age}}</span><br>
             <span>性别：{{patient.displaySex}}</span><br>
             <span>地区：{{patient.province}}  {{patient.city}}</span><br>
             <span>疾病：{{patient.displaySickness}}</span>
           </div>
-          <div class="col-xs-3">
+          <div class="col-xs-4">
             <button type="button" class="btn btn-primary btn-block" ng-click="showCases()">病历</button>
-            <button type="button" class="btn btn-success btn-block" ng-show="order.status=='init'" ng-click="payment()">
-              支付
-            </button>
-            <button type="button" class="btn btn-default btn-block" ng-show="order.status=='paid'" disabled>已支付</button>
+
+            <!-- patient payment options -->
+            <div ng-show="uiFlags.isShowPaymentButtons" style="margin-top: 5px">
+              <button type="button" class="btn btn-success btn-block" ng-show="order.status=='init'"
+                      ng-click="payment()">支付
+              </button>
+              <button type="button" class="btn btn-default btn-block" ng-show="order.status=='paid'"
+                      disabled>已支付
+              </button>
+            </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="row" ng-if="uiFlags.isShowDoctorConfirmButtons">
+    <div class="col-xs-4 col-xs-offset-1">
+      <button type="button" class="btn btn-success btn-block" ng-click="doctorAcceptBookingTime()"
+              ng-disabled="uiFlags.isDisableDoctorConfirmButtons">同意
+      </button>
+    </div>
+    <div class="col-xs-4 col-xs-offset-1">
+      <button type="button" class="btn btn-danger btn-block" ng-click="doctorRejectBookingTime()"
+              ng-disabled="uiFlags.isDisableDoctorConfirmButtons">拒绝
+      </button>
     </div>
   </div>
 </section>
@@ -67,7 +88,7 @@
     <div class="col-xs-12 media">
       <div class="media-left">
         <a href="#">
-          <img class="media-object" ng-src="{{comment.creator.avatar}}">
+          <img class="media-object avatar-md" ng-src="{{comment.creator.avatar}}">
         </a>
       </div>
       <div class="media-body">

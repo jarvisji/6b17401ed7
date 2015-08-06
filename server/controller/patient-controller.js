@@ -830,7 +830,7 @@ module.exports = function (app, api) {
   };
 
   var getOrdersBetweenDoctorAndPatient = function (doctorId, patientId, callback) {
-    var query = ServiceOrder.find({doctorId: doctorId, patientId: patientId});
+    var query = ServiceOrder.find({'doctors.id': doctorId, 'patient.id': patientId});
     if (callback) {
       query.exec(callback);
     } else {

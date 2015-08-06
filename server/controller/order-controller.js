@@ -289,17 +289,22 @@ module.exports = function (app) {
     var role = req.query.role; // operator
     _getCommonQueryOfOrder(req, function (err, query) {
       if (err) return utils.handleError(err, 'getOrders()', debug, res);
-      query.nin('status', finalStatus).exec()
-        .then(function (orders) {
-          debug('getOrders(), found %d orders.', orders.length);
-          //_appendOrderUsers(role, orders, function (err, newOrders) {
-          //  if (err) throw err;
-          //  res.json(utils.jsonResult(newOrders));
-          //});
-          res.json(utils.jsonResult(orders));
-        }).then(null, function (err) {
-          utils.handleError(err, 'getOrders()', debug, res);
-        });
+
+      var queryPromise = query.nin('status', finalStatus).exec();
+      if (role == app.consts.role.doctor) {
+        // don't display not paid orders for doctor.
+        queryPromise = query.nin('status', finalStatus.concat(orderStatus.init)).exec();
+      }
+      queryPromise.then(function (orders) {
+        debug('getOrders(), found %d orders.', orders.length);
+        //_appendOrderUsers(role, orders, function (err, newOrders) {
+        //  if (err) throw err;
+        //  res.json(utils.jsonResult(newOrders));
+        //});
+        res.json(utils.jsonResult(orders));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getOrders()', debug, res);
+      });
     });
   };
 

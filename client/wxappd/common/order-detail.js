@@ -5,6 +5,7 @@ angular.module('ylbWxApp')
   .controller('wxOrderDetailCtrl', ['$scope', '$rootScope', '$http', '$state', '$stateParams', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, $stateParams, resources, commonUtils) {
     var currentUser = $scope.currentUser = $rootScope.checkUserVerified();
     var orderId = $stateParams.id;
+    var sType = resources.doctorServices;
 
     var getOrderInfo = function () {
       $http.get('/api/orders/' + orderId)
@@ -13,7 +14,8 @@ angular.module('ylbWxApp')
           $rootScope.checkCommentAvatar(order.comments);
           checkCommentCanBeDelete(order.comments);
           commonUtils.date.convert2FriendlyDate(order.comments);
-          dealWithDisplayBookingTime(order);
+          handleDisplayBookingTime(order);
+          handleUIFlags(order);
           $scope.order = order;
           getPatientInfo();
         }).error(function (resp, status) {
@@ -75,7 +77,8 @@ angular.module('ylbWxApp')
         $http.put('/api/orders/' + orderId, {bookingTime: newDate})
           .success(function (resp) {
             $scope.order.bookingTime = newDate;
-            dealWithDisplayBookingTime($scope.order);
+            handleDisplayBookingTime($scope.order);
+            handleUIFlags($scope.order);
             $scope.isEditingBookingTime = false;
           }).error(function (resp, status) {
             $rootScope.alertError(null, resp, status);
@@ -88,10 +91,33 @@ angular.module('ylbWxApp')
     };
 
     $scope.payment = function () {
+      if (!currentUser.isPatient) {
+        return;
+      }
       //TODO: this will be replace by wechat payment. Currently update status directly.
       $http.put('/api/orders/' + orderId, {status: resources.orderStatus.paid.value})
         .success(function (resp) {
           $scope.order.status = resources.orderStatus.paid.value;
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
+
+    $scope.doctorRejectBookingTime = function () {
+      $http.put('/api/orders/' + orderId, {status: resources.orderStatus.rejected.value})
+        .success(function (resp) {
+          $scope.order.status = resources.orderStatus.rejected.value;
+          handleUIFlags($scope.order);
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
+
+    $scope.doctorAcceptBookingTime = function () {
+      $http.put('/api/orders/' + orderId, {status: resources.orderStatus.confirmed.value})
+        .success(function (resp) {
+          $scope.order.status = resources.orderStatus.confirmed.value;
+          handleUIFlags($scope.order);
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });
@@ -105,27 +131,51 @@ angular.module('ylbWxApp')
       }
     };
 
-    var dealWithDisplayBookingTime = function (order) {
-      var bookingDate = order.bookingTime;
-      if (bookingDate) {
-        if (typeof(bookingDate) === 'string') {
-          bookingDate = new Date(bookingDate);
-        }
-        var month = bookingDate.getMonth() + 1;
-        var date = bookingDate.getDate();
-        var hour = bookingDate.getHours();
-        var time = ' 上午';
-        if (hour > 12) {
-          hour = hour - 12;
-          time = ' 下午'
-        }
-        if (order.serviceType == resources.doctorServices.jiahao.type) {
-          order.displayBookingTime = '预约时间：' + month + '月' + date + '日';
-        } else if (order.serviceType == resources.doctorServices.suizhen.type) {
-          order.displayBookingTime = '预约周期：' + order.quantity + '个月';
-        } else if (order.serviceType == resources.doctorServices.huizhen.type) {
-          order.displayBookingTime = '预约时间：' + month + '月' + date + '日' + time + hour + '点';
+    var handleDisplayBookingTime = function (order) {
+      if (order.serviceType == sType.suizhen.type) {
+        order.displayBookingTime = '预约周期：' + order.quantity + '个月';
+      } else {
+        var bookingDate = order.bookingTime;
+        if (bookingDate) {
+          if (typeof(bookingDate) === 'string') {
+            bookingDate = new Date(bookingDate);
+          }
+          var month = bookingDate.getMonth() + 1;
+          var date = bookingDate.getDate();
+          var hour = bookingDate.getHours();
+          var time = ' 上午';
+          if (hour > 12) {
+            hour = hour - 12;
+            time = ' 下午'
+          }
+          if (order.serviceType == sType.jiahao.type) {
+            order.displayBookingTime = '预约时间：' + month + '月' + date + '日';
+          } else if (order.serviceType == sType.huizhen.type) {
+            order.displayBookingTime = '预约时间：' + month + '月' + date + '日' + time + hour + '点';
+          }
+        } else {
+          order.displayBookingTime = '尚未预约具体时间';
         }
       }
     };
+
+    var handleUIFlags = function (order) {
+      var flags = {};
+      if (currentUser.isDoctor) {
+        if (order.serviceType != sType.jiahao.type && order.status == resources.orderStatus.paid.value) {
+          flags.isShowDoctorConfirmButtons = true;
+        }
+        if (flags.isShowDoctorConfirmButtons && !order.bookingTime && !order.serviceType == sType.suizhen.type) {
+          flags.isDisableDoctorConfirmButtons = true;
+        }
+      }
+      if (currentUser.isPatient) {
+        flags.isShowPaymentButtons = true;
+        if (!order.bookingTime && !order.serviceType == sType.suizhen.type) {
+          flags.isShowBookingButtons = true;
+        }
+      }
+
+      $scope.uiFlags = flags;
+    }
   }]);

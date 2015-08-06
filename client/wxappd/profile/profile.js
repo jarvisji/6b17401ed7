@@ -236,7 +236,7 @@ angular.module('ylbWxApp')
       }
       var newOrder = {
         serviceId: $scope.suizhen._id,
-        serviceType: resources.doctorServices.huizhen.type,
+        serviceType: resources.doctorServices.suizhen.type,
         doctorId: $scope.doctor._id,
         patientId: currentUser.patient._id,
         price: $scope.modalData.price,
