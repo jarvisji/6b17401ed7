@@ -330,9 +330,80 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       {label: 'pomodoro', location: 'pomodoro', icon: 'fa-clock-o'},
       {label: 'todo', location: 'todo', icon: 'fa-tasks'},
       {label: 'profile', location: 'profile', icon: 'fa-user'}];
-  }
-  ]).
-  controller('entryCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log) {
+
+
+    $scope.doctorMenu = {
+      sub1: [
+        {
+          "text": "全部患者",
+          "href": "wxindex.html#/doctor/index"
+        }, {
+          "text": "随访病历",
+          "href": "wxindex.html#/doctor/index"
+        }, {
+          "text": "我的预约",
+          "href": "wxindex.html#/doctor/orders/"
+        }],
+      sub2: [
+        {
+          "text": "医生搜索",
+          "href": "wxindex.html#/search/doctor"
+        }, {
+          "text": "我的医友",
+          "href": "wxindex.html#/doctor/friends"
+        }],
+      sub3: [
+        {
+          "text": "商城",
+          "href": "wxindex.html#/doctor/index"
+        }, {
+          "text": "交易记录",
+          "href": "wxindex.html#/doctor/index"
+        }, {
+          "text": "个人设置",
+          "href": "wxindex.html#/profile/doctor/"
+        }]
+    };
+    $scope.patientMenu = {
+      sub1: [
+        {
+          "text": "搜索医生",
+          "href": "wxindex.html#/search/doctor"
+        }, {
+          "text": "我的医生",
+          "href": "wxindex.html#/patient/doctors"
+        }, {
+          "text": "我的预约",
+          "href": "wxindex.html#/patient/orders/"
+        }],
+      sub2: [
+        {
+          "text": "寻找病友",
+          "href": "wxindex.html#/search/patient"
+        }, {
+          "text": "我的病友",
+          "href": "wxindex.html#/patient/friends"
+        }, {
+          "text": "病友病历？",
+          "href": "wxindex.html#"
+        }, {
+          "text": "我的病历",
+          "href": "wxindex.html#/patient/cases/"
+        }],
+      sub3: [
+        {
+          "text": "商城",
+          "href": "wxindex.html#"
+        }, {
+          "text": "交易记录",
+          "href": "wxindex.html#/patient/orders/history"
+        }, {
+          "text": "个人设置",
+          "href": "wxindex.html#/profile/patient/"
+        }]
+    };
+  }])
+  .controller('entryCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log) {
     /**
      * Create separate entryCtrl from rootCtrl. Because rootCtrl is loaded by wxindex.html, which is usually before
      * 'entry' route defined in $stateProvider. In page initializing, 'verifyAndGetUserInfo()' method will be executed

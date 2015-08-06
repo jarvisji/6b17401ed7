@@ -5,7 +5,7 @@
 angular.module('ylbWxApp')
   .controller('wxMyDoctorsCtrl', ['$scope', '$rootScope', '$http', '$state', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, resources, commonUtils) {
     var currentUser = $rootScope.checkUserVerified();
-    $scope.displayType = 'putong';
+    $scope.uiFlags = {type: 'putong'};
 
     var getFollowedDoctors = function () {
       $http.get('/api/patients/' + currentUser.patient._id + '/follows?expand=true')
@@ -40,7 +40,7 @@ angular.module('ylbWxApp')
     };
 
     $scope.displayDoctors = function (type) {
-      console.log(type);
+      $scope.uiFlags.type = type;
       if (type == 'suizhen') {
         if (!$scope.doctorSuizhen) {
           getOrderDoctors();

@@ -6,7 +6,7 @@ angular.module('ylbWxApp')
   .controller('wxProfilePatientCtrl', ['$scope', '$rootScope', '$stateParams', '$http', '$alert', '$modal', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $stateParams, $http, $alert, $modal, resources, commonUtils) {
     var currentUser = $rootScope.checkUserVerified();
     var snapshot = {}; // snapshot data to compare changes.
-    var openid = $stateParams.openid;
+    var openid = $stateParams.openid ? $stateParams.openid : currentUser.openid;
 
     var loadPatientData = function () {
       $http.get('/api/patients', {params: {filter: {'wechat.openid': openid}}})

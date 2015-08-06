@@ -65,12 +65,50 @@
       <div ui-view class="page-content"></div>
     </div>
   </div>
-  <div class="row">
+
+
+  <div class="row" id="doctorMenu" ng-if="currentUser.doctor">
     <div class="btn-group btn-group-justified navbar-fixed-bottom" role="group">
-      <a class="btn btn-yellow" ui-sref="{{item.location}}" aria-label="{{item.label}}" ng-repeat="item in menu">
-        <i class="ace-icon bigger-160 fa" ng-class="item.icon"></i><br/>
-        <small>{{item.label}}</small>
-      </a>
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-lg btn-default" style="padding:1px">
+          <img src="/assets/image/logo.png" style="width:42px">
+        </button>
+      </div>
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-lg btn-default" data-placement="top" bs-dropdown="doctorMenu.sub1"
+                aria-haspopup="true" aria-expanded="false">患者
+        </button>
+      </div>
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-lg btn-default" data-placement="top" bs-dropdown="doctorMenu.sub2"
+                aria-haspopup="true" aria-expanded="false">医友
+        </button>
+      </div>
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-lg btn-default" data-placement="top" bs-dropdown="doctorMenu.sub3"
+                aria-haspopup="true" aria-expanded="false">更多
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" id="patientMenu" ng-if="currentUser.patient">
+    <div class="btn-group btn-group-justified navbar-fixed-bottom" role="group">
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-lg btn-default" data-placement="top" bs-dropdown="patientMenu.sub1"
+                aria-haspopup="true" aria-expanded="false">医生
+        </button>
+      </div>
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-lg btn-default" data-placement="top" bs-dropdown="patientMenu.sub2"
+                aria-haspopup="true" aria-expanded="false">病历
+        </button>
+      </div>
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-lg btn-default" data-placement="top" bs-dropdown="patientMenu.sub3"
+                aria-haspopup="true" aria-expanded="false">更多
+        </button>
+      </div>
     </div>
   </div>
 </div>
