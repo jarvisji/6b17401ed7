@@ -162,7 +162,7 @@ module.exports = function (app, api) {
               debug('getFollows(), get patient followed doctors failed: ', err);
               return res.status(500).json(utils.jsonResult(err));
             }
-            res.json(utils.jsonResult(doctors));
+            res.json(utils.jsonResult(handleDoctorOrder(doctors, patient.doctorFollowed)));
           });
         } else {
           res.json(utils.jsonResult(patient.doctorFollowed));
@@ -191,7 +191,8 @@ module.exports = function (app, api) {
         debug('Doctor does not exist, id: ', doctorId);
         return res.status(404).json(utils.jsonResult('Doctor not exist'));
       }
-      Patient.findByIdAndUpdate(patientId, {'$addToSet': {'doctorFollowed': doctorId}}, function (err, ret) {
+
+      doCreateFollow(function (err) {
         if (err) {
           debug('Create follows failed: ', err);
           return res.status(500).json(utils.jsonResult(err));
@@ -199,6 +200,23 @@ module.exports = function (app, api) {
         res.status(201).json(utils.jsonResult('success'));
       });
     });
+
+    var doCreateFollow = function (callback) {
+      Patient.findById(patientId).exec()
+        .then(function (patient) {
+          debug('createFollow(), pull and push doctor: %s to [doctorFollowed] of patient: %s', doctorId, patientId);
+          patient.doctorFollowed.pull(doctorId);
+          // push is faster than push, so here we save ids in reverse order, will reverse it again when get doctors.( in patientCtrl.getDoctors());
+          patient.doctorFollowed.push(doctorId);
+          return patient.save();
+        }).then(function (savedPatient) {
+          debug('createFollow(), save patient success');
+          if (callback) callback(null, savedPatient);
+        }).then(null, function (err) {
+          debug('createFollow(), error: %o', err);
+          if (callback) callback(err);
+        });
+    }
   };
 
   /**
@@ -444,30 +462,31 @@ module.exports = function (app, api) {
       var ret = {doctorInService: [], doctorPast: []};
       Doctor.find({'_id': {'$in': doctorInService}}).select(doctorExcludeFields).exec()
         .then(function (doctors) {
-          ret.doctorInService = handleOrder(doctors, doctorInService);
+          ret.doctorInService = handleDoctorOrder(doctors, doctorInService);
           return Doctor.find({_id: {'$in': doctorPast}}).select(doctorExcludeFields).exec();
         }).then(function (doctors) {
-          ret.doctorPast = handleOrder(doctors, doctorPast);
+          ret.doctorPast = handleDoctorOrder(doctors, doctorPast);
           res.json(utils.jsonResult(ret));
         }).then(null, function (err) {
           utils.handleError(err, 'getDoctors()', debug, res);
         });
     };
+  };
 
-    // use '$in' to find doctors return order is not as we want, need reorder them.
-    var handleOrder = function (doctors, idsInOrder) {
-      var ret = [];
-      for (var i in idsInOrder) {
-        for (var j in doctors) {
-          if (idsInOrder[i] == doctors[j].id) {
-            // the order of 'doctorInService' and 'doctorPast' is reversed, so use unshift instead of push.
-            ret.unshift(doctors[j]);
-            break;
-          }
+
+  // use '$in' to find doctors return order is not as we want, need reorder them.
+  var handleDoctorOrder = function (doctors, idsInOrderWillBeReversed) {
+    var ret = [];
+    for (var i in idsInOrderWillBeReversed) {
+      for (var j in doctors) {
+        if (idsInOrderWillBeReversed[i] == doctors[j].id) {
+          // the order of 'doctorInService' and 'doctorPast' is reversed, so use unshift instead of push.
+          ret.unshift(doctors[j]);
+          break;
         }
       }
-      return ret;
-    };
+    }
+    return ret;
   };
 
   /**

@@ -252,13 +252,13 @@ module.exports = function (app) {
         .then(function (patient) {
           if (order.serviceType == serviceType.jiahao.type) {
             var doctorId = order.doctors[0].id;
-            debug('handlePaymentSuccess(), pull and unshift doctor: %s to [doctorPast] of patient: %s', doctorId, order.patient.id);
+            debug('handlePaymentSuccess(), pull and push doctor: %s to [doctorPast] of patient: %s', doctorId, order.patient.id);
             patient.doctorPast.pull(doctorId);
-            // push is faster than unshift, so here we save ids in reverse order, will reverse it again when get doctors.( in patientCtrl.getDoctors());
+            // push is faster than push, so here we save ids in reverse order, will reverse it again when get doctors.( in patientCtrl.getDoctors());
             patient.doctorPast.push(doctorId);
           } else if (order.serviceType == serviceType.suizhen.type) {
             var doctorId = order.doctors[0].id;
-            debug('handlePaymentSuccess(), pull and unshift doctor: %s to [doctorInService] of patient: %s', doctorId, order.patient.id);
+            debug('handlePaymentSuccess(), pull and push doctor: %s to [doctorInService] of patient: %s', doctorId, order.patient.id);
             patient.doctorInService.pull(doctorId);
             patient.doctorInService.push(doctorId);
           } else if (order.serviceType == serviceType.huizhen.type) {
@@ -266,7 +266,7 @@ module.exports = function (app) {
             for (var idx in order.doctors) {
               doctorIds.push(order.doctors[idx].id);
             }
-            debug('handlePaymentSuccess(), pull and unshift doctor: %o to [doctorPast] of patient: %s', doctorIds, order.patient.id);
+            debug('handlePaymentSuccess(), pull and push doctor: %o to [doctorPast] of patient: %s', doctorIds, order.patient.id);
             patient.doctorPast.pull(doctorIds.join(','));
             patient.doctorPast.push(doctorIds);
           }
