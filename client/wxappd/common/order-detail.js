@@ -14,7 +14,7 @@ angular.module('ylbWxApp')
           $rootScope.checkCommentAvatar(order.comments);
           checkCommentCanBeDelete(order.comments);
           commonUtils.date.convert2FriendlyDate(order.comments);
-          handleDisplayBookingTime(order);
+          $rootScope.handleDisplayBookingTime(order);
           handleUIFlags(order);
           $scope.order = order;
           getPatientInfo();
@@ -77,7 +77,7 @@ angular.module('ylbWxApp')
         $http.put('/api/orders/' + orderId, {bookingTime: newDate})
           .success(function (resp) {
             $scope.order.bookingTime = newDate;
-            handleDisplayBookingTime($scope.order);
+            $rootScope.handleDisplayBookingTime($scope.order);
             handleUIFlags($scope.order);
             $scope.isEditingBookingTime = false;
           }).error(function (resp, status) {
@@ -127,34 +127,6 @@ angular.module('ylbWxApp')
       for (var idx in comments) {
         if (comments[idx].creator.id == currentUser.id) {
           comments[idx].canDelete = true;
-        }
-      }
-    };
-
-    var handleDisplayBookingTime = function (order) {
-      if (order.serviceType == sType.suizhen.type) {
-        order.displayBookingTime = '预约周期：' + order.quantity + '个月';
-      } else {
-        var bookingDate = order.bookingTime;
-        if (bookingDate) {
-          if (typeof(bookingDate) === 'string') {
-            bookingDate = new Date(bookingDate);
-          }
-          var month = bookingDate.getMonth() + 1;
-          var date = bookingDate.getDate();
-          var hour = bookingDate.getHours();
-          var time = ' 上午';
-          if (hour > 12) {
-            hour = hour - 12;
-            time = ' 下午'
-          }
-          if (order.serviceType == sType.jiahao.type) {
-            order.displayBookingTime = '预约时间：' + month + '月' + date + '日';
-          } else if (order.serviceType == sType.huizhen.type) {
-            order.displayBookingTime = '预约时间：' + month + '月' + date + '日' + time + hour + '点';
-          }
-        } else {
-          order.displayBookingTime = '尚未预约具体时间';
         }
       }
     };

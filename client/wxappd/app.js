@@ -325,6 +325,53 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       }
     };
 
+    /**
+     * Generate display booking time of order for showing on order list page and order detail page.
+     * @param order
+     */
+    $rootScope.handleDisplayBookingTime = function (order, noLabel) {
+      var sType = resources.doctorServices;
+      if (order.serviceType == sType.suizhen.type) {
+        if (noLabel) {
+          order.displayBookingTime = order.quantity + '个月';
+        } else {
+          order.displayBookingTime = '预约周期：' + order.quantity + '个月';
+        }
+
+      } else {
+        var bookingDate = order.bookingTime;
+        if (bookingDate) {
+          if (typeof(bookingDate) === 'string') {
+            bookingDate = new Date(bookingDate);
+          }
+          var month = bookingDate.getMonth() + 1;
+          var date = bookingDate.getDate();
+          var hour = bookingDate.getHours();
+          var time = ' 上午';
+          if (hour > 12) {
+            hour = hour - 12;
+            time = ' 下午'
+          }
+          if (order.serviceType == sType.jiahao.type) {
+            if (noLabel) {
+              order.displayBookingTime = month + '月' + date + '日';
+            } else {
+              order.displayBookingTime = '预约时间：' + month + '月' + date + '日';
+            }
+          } else if (order.serviceType == sType.huizhen.type) {
+            if (noLabel) {
+              order.displayBookingTime = month + '月' + date + '日' + time + hour + '点';
+            } else {
+              order.displayBookingTime = '预约时间：' + month + '月' + date + '日' + time + hour + '点';
+            }
+          }
+        } else {
+          order.displayBookingTime = '尚未预约具体时间';
+        }
+      }
+    };
+
+
     $scope.menu = [
       {label: 'dashboard', location: 'dashboard', icon: 'fa-tachometer'},
       {label: 'pomodoro', location: 'pomodoro', icon: 'fa-clock-o'},

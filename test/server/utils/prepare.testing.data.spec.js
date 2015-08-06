@@ -43,60 +43,64 @@ before(function (done) {
         }
 
         Doctor.create(mockDoctors, function (err, createdDoctors) {
-          if (err) done(err);
+          if (err) return done(err);
           console.log('insert test doctors success.');
+          preparePatientData();
           //done();
         });
       });
     } else {
-      console.log('no data to be inserted.');
+      console.log('no doctor data to be inserted.');
+      preparePatientData();
     }
   });
 
-  console.log('Preparing test data for patient................');
-  var testPatientOpenId = [];
-  var mockPatient = util.conf.testData.patients.concat();
-  for (var j = 0; j < mockPatient.length; j++) {
-    testPatientOpenId.push(mockPatient[j].wechat.openid);
-  }
-  var Patient = util.app.models.Patient;
-  // find test data, will not create again if they are exist.
-  var patientFilter = {'wechat.openid': {'$in': testPatientOpenId}};
-  Patient.find(patientFilter, function (err, found) {
-    if (err) return done(err);
-    console.log('trying to insert %d test patients.', mockPatient.length);
-    console.log('found %d test patients in db.', found.length);
-    // only create mock patients which not in db.
-    if (found.length != mockPatient.length) {
-      for (var i in found) {
-        for (var j in mockPatient) {
-          if (found[i].mobile == mockPatient[j].mobile) {
-            mockPatient.splice(j, 1);
-            break;
+  var preparePatientData = function () {
+    console.log('Preparing test data for patient................');
+    var testPatientOpenId = [];
+    var mockPatient = util.conf.testData.patients.concat();
+    for (var j = 0; j < mockPatient.length; j++) {
+      testPatientOpenId.push(mockPatient[j].wechat.openid);
+    }
+    var Patient = util.app.models.Patient;
+    // find test data, will not create again if they are exist.
+    var patientFilter = {'wechat.openid': {'$in': testPatientOpenId}};
+    Patient.find(patientFilter, function (err, found) {
+      if (err) return done(err);
+      console.log('trying to insert %d test patients.', mockPatient.length);
+      console.log('found %d test patients in db.', found.length);
+      // only create mock patients which not in db.
+      if (found.length != mockPatient.length) {
+        for (var i in found) {
+          for (var j in mockPatient) {
+            if (found[i].mobile == mockPatient[j].mobile) {
+              mockPatient.splice(j, 1);
+              break;
+            }
           }
         }
-      }
 
-      Patient.find({}, 'number').limit(1).sort({'number': -1}).exec(function (err, maxNumberPatient) {
-        if (err) return done(err);
-        var maxNumber = maxNumberPatient.length > 0 ? maxNumberPatient[0].number : 0;
-        console.log('max number of patients is: %d', maxNumber);
-        // set number.
-        for (var i = 0; i < mockPatient.length; i++) {
-          mockPatient[i].number = maxNumber + i + 1;
-        }
-
-        Patient.create(mockPatient, function (err, createdPatients) {
+        Patient.find({}, 'number').limit(1).sort({'number': -1}).exec(function (err, maxNumberPatient) {
           if (err) return done(err);
-          console.log('insert test patients success.');
-          done();
+          var maxNumber = maxNumberPatient.length > 0 ? maxNumberPatient[0].number : 0;
+          console.log('max number of patients is: %d', maxNumber);
+          // set number.
+          for (var i = 0; i < mockPatient.length; i++) {
+            mockPatient[i].number = maxNumber + i + 1;
+          }
+
+          Patient.create(mockPatient, function (err, createdPatients) {
+            if (err) return done(err);
+            console.log('insert test patients success.');
+            done();
+          });
         });
-      });
-    } else {
-      console.log('no data to be inserted.');
-      done();
-    }
-  });
+      } else {
+        console.log('no patient data to be inserted.');
+        done();
+      }
+    });
+  }
 });
 
 after(function () {

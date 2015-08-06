@@ -13,6 +13,7 @@ angular.module('ylbWxApp')
             order.displayType = resources.doctorServices[order.serviceType].label;
             order.displayStatus = resources.orderStatus[order.status].label;
             applyStatusLabelStyle(order);
+            $rootScope.handleDisplayBookingTime(order, /*noLabel*/true);
           }
           $scope.orders = resp.data;
         }).error(function (resp, status) {
