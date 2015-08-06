@@ -1,40 +1,40 @@
 <section>
-  <div class="btn-group btn-group-justified" role="group" aria-label="">
+  <div class="btn-group btn-group-justified" role="group">
     <div class="btn-group" role="group">
       <button type="button" class="btn btn-default" ng-class="{active: uiFlags.type=='suizhen'}"
-              ng-click="displayDoctors('suizhen')"> 随诊医生
+              ng-click="displayPatients('suizhen')"> 随诊患者
       </button>
     </div>
     <div class="btn-group" role="group">
       <button type="button" class="btn btn-default" ng-class="{active: uiFlags.type=='jiwang'}"
-              ng-click="displayDoctors('jiwang')"> 既往医生
+              ng-click="displayPatients('jiwang')"> 既往患者
       </button>
     </div>
     <div class="btn-group" role="group">
       <button type="button" class="btn btn-default" ng-class="{active: uiFlags.type=='putong'}"
-              ng-click="displayDoctors('putong')"> 普通医生
+              ng-click="displayPatients('putong')"> 普通患者
       </button>
     </div>
   </div>
 </section>
 
-<section id="myDoctors" ng-if="doctors">
-  <span ng-hide="doctors.length > 0">没有数据</span>
+<section id="myPatients" ng-if="patients">
+  <span ng-hide="patients.length > 0">没有数据</span>
 
   <div class="general-item-list">
-    <div class="item" ng-repeat="doctor in doctors" ng-click="showDetails(doctor.wechat.openid)"
+    <div class="item" ng-repeat="patient in patients" ng-click="showDetails(patients.wechat.openid)"
          ng-swipe-left="itemButton=$index">
       <div class="item-head">
         <div class="item-details">
           <div class="item-pic-container">
-            <img class="item-pic" ng-src="{{doctor.wechat.headimgurl}}">
+            <img class="item-pic" ng-src="{{patient.displayAvatar}}">
             <span class="item-pic-v-icon"><i class="fa fa-vimeo-square"></i></span>
           </div>
-          <span class="item-name">{{doctor.name}}</span>
+          <span class="item-name">{{patient.name}}</span>
           <span class="item-label"></span>
         </div>
         <!--<button type="button" class="btn btn-danger pull-right" ng-if="itemButton == $index"></button>-->
-        <span class="item-status">{{doctor.hospital}}&nbsp;&nbsp;</span>
+        <span class="item-status">{{patient.hospital}}&nbsp;&nbsp;</span>
       </div>
     </div>
   </div>

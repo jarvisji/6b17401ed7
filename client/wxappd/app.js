@@ -87,6 +87,11 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       templateUrl: 'wxappd/doctor/my-friends.tpl.html',
       controller: 'wxDoctorFriendsCtrl'
     });
+    $stateProvider.state('doctor-my-patients', {
+      url: '/doctor/patients',
+      templateUrl: 'wxappd/doctor/my-patients.tpl.html',
+      controller: 'wxMyPatientsCtrl'
+    });
     $stateProvider.state('doctor-orders', {
       url: '/doctor/orders/:type',
       templateUrl: 'wxappd/common/my-orders.tpl.html',
@@ -307,7 +312,9 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
      */
     $rootScope.checkAvatar = function (user) {
       if (!user.wechat.headimgurl) {
-        user.wechat.headimgurl = resources.defaultAvatar;
+        user.displayAvatar = resources.defaultAvatar;
+      } else {
+        user.displayAvatar = user.wechat.headimgurl;
       }
     };
 
@@ -383,9 +390,9 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       sub1: [
         {
           "text": "全部患者",
-          "href": "wxindex.html#/doctor/index"
+          "href": "wxindex.html#/doctor/patients"
         }, {
-          "text": "随访病历",
+          "text": "随访病历?",
           "href": "wxindex.html#/doctor/index"
         }, {
           "text": "我的预约",
