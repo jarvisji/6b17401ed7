@@ -1,13 +1,17 @@
 <section>
-  <div class="btn-group btn-group-justified" ng-model="displayType" bs-radio-group>
-    <label class="btn btn-default">
-      <input type="radio" class="btn btn-default" value="suizhen" ng-click="displayDoctors(displayType)"> 随诊医生</label>
-    <label class="btn btn-default">
-      <input type="radio" class="btn btn-default" value="jiwang" ng-click="displayDoctors(displayType)"> 既往医生</label>
-    <label class="btn btn-default">
-      <input type="radio" class="btn btn-default" value="putong" ng-click="displayDoctors(displayType)"> 普通医生</label>
+  <div class="btn-group btn-group-justified" role="group" aria-label="...">
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-default" ng-click="displayDoctors('suizhen')"> 随诊医生</button>
+    </div>
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-default" ng-click="displayDoctors('jiwang')"> 既往医生</button>
+    </div>
+    <div class="btn-group" role="group">
+      <button type="button" class="btn btn-default" ng-click="displayDoctors('putong')"> 普通医生</button>
+    </div>
   </div>
 </section>
+
 <section id="myDoctors" ng-if="doctors">
   <span ng-hide="doctors.length > 0">没有数据</span>
 

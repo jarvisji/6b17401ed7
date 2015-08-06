@@ -14,6 +14,7 @@ module.exports = function (app) {
   var Doctor = app.models.Doctor;
 
   var orderStatus = app.consts.orderStatus;
+  var serviceType = app.consts.doctorServices;
   var finalStatus = [orderStatus.rejected, orderStatus.finished, orderStatus.expired, orderStatus.cancelled];
   /**
    * POST '/api/orders'
@@ -161,6 +162,7 @@ module.exports = function (app) {
 
   /**
    * PUT '/api/orders/:id/status/:status'
+   * 1. 'paid' status cannot be set through this API, there is another payment callback method.
    * @param req
    * @param res
    */
@@ -171,7 +173,7 @@ module.exports = function (app) {
     var openid = req.query.openid; // operator
     debug('updateOrderStatus(), new status: %s, user role: %s, openid: %s, updating order: %s', newStatus, role, openid, orderId);
     var validStatus = Object.keys(app.consts.orderStatus);
-    if (validStatus.indexOf(newStatus) == -1) {
+    if (validStatus.indexOf(newStatus) == -1 /*TODO: uncomment || newStatus == orderStatus.paid*/) {
       debug('updateOrderStatus(), invalid status.');
       return res.status(400).json(utils.jsonResult(new Error('invalid status')));
     }
@@ -200,6 +202,7 @@ module.exports = function (app) {
               return res.status(400).json(utils.jsonResult(new Error('order status is final')));
             }
           }
+
           order.status = newStatus;
           order.save(function (err) {
             if (err) return utils.handleError(err, 'updateOrderStatus()', debug, res);
@@ -207,7 +210,12 @@ module.exports = function (app) {
 
             // after order status changed.
             updateServiceStock(order.serviceId);
-            updatePatientDoctorRelation(order);
+
+            //TODO: this should be invoke when wechat server callback.
+            if (newStatus == orderStatus.paid) {
+              handlePaymentSuccess(order);
+            }
+            //updatePatientDoctorRelation(order);
           });
         }).then(null, function (err) {
           utils.handleError(err, 'updateOrderStatus()', debug, res);
@@ -228,6 +236,56 @@ module.exports = function (app) {
       }
     };
 
+    /**
+     * When patient payment success, we should:
+     * 1. update patient and doctor relationship.
+     *    If it is 'suizhen' order, the doctor should be push to 'doctorInService', otherwise, the doctor should
+     *    be push to 'doctorPast'.
+     * 2. send wechat message to doctor and patient.
+     * @param order
+     */
+    var handlePaymentSuccess = function (order, callback) {
+      // update doctor and patient relationship. To make sure new order doctor will be positioned on top, we pull and unshift doctorId.
+      var error = null;
+      debug('handlePaymentSuccess(), update patient and doctor relations for order: %s, type: %s', order.id, order.serviceType);
+      Patient.findById(order.patient.id).exec()
+        .then(function (patient) {
+          if (order.serviceType == serviceType.jiahao.type) {
+            var doctorId = order.doctors[0].id;
+            debug('handlePaymentSuccess(), pull and unshift doctor: %s to [doctorPast] of patient: %s', doctorId, order.patient.id);
+            patient.doctorPast.pull(doctorId);
+            // push is faster than unshift, so here we save ids in reverse order, will reverse it again when get doctors.( in patientCtrl.getDoctors());
+            patient.doctorPast.push(doctorId);
+          } else if (order.serviceType == serviceType.suizhen.type) {
+            var doctorId = order.doctors[0].id;
+            debug('handlePaymentSuccess(), pull and unshift doctor: %s to [doctorInService] of patient: %s', doctorId, order.patient.id);
+            patient.doctorInService.pull(doctorId);
+            patient.doctorInService.push(doctorId);
+          } else if (order.serviceType == serviceType.huizhen.type) {
+            var doctorIds = [];
+            for (var idx in order.doctors) {
+              doctorIds.push(order.doctors[idx].id);
+            }
+            debug('handlePaymentSuccess(), pull and unshift doctor: %o to [doctorPast] of patient: %s', doctorIds, order.patient.id);
+            patient.doctorPast.pull(doctorIds.join(','));
+            patient.doctorPast.push(doctorIds);
+          }
+          return patient.save();
+        }).then(function (savedPatient) {
+          debug('handlePaymentSuccess(), save patient success');
+          if (callback) callback(null, savedPatient);
+        }).then(null, function (err) {
+          debug('handlePaymentSuccess(), error: %o', err);
+          if (callback) callback(err);
+        });
+    };
+
+    /**
+     * TODO: remove this method.
+     * This method is not in use. Logic incorrect.
+     *
+     * @param order
+     */
     var updatePatientDoctorRelation = function (order) {
       var patientId = order.patient.id;
       var doctorIds = _getOrderDoctorIds(order);

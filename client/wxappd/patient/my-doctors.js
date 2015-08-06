@@ -12,19 +12,24 @@ angular.module('ylbWxApp')
         .success(function (resp) {
           commonUtils.checkDoctorVIcon(resp.data);
           $scope.doctors = $scope.doctorFollowed = resp.data;
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
         });
     };
-    if (currentUser && currentUser.isPatient) {
-      getFollowedDoctors();
-    }
-
-    var getSuizhenDoctors = function () {
-      $scope.doctors = $scope.doctorSuizhen = [];
+    var getOrderDoctors = function () {
+      $http.get('/api/patients/' + currentUser.patient._id + '/doctors')
+        .success(function (resp) {
+          commonUtils.checkDoctorVIcon(resp.data.doctorInService);
+          commonUtils.checkDoctorVIcon(resp.data.doctorPast);
+          $scope.doctorSuizhen = resp.data.doctorInService;
+          $scope.doctorJiwang = resp.data.doctorPast;
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
     };
+    getFollowedDoctors();
+    getOrderDoctors();
 
-    var getJiwangDoctors = function () {
-      $scope.doctors = $scope.doctorJiwang = [];
-    };
 
     /**
      * Show doctor profile.
@@ -35,15 +40,16 @@ angular.module('ylbWxApp')
     };
 
     $scope.displayDoctors = function (type) {
+      console.log(type);
       if (type == 'suizhen') {
         if (!$scope.doctorSuizhen) {
-          getSuizhenDoctors();
+          getOrderDoctors();
         } else {
           $scope.doctors = $scope.doctorSuizhen;
         }
       } else if (type == 'jiwang') {
         if (!$scope.doctorJiwang) {
-          getJiwangDoctors();
+          getOrderDoctors();
         } else {
           $scope.doctors = $scope.doctorJiwang;
         }

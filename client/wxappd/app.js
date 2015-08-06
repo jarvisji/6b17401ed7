@@ -233,9 +233,15 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
      */
     $rootScope.alertError = function (_title, content, status, duration) {
       var title = generateAlertTitle('错误 ', _title, status);
+      var content;
+      if (status == 403) {
+        content = '没有权限';
+      } else {
+        content = parseContent(content);
+      }
       $alert({
         title: title,
-        content: parseContent(content),
+        content: content,
         placement: 'top',
         type: 'danger',
         duration: duration != undefined ? duration : 5,

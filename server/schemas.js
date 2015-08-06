@@ -104,8 +104,7 @@ module.exports = function () {
     doctors: [{
       id: {type: String, required: true},
       name: String,
-      avatar: String,
-      confirmed: {type: Boolean, default: false}
+      avatar: String
     }],
     patient: {
       id: {type: String, required: true},

@@ -95,7 +95,7 @@ angular.module('ylbWxApp')
         return;
       }
       //TODO: this will be replace by wechat payment. Currently update status directly.
-      $http.put('/api/orders/' + orderId, {status: resources.orderStatus.paid.value})
+      $http.put('/api/orders/' + orderId + '/status/' + resources.orderStatus.paid.value, {})
         .success(function (resp) {
           $scope.order.status = resources.orderStatus.paid.value;
         }).error(function (resp, status) {
