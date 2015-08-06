@@ -1,5 +1,35 @@
 <section id="patientProfile" ng-show="patient">
-  <div>{{order.bookingTime|date:"yyyy-MM-dd"}}</div>
+  <div>{{order.displayBookingTime}}</div>
+  <div class="alert alert-warning" role="alert" ng-if="!order.displayBookingTime">
+    您还没有预约。
+    <button type="button" class="btn btn-primary btn-sm" ng-show="!isEditingBookingTime"
+            ng-click="toggleSetBookingTime()">立即预约
+    </button>
+    <button type="button" class="btn btn-default btn-sm" ng-show="isEditingBookingTime"
+            ng-click="toggleSetBookingTime()">取消
+    </button>
+    <button type="button" class="btn btn-success btn-sm" ng-show="isEditingBookingTime" ng-click="saveBookingTime()">
+      保存
+    </button>
+
+    <form class="form-horizontal" ng-show="isEditingBookingTime">
+      <p>&nbsp;</p>
+
+      <div class="form-group">
+        <!--<label class="control-label"><i class="fa fa-calendar"></i> Datetime picker</label><br>-->
+        <div class="col-xs-6">
+          <input type="text" class="form-control" ng-model="order.bookingTimeDate" data-autoclose="1"
+                 data-date-format="yyyy-MM-dd" data-date-type="date" data-min-date="today" placeholder="日期"
+                 bs-datepicker>
+        </div>
+        <div class="col-xs-6">
+          <input type="text" class="form-control" ng-model="order.bookingTimeTime" data-autoclose="1"
+                 data-time-format="HH:mm" data-time-type="date" data-use-native="false" placeholder="时间"
+                 bs-timepicker>
+        </div>
+      </div>
+    </form>
+  </div>
   <div class="general-item-list">
     <div class="item">
       <div class="item-head">
@@ -19,7 +49,8 @@
             <span>疾病：{{patient.displaySickness}}</span>
           </div>
           <div class="col-xs-3">
-            <button type="button" class="btn btn-primary btn-block">病历</button>
+            <button type="button" class="btn btn-primary btn-block" ng-click="showCases()">病历</button>
+            <button type="button" class="btn btn-success btn-block" ng-show="order.status=='init'" ng-click="payment()">支付</button>
           </div>
         </div>
       </div>

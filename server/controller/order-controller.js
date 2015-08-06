@@ -146,7 +146,7 @@ module.exports = function (app) {
         if (!order) {
           throw new Error('order not found');
         }
-        if (_getOrderDoctorIds(order).indexOf(currentUserId) == -1 && order.patientId != currentUserId) {
+        if (_getOrderDoctorIds(order).indexOf(currentUserId) == -1 && order.patient.id != currentUserId) {
           debug('updateOrder(), user: %s hasn\'t privilege to update order: %s', currentUserId, orderId);
           throw new Error('no privilege');
         }

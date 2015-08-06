@@ -13,6 +13,7 @@ angular.module('ylbWxApp')
           $rootScope.checkCommentAvatar(order.comments);
           checkCommentCanBeDelete(order.comments);
           commonUtils.date.convert2FriendlyDate(order.comments);
+          dealWithDisplayBookingTime(order);
           $scope.order = order;
           getPatientInfo();
         }).error(function (resp, status) {
@@ -63,11 +64,62 @@ angular.module('ylbWxApp')
         });
     };
 
+    $scope.toggleSetBookingTime = function () {
+      $scope.isEditingBookingTime = !$scope.isEditingBookingTime;
+    };
+    $scope.saveBookingTime = function () {
+      var newDate = $scope.order.bookingTimeDate;
+      var newTime = $scope.order.bookingTimeTime;
+      if (newDate && newTime) {
+        newDate.setHours(newTime.getHours(), newTime.getMinutes());
+        $http.put('/api/orders/' + orderId, {bookingTime: newDate})
+          .success(function (resp) {
+            $scope.order.bookingTime = newDate;
+            dealWithDisplayBookingTime($scope.order);
+            $scope.isEditingBookingTime = false;
+          }).error(function (resp, status) {
+            $rootScope.alertError(null, resp, status);
+          });
+      }
+    };
+
+    $scope.showCases = function() {
+
+    };
+
+    $scope.payment = function() {
+
+    };
+
     var checkCommentCanBeDelete = function (comments) {
       for (var idx in comments) {
         if (comments[idx].creator.id == currentUser.id) {
           comments[idx].canDelete = true;
         }
       }
-    }
+    };
+
+    var dealWithDisplayBookingTime = function (order) {
+      var bookingDate = order.bookingTime;
+      if (bookingDate) {
+        if (typeof(bookingDate) === 'string') {
+          bookingDate = new Date(bookingDate);
+        }
+        var month = bookingDate.getMonth() + 1;
+        var date = bookingDate.getDate();
+        var hour = bookingDate.getHours();
+        var time = ' 上午';
+        if (hour > 12) {
+          hour = hour - 12;
+          time = ' 下午'
+        }
+        if (order.serviceType == resources.doctorServices.jiahao.type) {
+          order.displayBookingTime = '预约时间：' + month + '月' + date + '日';
+        } else if (order.serviceType == resources.doctorServices.suizhen.type) {
+          order.displayBookingTime = '预约周期：' + order.quantity + '个月';
+        } else if (order.serviceType == resources.doctorServices.huizhen.type) {
+          order.displayBookingTime = '预约时间：' + month + '月' + date + '日' + time + hour + '点';
+        }
+      }
+    };
   }]);
