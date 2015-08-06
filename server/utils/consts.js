@@ -28,7 +28,7 @@ module.exports = {
   },
   orderStatus: {
     init: 'init',
-    payed: 'paid',
+    paid: 'paid',
     confirmed: 'confirmed', // doctor confirmed
     rejected: 'rejected',   //doctor rejected
     doctorFinished: 'doctorFinished',

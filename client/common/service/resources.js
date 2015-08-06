@@ -22,8 +22,8 @@ angular.module('ylbWxApp')
       suizhen: {type: 'suizhen', label: "随诊"}
     },
     orderStatus: {
-      init: {value: 'init', label: '已生成'},
-      payed: {value: 'paid', label: '已支付'},
+      init: {value: 'init', label: '未支付'},
+      paid: {value: 'paid', label: '已支付'},
       confirmed: {value: 'confirmed', label: '已确认'}, // doctor confirmed
       rejected: {value: 'rejected', label: '已拒绝'},   //doctor rejected
       doctorFinished: {value: 'doctorFinished', label: '医生已完成'},
