@@ -323,7 +323,13 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           comment.creator.avatar = resources.defaultAvatar;
         }
       }
-    }
+    };
+
+    $scope.menu = [
+      {label: 'dashboard', location: 'dashboard', icon: 'fa-tachometer'},
+      {label: 'pomodoro', location: 'pomodoro', icon: 'fa-clock-o'},
+      {label: 'todo', location: 'todo', icon: 'fa-tasks'},
+      {label: 'profile', location: 'profile', icon: 'fa-user'}];
   }
   ]).
   controller('entryCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log) {

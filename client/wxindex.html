@@ -65,6 +65,14 @@
       <div ui-view class="page-content"></div>
     </div>
   </div>
+  <div class="row">
+    <div class="btn-group btn-group-justified navbar-fixed-bottom" role="group">
+      <a class="btn btn-yellow" ui-sref="{{item.location}}" aria-label="{{item.label}}" ng-repeat="item in menu">
+        <i class="ace-icon bigger-160 fa" ng-class="item.icon"></i><br/>
+        <small>{{item.label}}</small>
+      </a>
+    </div>
+  </div>
 </div>
 
 </body>
