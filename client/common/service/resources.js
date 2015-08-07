@@ -16,6 +16,11 @@ angular.module('ylbWxApp')
       1: '普通',
       2: '正式'
     },
+    relationStatus: {
+      normal: {value: 1},
+      jiwang: {value: 2},
+      suizhen: {value: 3}
+    },
     doctorServices: {
       jiahao: {type: 'jiahao', label: "加号"},
       huizhen: {type: 'huizhen', label: "会诊"},

@@ -311,10 +311,18 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
      * @param user
      */
     $rootScope.checkAvatar = function (user) {
-      if (!user.wechat.headimgurl) {
-        user.displayAvatar = resources.defaultAvatar;
+      if (user instanceof Array) {
+        for (var i = 0; i < user.length; i++) {
+          $rootScope.checkAvatar(user[i]);
+        }
       } else {
-        user.displayAvatar = user.wechat.headimgurl;
+        if (user.wechat.headimgurl) {
+          user.displayAvatar = user.wechat.headimgurl;
+        } else if (user.avatar) {
+          user.displayAvatar = user.avatar;
+        } else {
+          user.displayAvatar = resources.defaultAvatar;
+        }
       }
     };
 
@@ -392,7 +400,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           "text": "全部患者",
           "href": "wxindex.html#/doctor/patients"
         }, {
-          "text": "随访病历?",
+          "text": "随访病历",
           "href": "wxindex.html#/doctor/index"
         }, {
           "text": "我的预约",
@@ -438,7 +446,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           "text": "我的病友",
           "href": "wxindex.html#/patient/friends"
         }, {
-          "text": "病友病历？",
+          "text": "病友病历",
           "href": "wxindex.html#"
         }, {
           "text": "我的病历",
@@ -456,8 +464,10 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           "href": "wxindex.html#/profile/patient/"
         }]
     };
-  }])
-  .controller('entryCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log) {
+  }
+  ])
+  .
+  controller('entryCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log) {
     /**
      * Create separate entryCtrl from rootCtrl. Because rootCtrl is loaded by wxindex.html, which is usually before
      * 'entry' route defined in $stateProvider. In page initializing, 'verifyAndGetUserInfo()' method will be executed

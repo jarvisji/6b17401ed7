@@ -12,6 +12,10 @@ module.exports = {
   },
 
   handleError: function (err, prefix, debug, res, status) {
+    if (err.message == 'responded') {
+      // means already send response to user and skip after promise then().
+      return;
+    }
     var theDebug = debug ? debug : _debug;
     if (prefix)
       theDebug('%s, error: %o', prefix, err);
@@ -21,11 +25,17 @@ module.exports = {
     if (res) {
       var statusCode = 500;
       if (err.message == 'no privilege')
-        statusCode = 403
+        statusCode = 403;
       if (status)
         statusCode = status;
       return res.status(statusCode).json(this.jsonResult(err));
     }
+  },
+
+  response403: function (res, message) {
+    var msg = message ? message : 'no privilege';
+    res.status(403).json(utils.jsonResult(new Error(msg)));
+    return new Error('responded');
   },
 
   /**
@@ -65,11 +75,13 @@ module.exports = {
   getUserByOpenid: function (openid, role, callback) {
     var Doctor = gApp.models.Doctor;
     var Patient = gApp.models.Patient;
+    var queryPromise;
     if (role == gApp.consts.role.doctor) {
-      var queryPromise = Doctor.findOne({'wechat.openid': openid}).exec();
+      queryPromise = Doctor.findOne({'wechat.openid': openid}).exec();
     } else if (role == gApp.consts.role.patient) {
-      var queryPromise = Patient.findOne({'wechat.openid': openid}).exec();
+      queryPromise = Patient.findOne({'wechat.openid': openid}).exec();
     } else {
+      _debug('getrUserByOpenid(), invalid role: %s', role);
       throw new Error('invalid role');
     }
     if (callback) {
@@ -78,8 +90,7 @@ module.exports = {
       }, function (err) {
         callback(err);
       })
-    } else {
-      return queryPromise;
     }
+    return queryPromise;
   }
 };

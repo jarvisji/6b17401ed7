@@ -158,9 +158,9 @@ module.exports = function () {
       remark: String,
       groupid: Number
     },
-    doctorFollowed: [String], // doctorId
-    doctorInService: [String], // doctorId
-    doctorPast: [String], // doctorId
+    //doctorFollowed: [String], // doctorId
+    //doctorInService: [String], // doctorId
+    //doctorPast: [String], // doctorId
     //patientFriends: [String], // patientId
     created: {type: Date, default: Date.now},
     lastModified: {type: Date, default: Date.now}
@@ -210,6 +210,27 @@ module.exports = function () {
   });
   caseHistorySchema.index({patientId: 1, created: -1});
 
+  var doctorPatientRelationSchema = new Schema({
+    patient: {
+      id: String,
+      name: String,
+      avatar: String
+    },
+    doctor: {
+      id: String,
+      name: String,
+      avatar: String,
+      hospital: String
+    },
+    status: Number, // 1-putong, 2-jiwang, 3-suizhen, they have priority.
+    memo: String,
+    created: {type: Date, default: Date.now},
+    lastModified: {type: Date, default: Date.now}
+  });
+  doctorPatientRelationSchema.pre('update', function () {
+    this.update({}, {$set: {lastModified: new Date()}});
+  });
+  doctorPatientRelationSchema.index({'patient.id': 1, 'doctor.id': 1, status: 1, 'created': -1});
 
   var wechatOAuthSchema = new Schema({
     access_token: String,
@@ -240,6 +261,7 @@ module.exports = function () {
     patientSchema: patientSchema,
     patientFriendSchema: patientFriendSchema,
     caseHistorySchema: caseHistorySchema,
+    doctorPatientRelationSchema: doctorPatientRelationSchema,
     wechatOAuthSchema: wechatOAuthSchema
   };
 };

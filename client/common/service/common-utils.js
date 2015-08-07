@@ -28,6 +28,18 @@ angular.module('ylbWxApp')
         return age;
       },
       /**
+       * Check input is string of ObjectId of MongoDB.
+       * @param str
+       * @returns {boolean}
+       */
+      isObjectId: function (str) {
+        var ret = false;
+        if (typeof(str) === 'string' && str.length == 24) {
+          ret = true;
+        }
+        return ret;
+      },
+      /**
        * Get drop-down data for Provinces.
        * @returns {Array}
        */

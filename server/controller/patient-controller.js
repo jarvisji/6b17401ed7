@@ -15,6 +15,7 @@ module.exports = function (app, api) {
   var Doctor = app.models.Doctor;
   var CaseHistory = app.models.CaseHistory;
   var ServiceOrder = app.models.ServiceOrder;
+  var DPRelation = app.models.DoctorPatientRelation;
   var Comment = app.models.Comment;
   var doctorExcludeFields = app.models.doctorExcludeFields + ' -services';
   var patientExcludeFields = app.models.patientExcludeFields;
@@ -122,141 +123,219 @@ module.exports = function (app, api) {
    * @param req
    * @param res
    */
-  var getFollows = function (req, res) {
-    var patientId = req.params.id;
-    var expand = req.query.expand;
-    var openid = req.query.openid; // operator
-    var role = req.query.role; // operator
-    debug('getFollows(), patientId: %s, expand: %s.', patientId, expand);
-
-    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
-      if (err) {
-        return res.status(500).json(utils.jsonResult(err));
-      }
-      if (isSelf) {
-        doGetFollows(opUser);
-      } else {
-        return res.status(403).json(utils.jsonResult(new Error('no privilege')));
-      }
-    });
-
-    var doGetFollows = function () {
-      Patient.findById(patientId, 'doctorFollowed', function (err, patient) {
-        if (err) {
-          debug('getFollows(), get patient follows failed: ', err);
-          return res.status(500).json(utils.jsonResult(err));
-        }
-
-        if (!patient) {
-          debug('getFollows() error: patient not found, id: %s', patientId);
-          return res.status(404).json(utils.jsonResult('Patient not found'));
-        }
-
-        if (!patient.doctorFollowed || !patient.doctorFollowed.length)
-          patient.doctorFollowed = [];
-
-        if (expand) {
-          debug('getFollows(), getting expand info of doctors that followed: %o ', patient.doctorFollowed);
-          Doctor.find({'_id': {'$in': patient.doctorFollowed}}, doctorExcludeFields, function (err, doctors) {
-            if (err) {
-              debug('getFollows(), get patient followed doctors failed: ', err);
-              return res.status(500).json(utils.jsonResult(err));
-            }
-            res.json(utils.jsonResult(handleDoctorOrder(doctors, patient.doctorFollowed)));
-          });
-        } else {
-          res.json(utils.jsonResult(patient.doctorFollowed));
-        }
-      });
-    }
-  };
+  //var getFollows = function (req, res) {
+  //  var patientId = req.params.id;
+  //  var expand = req.query.expand;
+  //  var openid = req.query.openid; // operator
+  //  var role = req.query.role; // operator
+  //  debug('getFollows(), patientId: %s, expand: %s.', patientId, expand);
+  //
+  //  checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+  //    if (err) {
+  //      return res.status(500).json(utils.jsonResult(err));
+  //    }
+  //    if (isSelf) {
+  //      doGetFollows(opUser);
+  //    } else {
+  //      return res.status(403).json(utils.jsonResult(new Error('no privilege')));
+  //    }
+  //  });
+  //
+  //  var doGetFollows = function () {
+  //    Patient.findById(patientId, 'doctorFollowed', function (err, patient) {
+  //      if (err) {
+  //        debug('getFollows(), get patient follows failed: ', err);
+  //        return res.status(500).json(utils.jsonResult(err));
+  //      }
+  //
+  //      if (!patient) {
+  //        debug('getFollows() error: patient not found, id: %s', patientId);
+  //        return res.status(404).json(utils.jsonResult('Patient not found'));
+  //      }
+  //
+  //      if (!patient.doctorFollowed || !patient.doctorFollowed.length)
+  //        patient.doctorFollowed = [];
+  //
+  //      if (expand) {
+  //        debug('getFollows(), getting expand info of doctors that followed: %o ', patient.doctorFollowed);
+  //        Doctor.find({'_id': {'$in': patient.doctorFollowed}}, doctorExcludeFields, function (err, doctors) {
+  //          if (err) {
+  //            debug('getFollows(), get patient followed doctors failed: ', err);
+  //            return res.status(500).json(utils.jsonResult(err));
+  //          }
+  //          res.json(utils.jsonResult(handleDoctorOrder(doctors, patient.doctorFollowed)));
+  //        });
+  //      } else {
+  //        res.json(utils.jsonResult(patient.doctorFollowed));
+  //      }
+  //    });
+  //  }
+  //};
 
   /**
-   * POST /api/patients/:id/follows
-   * Data: {'doctorId':''}
-   * Create follow relationship that a patient follows a doctor.
+   * Comment method to find doctor and patient information to generate a base DoctorPatientRelation document.
+   * @param patientId
+   * @param doctorId
+   * @param callback
+   */
+  var generateNewRelationObject = function (patientId, doctorId, callback) {
+    var newDpr = {};
+    debug('generateNewRelationObject(), getting doctor info: %s', doctorId);
+    Doctor.findById(doctorId).exec()
+      .then(function (doctor) {
+        if (!doctor) {
+          debug('generateNewRelationObject(), doctor does not exist: %s', doctorId);
+          throw new Error('doctor not exist');
+        }
+        newDpr.doctor = {id: doctor.id, name: doctor.name, avatar: doctor.wechat.headimgurl, hospital: doctor.hospital};
+        debug('generateNewRelationObject(), getting patient info: %s', patientId);
+        return Patient.findById(patientId).exec();
+      }).then(function (patient) {
+        if (!patient) {
+          debug('generateNewRelationObject(), patient does not exist: %s', patientId);
+          throw new Error('patient not exist');
+        }
+        newDpr.patient = {id: patient.id, name: patient.name, avatar: patient.wechat.headimgurl};
+        debug('generateNewRelationObject(), generated new relation: %o', newDpr);
+        callback(null, newDpr);
+      }).then(null, function (err) {
+        callback(err);
+      });
+  };
+  /**
+   * POST /api/relations/normal
+   * Data: {'doctorId':'', 'patientId': ''}
+   * Create normal relationship that a patient follows a doctor.
+   *
+   * 患者关注医生：
+   * - 如果没有关系存在，创建新的关系，状态为普通。
+   * - 如果已有关系存在，保持状态不变。
    * @param req
    * @param res
    */
   var createFollow = function (req, res) {
-    var patientId = req.params.id;
-    var doctorId = req.body.doctorId;
-    debug('Creating follow, patientId: %s, doctorId: %s.', patientId, doctorId);
-    Doctor.findById(doctorId, function (err, doctor) {
-      if (err) {
-        debug('Get doctor which trying to follow failed: ', err);
-        return res.status(500).json(utils.jsonResult(err));
+    var reqDpr = req.body;
+    var patientId = reqDpr.patientId;
+    var doctorId = reqDpr.doctorId;
+    debug('createFollow(), receive create follow request, patientId: %s, doctorId: %s.', patientId, doctorId);
+    if (!patientId || !doctorId) {
+      return utils.handleError(new Error('invalid data'), 'createFollow()', debug, res, 400);
+    }
+    debug('createFollow(), checking current relation...');
+    DPRelation.find({'patient.id': patientId, 'doctor.id': doctorId}, function (err, relation) {
+      if (err) return utils.handleError(err, 'createFollow()', debug, res);
+      if (relation.length == 0) {
+        debug('createFollow(), no relation exist, creating a new one.');
+        generateNewRelationObject(patientId, doctorId, doCreateFollow);
+      } else {
+        debug('createFollow(), skip create since relation exists: %s', relation.status);
+        res.json(utils.jsonResult(relation));
       }
-      if (!doctor) {
-        debug('Doctor does not exist, id: ', doctorId);
-        return res.status(404).json(utils.jsonResult('Doctor not exist'));
-      }
-
-      doCreateFollow(function (err) {
-        if (err) {
-          debug('Create follows failed: ', err);
-          return res.status(500).json(utils.jsonResult(err));
-        }
-        res.status(201).json(utils.jsonResult('success'));
-      });
     });
 
-    var doCreateFollow = function (callback) {
-      Patient.findById(patientId).exec()
-        .then(function (patient) {
-          debug('createFollow(), pull and push doctor: %s to [doctorFollowed] of patient: %s', doctorId, patientId);
-          patient.doctorFollowed.pull(doctorId);
-          // push is faster than push, so here we save ids in reverse order, will reverse it again when get doctors.( in patientCtrl.getDoctors());
-          patient.doctorFollowed.push(doctorId);
-          return patient.save();
-        }).then(function (savedPatient) {
-          debug('createFollow(), save patient success');
-          if (callback) callback(null, savedPatient);
-        }).then(null, function (err) {
-          debug('createFollow(), error: %o', err);
-          if (callback) callback(err);
-        });
+    var doCreateFollow = function (err, newDpr) {
+      if (err) return utils.handleError(err, 'doCreateFollow()', debug, res);
+      newDpr.memo = reqDpr.memo;
+      newDpr.status = app.consts.relationStatus.putong.value;
+      debug('createFollow(), doCreateFollow(), saving to db.');
+      DPRelation.create(newDpr, function (err, created) {
+        if (err) return utils.handleError(err, 'doCreateFollow()', debug, res);
+        res.json(utils.jsonResult(created));
+      })
     }
   };
 
   /**
-   * Check patient is followed a doctor or not.
-   * GET '/api/patients/:id/follows/:doctorId'
-   * @Response: {data: true/false}
+   * GET '/api/relations/doctor/:doctorId/patient/:patientId'
+   * Get relation between patient and doctor.
+   * @Response: {DoctorPatientRelation}
    * @param req
    * @param res
    */
-  var isFollowed = function (req, res) {
-    var patientId = req.params.id;
+  var getRelation = function (req, res) {
+    var patientId = req.params.patientId;
     var doctorId = req.params.doctorId;
-    debug('isFollowed(), patientId: %s, doctorId: %s.', patientId, doctorId);
-    Patient.find({'_id': patientId, 'doctorFollowed': doctorId}, function (err, found) {
-      if (err) {
-        debug('isFollowed(), get follows failed: ', err);
-        return res.status(500).json(utils.jsonResult(err));
-      }
-      var isFollowed = found.length > 0;
-      res.json(utils.jsonResult(isFollowed));
-    });
+    var role = req.query.role;
+    var openid = req.query.openid;
+    debug('getRelation(), patientId: %s, doctorId: %s.', patientId, doctorId);
+
+    var _relation;
+    DPRelation.find({'doctor.id': doctorId, 'patient.id': patientId}).exec()
+      .then(function (relation) {
+        if (relation.length == 0) {
+          debug('getRelation(), relation not exist.');
+          res.json(utils.jsonResult(null));
+          throw new Error('responded');
+        }
+        _relation = relation[0];
+        if (!_relation.doctor || !_relation.patient) {
+          debug('getRelation(), invalid relation data: %o', _relation);
+          throw new Error('invalid relation data');
+        }
+        debug('getRelation(), get current operation user, role: %s, openid: %s', role, openid);
+        return utils.getUserByOpenid(openid, role);
+      }).then(function (user) {
+        if (!user) {
+          debug('getRelation(), operate user not exist.');
+          throw new Error('user not found');
+        }
+        if (user.id != _relation.doctor.id && user.id != _relation.patient.id) {
+          debug('getRelation(), user: %s no privilege to delete relation: %s', user.id, _relation._id);
+          return utils.response403(res);
+        }
+        debug('getRelation(), pass privilege check, return relation.');
+        res.json(utils.jsonResult(_relation));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getRelation()', debug, res);
+      });
   };
 
   /**
-   * DELETE /api/patients/:id/follows/:followId
-   * Delete follow relationship that a patient follows a doctor.
+   * DELETE /api/relations/normal/:relationId
+   * Delete normal relationship that a patient follows a doctor.
+   *
+   * Only patient can delete his follow relation.
    * @param req
    * @param res
    */
   var deleteFollow = function (req, res) {
-    var patientId = req.params.id;
-    var doctorId = req.params.doctorId;
-    debug('Deleting follow, patientId: %s, doctorId: %s.', patientId, doctorId);
-    Patient.findByIdAndUpdate(patientId, {'$pull': {'doctorFollowed': doctorId}}, function (err, ret) {
-      if (err) {
-        debug('Delete follows failed: ', err);
-        return res.status(500).json(utils.jsonResult(err));
-      }
-      res.status(200).json(utils.jsonResult('success'));
-    });
+    var relationId = req.params.relationId;
+    var role = req.query.role;
+    var openid = req.query.openid;
+
+    debug('deleteFollow(), receive request to delete normal relation: %s', relationId);
+    if (role != app.consts.role.patient) {
+      debug('deleteFollow(), only patient can delete normal relation.');
+      return res.status(403).json(utils.jsonResult(new Error('no privilege')));
+    }
+    var _relation;
+    DPRelation.findById(relationId).exec()
+      .then(function (relation) {
+        if (!relation) {
+          debug('deleteFollow(), no relation found, response success.');
+          res.json(utils.jsonResult('success'));
+          throw new Error('responded');
+        }
+        if (relation.status != app.consts.relationStatus.putong.value) {
+          debug('deleteFollow(), cannot delete relation of status: %s', relation.status);
+          res.status(500).json(utils.jsonResult(new Error('invalid relation status')));
+          throw new Error('responded');
+        }
+        _relation = relation;
+        return utils.getUserByOpenid(openid, role);
+      }).then(function (patient) {
+        if (patient.id != _relation.patient.id) {
+          debug('deleteFollow(), patient only can delete own relation.');
+          res.status(403).json(utils.jsonResult(new Error('no privilege')));
+          throw new Error('responded');
+        }
+        return patient.remove();
+      }).then(function (removed) {
+        debug('deleteFollow(), delete normal relation success: %s', relationId);
+        res.json(utils.jsonResult('success'));
+      }).then(null, function (err) {
+        utils.handleError(err, 'deleteFollow()', debug, res);
+      });
   };
 
 
@@ -435,42 +514,56 @@ module.exports = function (app, api) {
 
   /**
    * GET '/api/patients/:id/doctors'
-   * Get the doctors those have orders with the given patient.
+   * Get the doctors those have relations with the given patient.
    * @param req
    * @param res
    */
-  var getDoctors = function (req, res) {
+  var getDoctorRelations = function (req, res) {
     var openid = req.query.openid; // operator
     var role = req.query.role; // operator
     var patientId = req.params.id;
 
-    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
-      if (err) {
-        res.status(500).json(utils.jsonResult(err));
-      } else {
-        if (isSelf) {
-          doGetDoctors(opUser);
-        } else {
-          res.status(403).json(utils.jsonResult(err));
+    debug('getDoctors(), receive request to get doctors of patient: %s', patientId);
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        if (user.id != patientId) {
+          debug('getDoctors(), currently only support get own relations. operate user is %s, ', user.id);
+          throw utils.response403(res);
         }
-      }
-    });
+        return DPRelation.find({'patient.id': patientId}).sort({created: -1}).exec();
+      }).then(function (relations) {
+        res.json(utils.jsonResult(relations));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getDoctors()', debug, res);
+      });
 
-    var doGetDoctors = function (patient) {
-      var doctorInService = patient.doctorInService;
-      var doctorPast = patient.doctorPast;
-      var ret = {doctorInService: [], doctorPast: []};
-      Doctor.find({'_id': {'$in': doctorInService}}).select(doctorExcludeFields).exec()
-        .then(function (doctors) {
-          ret.doctorInService = handleDoctorOrder(doctors, doctorInService);
-          return Doctor.find({_id: {'$in': doctorPast}}).select(doctorExcludeFields).exec();
-        }).then(function (doctors) {
-          ret.doctorPast = handleDoctorOrder(doctors, doctorPast);
-          res.json(utils.jsonResult(ret));
-        }).then(null, function (err) {
-          utils.handleError(err, 'getDoctors()', debug, res);
-        });
-    };
+    //checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+    //  if (err) {
+    //    res.status(500).json(utils.jsonResult(err));
+    //  } else {
+    //    if (isSelf) {
+    //      doGetDoctors(opUser);
+    //    } else {
+    //      res.status(403).json(utils.jsonResult(err));
+    //    }
+    //  }
+    //});
+    //
+    //var doGetDoctors = function (patient) {
+    //  var doctorInService = patient.doctorInService;
+    //  var doctorPast = patient.doctorPast;
+    //  var ret = {doctorInService: [], doctorPast: []};
+    //  Doctor.find({'_id': {'$in': doctorInService}}).select(doctorExcludeFields).exec()
+    //    .then(function (doctors) {
+    //      ret.doctorInService = handleDoctorOrder(doctors, doctorInService);
+    //      return Doctor.find({_id: {'$in': doctorPast}}).select(doctorExcludeFields).exec();
+    //    }).then(function (doctors) {
+    //      ret.doctorPast = handleDoctorOrder(doctors, doctorPast);
+    //      res.json(utils.jsonResult(ret));
+    //    }).then(null, function (err) {
+    //      utils.handleError(err, 'getDoctors()', debug, res);
+    //    });
+    //};
   };
 
 
@@ -512,11 +605,11 @@ module.exports = function (app, api) {
       return res.status(400).json(utils.jsonResult(new Error('Invalid content')));
     }
 
-    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, creatorUser) {
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasRelation, creatorUser) {
       if (err) {
         res.status(500).json(utils.jsonResult(err));
       } else {
-        if (isSelf || hasOrder) {
+        if (isSelf || hasRelation) {
           createCase(creatorUser);
         } else {
           res.status(403).json(utils.jsonResult(err));
@@ -602,11 +695,11 @@ module.exports = function (app, api) {
     var openid = req.query.openid; // operator
     var role = req.query.role; // operator
     var patientId = req.params.id;
-    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasRelation, opUser) {
       if (err) {
         res.status(500).json(utils.jsonResult(err));
       } else {
-        if (isSelf || hasOrder) {
+        if (isSelf || hasRelation) {
           res.json('ok');
         } else {
           res.status(403).json(utils.jsonResult(err));
@@ -626,11 +719,11 @@ module.exports = function (app, api) {
     var openid = req.query.openid; // operator
     var role = req.query.role; // operator
     var patientId = req.params.id;
-    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasRelation, opUser) {
       if (err) {
         res.status(500).json(utils.jsonResult(err));
       } else {
-        if (isSelf || isFriend || hasOrder) {
+        if (isSelf || isFriend || hasRelation) {
           res.json('ok');
         } else {
           res.status(403).json(utils.jsonResult(err));
@@ -649,11 +742,11 @@ module.exports = function (app, api) {
     var role = req.query.role; // operator
     var patientId = req.params.id;
 
-    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasRelation, opUser) {
       if (err) {
         res.status(500).json(utils.jsonResult(err));
       } else {
-        if (isSelf || isFriend || hasOrder) {
+        if (isSelf || isFriend || hasRelation) {
           getCasesData();
         } else {
           res.status(403).json(utils.jsonResult(err));
@@ -683,7 +776,7 @@ module.exports = function (app, api) {
     var patientId = req.params.id;
     var caseId = req.params.caseId;
 
-    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasRelation, opUser) {
       if (err) {
         res.status(500).json(utils.jsonResult(err));
       } else {
@@ -724,11 +817,11 @@ module.exports = function (app, api) {
     var caseId = req.params.caseId;
     var newComment = req.body;
 
-    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasRelation, opUser) {
       if (err) {
         res.status(500).json(utils.jsonResult(err));
       } else {
-        if (isSelf || isFriend || hasOrder) {
+        if (isSelf || isFriend || hasRelation) {
           createComment(opUser);
         } else {
           res.status(403).json(utils.jsonResult(err));
@@ -767,7 +860,7 @@ module.exports = function (app, api) {
     var caseId = req.params.caseId;
     var commentId = req.params.commentId;
 
-    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
+    checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasRelation, opUser) {
       if (err) {
         res.status(500).json(utils.jsonResult(err));
       } else {
@@ -813,7 +906,7 @@ module.exports = function (app, api) {
   var checkRelationshipWithPatient = function (patientId, operatorOpenId, operatorRole, callback) {
     var isSelf = false;
     var isFriend = false;
-    var hasOrder = false;
+    var hasRelation = false;
     var error = null;
     var operationUser;
     if (operatorRole != app.consts.role.doctor && operatorRole != app.consts.role.patient) {
@@ -831,7 +924,7 @@ module.exports = function (app, api) {
           if (operatorRole == app.consts.role.doctor) {
             // doctor, check order relationship.
             debug('checkRelationship(), operator is doctor, check if they have order relationship.');
-            return getOrdersBetweenDoctorAndPatient(user.id, patientId);
+            return getRelationBetweenDoctorAndPatient(user.id, patientId);
           } else if (operatorRole == app.consts.role.patient) {
             if (user.id == patientId) {
               // patient self
@@ -848,7 +941,7 @@ module.exports = function (app, api) {
             // orders
             if (data.length > 0) {
               debug('checkRelationship(), doctor and patient has order relationship.');
-              hasOrder = true;
+              hasRelation = true;
             } else {
               debug('checkRelationship(), doctor: %s, openid: %s has no orders with patient: %s.', operationUser.id, operatorOpenId, patientId);
               error = new Error('No privilege');
@@ -863,7 +956,7 @@ module.exports = function (app, api) {
             }
           }
         }
-        callback(error, isSelf, isFriend, hasOrder, operationUser);
+        callback(error, isSelf, isFriend, hasRelation, operationUser);
       }).then(null, function (err) {
         if (err) {
           debug('checkRelationship(), get error: %o', err);
@@ -872,8 +965,8 @@ module.exports = function (app, api) {
       });
   };
 
-  var getOrdersBetweenDoctorAndPatient = function (doctorId, patientId, callback) {
-    var query = ServiceOrder.find({'doctors.id': doctorId, 'patient.id': patientId});
+  var getRelationBetweenDoctorAndPatient = function (doctorId, patientId, callback) {
+    var query = DPRelation.find({'doctors.id': doctorId, 'patient.id': patientId});
     if (callback) {
       query.exec(callback);
     } else {
@@ -924,9 +1017,9 @@ module.exports = function (app, api) {
     find: find,
     getPatient: getPatient,
     save: save,
-    getFollows: getFollows,
+    //getFollows: getFollows,
     createFollow: createFollow,
-    isFollowed: isFollowed,
+    getRelation: getRelation,
     deleteFollow: deleteFollow,
     createFriendsRequests: createFriendsRequests,
     getFriendsRequests: getFriendsRequests,
@@ -935,7 +1028,7 @@ module.exports = function (app, api) {
     deleteFriendsRequests: deleteFriendsRequests,
     getFriendsRequestsStatus: getFriendsRequestsBetween2Patients,
     getFriends: getFriends,
-    getDoctors: getDoctors,
+    getDoctorRelations: getDoctorRelations,
     createCase: createCase,
     getCases: getCases,
     deleteCase: deleteCase,

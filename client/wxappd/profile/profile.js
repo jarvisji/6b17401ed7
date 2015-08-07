@@ -10,7 +10,11 @@ angular.module('ylbWxApp')
     var openid = $stateParams.openid ? $stateParams.openid : currentUser.openid
 
     var loadDoctorData = function () {
-      $http.get('/api/doctors', {params: {filter: {'wechat.openid': openid}}})
+      var filter = {filter: {'wechat.openid': openid}};
+      if (commonUtils.isObjectId(openid)) {
+        filter = {filter: {'_id': openid}};
+      }
+      $http.get('/api/doctors', {params: filter})
         .success(function (res) {
           if (res.count > 0) {
             var doctor = res.data[0];
@@ -26,6 +30,9 @@ angular.module('ylbWxApp')
     };
     if (openid) {
       $scope.isSelf = openid == currentUser.openid;
+      if (commonUtils.isObjectId(openid)) {
+        $scope.isSelf = openid == currentUser.id;
+      }
       loadDoctorData();
     }
 
@@ -59,9 +66,11 @@ angular.module('ylbWxApp')
 
       // get current user follow this doctor or not.
       if (currentUser.isPatient) {
-        $http.get('/api/patients/' + currentUser.patient._id + '/follows/' + doctor._id)
+        $http.get('/api/relations/doctor/' + doctor._id + '/patient/' + currentUser.patient._id)
           .success(function (resp) {
-            $scope.isFollowed = resp.data;
+            if (resp.data && resp.data.status == resources.relationStatus.normal.value) {
+              $scope.isFollowed = resp.data._id;
+            }
           });
       }
 
@@ -255,10 +264,10 @@ angular.module('ylbWxApp')
     $scope.followDoctor = function () {
       var profileDoctorId = $scope.doctor._id;
       var patientId = currentUser.patient._id;
-      $http.post('/api/patients/' + patientId + '/follows', {'doctorId': profileDoctorId})
+      $http.post('/api/relations/normal', {'doctorId': profileDoctorId, 'patientId': patientId})
         .success(function (resp) {
           $rootScope.alertSuccess('', '已加关注。');
-          $scope.isFollowed = true;
+          $scope.isFollowed = resp.data._id;
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });
@@ -267,7 +276,7 @@ angular.module('ylbWxApp')
     $scope.unfollowDoctor = function () {
       var profileDoctorId = $scope.doctor._id;
       var patientId = currentUser.patient._id;
-      $http.delete('/api/patients/' + patientId + '/follows/' + profileDoctorId)
+      $http.delete('/api/relations/normal/' + $scope.isFollowed)
         .success(function (resp) {
           $rootScope.alertSuccess('', '已取消关注。');
           $scope.isFollowed = false;

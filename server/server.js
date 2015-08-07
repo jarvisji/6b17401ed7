@@ -88,6 +88,11 @@ var registerRoutes = function () {
    * Response: For 'jiahao', return remain counts of this week and next week.
    */
   app.get('/api/doctors/:id/serviceStock', doctorCtrl.getServiceStock);
+  /**
+   * Get the patients those have relations with the given doctor.
+   * Response: List of patients.
+   */
+  app.get('/api/doctors/:id/patients', doctorCtrl.getPatientRelations);
 
   /* Patient APIs ----------------------------------------------------------------------------------------*/
   app.get('/api/patients', patientCtrl.find);
@@ -111,28 +116,19 @@ var registerRoutes = function () {
   app.get('/api/patients/friends/:id1/:id2', patientCtrl.getFriendsRequestsStatus);
   app.get('/api/patients/:id/friends', patientCtrl.getFriends);
   /**
-   * Get the doctors those have orders with the given patient.
+   * Get the doctors those have relations with the given patient.
    * Response: List of doctors.
    */
-  app.get('/api/patients/:id/doctors', patientCtrl.getDoctors);
+  app.get('/api/patients/:id/doctors', patientCtrl.getDoctorRelations);
 
   /**
    * GET '/api/patients/:id/follows?[expand=true]'
    * Get doctors list that a patient follows.
    */
-  app.get('/api/patients/:id/follows', patientCtrl.getFollows);
-  /**
-   * POST '/api/patients/:id/follows'
-   * @Data: {"doctorId":"string"}
-   */
-  app.post('/api/patients/:id/follows', patientCtrl.createFollow);
-  /**
-   * Check patient is followed a doctor or not.
-   * GET '/api/patients/:id/follows/:doctorId'
-   * @Response: {data: true/false}
-   */
-  app.get('/api/patients/:id/follows/:doctorId', patientCtrl.isFollowed);
-  app.delete('/api/patients/:id/follows/:doctorId', patientCtrl.deleteFollow);
+  //app.get('/api/patients/:id/follows', patientCtrl.getFollows);
+
+
+
 
   /* -- Patient APIs - Cases ------------------------------------------------------------------------------*/
   app.post('/api/patients/:id/cases', patientCtrl.createCase);
@@ -156,6 +152,21 @@ var registerRoutes = function () {
   app.get('/api/orders/:id', orderCtrl.getOrderDetail);
   app.post('/api/orders/:id/comments', orderCtrl.createComment);
   app.delete('/api/orders/:id/comments/:commentId', orderCtrl.deleteComment);
+
+  /* -- Relation APIs ------------------------------------------------------------------------------*/
+  /**
+   * POST '/api/patients/:id/follows'
+   * @Data: {"doctorId":"string", "patientId":"string"}
+   */
+  app.post('/api/relations/normal', patientCtrl.createFollow);
+  app.delete('/api/relations/normal/:relationId', patientCtrl.deleteFollow);
+
+  /**
+   * GET '/api/relations/doctor/:doctorId/patient/:patientId'
+   * Get relation between patient and doctor.
+   * @Response: {data: true/false}
+   */
+  app.get('/api/relations/doctor/:doctorId/patient/:patientId', patientCtrl.getRelation);
 };
 
 var startServer = function () {

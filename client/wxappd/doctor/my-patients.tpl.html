@@ -22,7 +22,7 @@
   <span ng-hide="patients.length > 0">没有数据</span>
 
   <div class="general-item-list">
-    <div class="item" ng-repeat="patient in patients" ng-click="showDetails(patients.wechat.openid)"
+    <div class="item" ng-repeat="patient in patients" ng-click="showDetails(patients.id)"
          ng-swipe-left="itemButton=$index">
       <div class="item-head">
         <div class="item-details">
@@ -34,7 +34,7 @@
           <span class="item-label"></span>
         </div>
         <!--<button type="button" class="btn btn-danger pull-right" ng-if="itemButton == $index"></button>-->
-        <span class="item-status">{{patient.hospital}}&nbsp;&nbsp;</span>
+        <span class="item-status">{{patient.relationCreated|date:'yyyy-MM-dd'}}&nbsp;&nbsp;</span>
       </div>
     </div>
   </div>

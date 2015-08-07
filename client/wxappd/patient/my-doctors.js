@@ -6,29 +6,34 @@ angular.module('ylbWxApp')
   .controller('wxMyDoctorsCtrl', ['$scope', '$rootScope', '$http', '$state', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, resources, commonUtils) {
     var currentUser = $rootScope.checkUserVerified();
     $scope.uiFlags = {type: 'putong'};
+    var rStatus = resources.relationStatus;
+    var putong = [];
+    var jiwang = [];
+    var suizhen = [];
 
-    var getFollowedDoctors = function () {
-      $http.get('/api/patients/' + currentUser.patient._id + '/follows?expand=true')
+    var getDoctorRelations = function () {
+      $http.get('/api/patients/' + currentUser.id + '/doctors')
         .success(function (resp) {
-          commonUtils.checkDoctorVIcon(resp.data);
-          $scope.doctors = $scope.doctorFollowed = resp.data;
+          for (var i = 0; i < resp.data.length; i++) {
+            var data = resp.data[i];
+            if (data.status == rStatus.normal.value) {
+              putong.push(data.doctor);
+            } else if (data.status == rStatus.jiwang.value) {
+              jiwang.push(data.doctor);
+            } else if (data.status == rStatus.suizhen.value) {
+              suizhen.push(data.doctor);
+            }
+          }
+          $rootScope.checkAvatar(putong);
+          $rootScope.checkAvatar(jiwang);
+          $rootScope.checkAvatar(suizhen);
+          //commonUtils.checkDoctorVIcon(resp.data.doctorInService);
+          $scope.doctors = suizhen;
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });
     };
-    var getOrderDoctors = function () {
-      $http.get('/api/patients/' + currentUser.patient._id + '/doctors')
-        .success(function (resp) {
-          commonUtils.checkDoctorVIcon(resp.data.doctorInService);
-          commonUtils.checkDoctorVIcon(resp.data.doctorPast);
-          $scope.doctorSuizhen = resp.data.doctorInService;
-          $scope.doctorJiwang = resp.data.doctorPast;
-        }).error(function (resp, status) {
-          $rootScope.alertError(null, resp, status);
-        });
-    };
-    getFollowedDoctors();
-    getOrderDoctors();
+    getDoctorRelations();
 
 
     /**
@@ -42,23 +47,11 @@ angular.module('ylbWxApp')
     $scope.displayDoctors = function (type) {
       $scope.uiFlags.type = type;
       if (type == 'suizhen') {
-        if (!$scope.doctorSuizhen) {
-          getOrderDoctors();
-        } else {
-          $scope.doctors = $scope.doctorSuizhen;
-        }
+        $scope.doctors = suizhen;
       } else if (type == 'jiwang') {
-        if (!$scope.doctorJiwang) {
-          getOrderDoctors();
-        } else {
-          $scope.doctors = $scope.doctorJiwang;
-        }
+        $scope.doctors = jiwang;
       } else if (type == 'putong') {
-        if (!$scope.doctorFollowed) {
-          getFollowedDoctors();
-        } else {
-          $scope.doctors = $scope.doctorFollowed;
-        }
+        $scope.doctors = putong;
       }
     };
   }]);

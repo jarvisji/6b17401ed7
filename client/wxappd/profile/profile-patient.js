@@ -9,7 +9,11 @@ angular.module('ylbWxApp')
     var openid = $stateParams.openid ? $stateParams.openid : currentUser.openid;
 
     var loadPatientData = function () {
-      $http.get('/api/patients', {params: {filter: {'wechat.openid': openid}}})
+      var filter = {filter: {'wechat.openid': openid}};
+      if (commonUtils.isObjectId(openid)) {
+        filter = {filter: {'_id': openid}};
+      }
+      $http.get('/api/patients', {params: filter})
         .success(function (res) {
           if (res.count > 0) {
             var patient = res.data[0];
@@ -24,6 +28,9 @@ angular.module('ylbWxApp')
     };
     if (openid && currentUser) {
       $scope.isSelf = openid == currentUser.openid;
+      if (commonUtils.isObjectId(openid)) {
+        $scope.isSelf = openid == currentUser.id;
+      }
       loadPatientData();
     }
 

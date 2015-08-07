@@ -35,5 +35,11 @@ module.exports = {
     finished: 'finished',   // patient accept 'doctorFinished' status.
     expired: 'expired',
     cancelled: 'cancelled'  // only can be cancel before 'confirmed'.
+  },
+  // for doctor and patient relation.
+  relationStatus: {
+    putong: {value: 1},
+    jiwang: {value: 2},
+    suizhen: {value: 3}
   }
 };

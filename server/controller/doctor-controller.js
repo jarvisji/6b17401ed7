@@ -12,6 +12,7 @@ module.exports = function (app) {
   var Doctor = app.models.Doctor;
   var DoctorFriend = app.models.DoctorFriend;
   var ServiceStock = app.models.ServiceStock;
+  var DPRelation = app.models.DoctorPatientRelation;
   var excludeFields = app.models.doctorExcludeFields;
 
   var login = function (req, res) {
@@ -545,6 +546,33 @@ module.exports = function (app) {
   };
 
   /**
+   * GET '/api/doctors/:id/patients'
+   * Get the patients those have relations with the given doctor.
+   * Response: List of patients.
+   * @param req
+   * @param res
+   */
+  var getPatientRelations = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var doctorId = req.params.id;
+
+    debug('getPatientRelations(), receive request to get patients of doctor: %s', doctorId);
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        if (user.id != doctorId) {
+          debug('getPatientRelations(), currently only support get own relations. operate user is %s, ', user.id);
+          throw utils.response403(res);
+        }
+        return DPRelation.find({'doctor.id': doctorId}).sort({created: -1}).exec();
+      }).then(function (relations) {
+        res.json(utils.jsonResult(relations));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getPatientRelations()', debug, res);
+      });
+  };
+
+  /**
    * Remove some data not tend to expose to user.
    * @param doctor
    */
@@ -570,7 +598,8 @@ module.exports = function (app) {
     deleteFriendsRequests: deleteFriendsRequests,
     getFriendsRequestsStatus: getFriendsRequestsBetween2Doctors,
     getFriends: getFriends,
-    getServiceStock: getServiceStock
+    getServiceStock: getServiceStock,
+    getPatientRelations: getPatientRelations
   };
 };
 
