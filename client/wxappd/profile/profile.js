@@ -235,7 +235,7 @@ angular.module('ylbWxApp')
     var addSuizhenModal = $modal({scope: $scope, template: 'wxappd/doctor/add-suizhen-modal.tpl.html', show: false});
     // Show when some event occurs (use $promise property to ensure the template has been loaded)
     $scope.showAddSuizhenModal = function () {
-      $scope.modalData = {price: $scope.suizhen.price * 1.1, quantity: 1};
+      $scope.modalData = {price: $scope.suizhen.price, quantity: 1};
       addSuizhenModal.$promise.then(addSuizhenModal.show);
     };
     $scope.buySuizhen = function () {

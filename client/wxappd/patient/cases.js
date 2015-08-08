@@ -120,6 +120,7 @@ angular.module('ylbWxApp')
         var newOrder = $scope.newCase.link.order;
         $http.post('/api/orders', newOrder)
           .success(function (resp) {
+            console.log(resp);
             $scope.newCase.link.target.params.id = resp.data._id;
             callCreateApi();
           }).error(function (resp, status) {
@@ -231,6 +232,55 @@ angular.module('ylbWxApp')
       addJiahaoModal.$promise.then(addJiahaoModal.hide);
     };
 
+    var addSuizhenModal = $modal({scope: $scope, template: 'wxappd/doctor/add-suizhen-modal.tpl.html', show: false});
+    $scope.showAddSuizhenModal = function (doctorId) {
+      $http.get('/api/doctors/' + doctorId)
+        .success(function (resp) {
+          var services = resp.data.services;
+          var suizhen;
+          for (var idx in services) {
+            if (services[idx].type == resources.doctorServices.suizhen.type) {
+              suizhen = services[idx];
+              break;
+            }
+          }
+
+          $scope.modalData = {price: suizhen.price, quantity: 1};
+          $scope.suizhen = suizhen;
+          $scope.suizhenDoctor = resp.data;
+          addSuizhenModal.$promise.then(addSuizhenModal.show);
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+
+    };
+    $scope.buySuizhen = function () {
+      if ($scope.modalData.quantity < 1 || $scope.modalData.quantity > 12) {
+        $rootScope.alertWarn('', '清输入1-12的数字');
+        return;
+      }
+      var newOrder = {
+        serviceId: $scope.suizhen._id,
+        serviceType: resources.doctorServices.suizhen.type,
+        doctorId: $scope.suizhenDoctor._id,
+        patientId: patientId,
+        price: $scope.modalData.price,
+        quantity: $scope.modalData.quantity,
+        referee: {
+          id: currentUser.doctor._id,
+          name: currentUser.doctor.name,
+          effectDate: new Date()
+        }
+      };
+      var newLink = $scope.newLink;
+      newLink.avatar = resources.iconSuizhen;
+      newLink.title += '的随诊';
+      newLink.target = {targetType: 'state', name: 'order-detail', params: {}};
+      newLink.order = newOrder;
+      $scope.newCase.link = newLink;
+      addSuizhenModal.$promise.then(addSuizhenModal.hide);
+    };
+
     /********************************************************************************
      * When user select item on the dialog of add link, we generate target data.
      * @param linkType
@@ -269,6 +319,9 @@ angular.module('ylbWxApp')
         $scope.newLink = newLink;
       }
       if (linkType == resources.linkTypes.serviceSuizhen.value) {
+        var doctorId = item.id;
+        $scope.showAddSuizhenModal(doctorId);
+        $scope.newLink = newLink;
       }
       if (linkType == resources.linkTypes.serviceHuizhen.value) {
       }
@@ -373,12 +426,17 @@ angular.module('ylbWxApp')
           resp.data.unshift(currentUser.doctor);
           modalData.data = $rootScope.generatePatientDisplayData(resp.data);
           $scope.modalData = modalData;
-          console.log(modalData);
           showAddLinkModal();
         })
       }
       if (linkType == resources.linkTypes.serviceSuizhen.value) {
         modalData.title = '选择随诊服务';
+        _getDoctorFriends(function (resp) {
+          resp.data.unshift(currentUser.doctor);
+          modalData.data = $rootScope.generatePatientDisplayData(resp.data);
+          $scope.modalData = modalData;
+          showAddLinkModal();
+        })
       }
       if (linkType == resources.linkTypes.serviceHuizhen.value) {
         modalData.title = '选择会诊服务';

@@ -75,7 +75,7 @@ module.exports = function (app) {
         } else {
           ServiceOrder.create(newOrder, function (err, createdOrder) {
             if (err) return utils.handleError(err, 'createOrder()', debug, res);
-            res.json(createdOrder);
+            res.json(utils.jsonResult(createdOrder));
           });
         }
       }).then(null, function (err) {
