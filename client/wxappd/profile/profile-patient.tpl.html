@@ -50,7 +50,7 @@
 
 
   <section>
-    <div class="follow-buttons" ng-hide="isSelf">
+    <div class="follow-buttons" ng-hide="isSelf || currentUser.isDoctor">
       <button type="button" class="btn btn-primary btn-block btn-lg"
               ng-show="!friendStatus" ng-click="showAddFriendModal()">加为好友
       </button>
