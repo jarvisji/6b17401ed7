@@ -2,17 +2,17 @@
   <div class="btn-group btn-group-justified" role="group">
     <div class="btn-group" role="group">
       <button type="button" class="btn btn-default" ng-class="{active: uiFlags.type=='suizhen'}"
-              ng-click="displayPatients('suizhen')"> 随诊患者
+              ng-click="switchPatients('suizhen')"> 随诊患者
       </button>
     </div>
     <div class="btn-group" role="group">
       <button type="button" class="btn btn-default" ng-class="{active: uiFlags.type=='jiwang'}"
-              ng-click="displayPatients('jiwang')"> 既往患者
+              ng-click="switchPatients('jiwang')"> 既往患者
       </button>
     </div>
     <div class="btn-group" role="group">
       <button type="button" class="btn btn-default" ng-class="{active: uiFlags.type=='putong'}"
-              ng-click="displayPatients('putong')"> 普通患者
+              ng-click="switchPatients('putong')"> 普通患者
       </button>
     </div>
   </div>
@@ -22,8 +22,7 @@
   <span ng-hide="patients.length > 0">没有数据</span>
 
   <div class="general-item-list">
-    <div class="item" ng-repeat="patient in patients" ng-click="showDetails(patients.id)"
-         ng-swipe-left="itemButton=$index">
+    <div class="item" ng-repeat="patient in patients" ng-click="showDetails(patient.id)">
       <div class="item-head">
         <div class="item-details">
           <div class="item-pic-container">
@@ -35,6 +34,19 @@
         </div>
         <!--<button type="button" class="btn btn-danger pull-right" ng-if="itemButton == $index"></button>-->
         <span class="item-status">{{patient.relationCreated|date:'yyyy-MM-dd'}}&nbsp;&nbsp;</span>
+      </div>
+      <div class="item-body" ng-if="patientDetail._id==patient.id">
+        <div class="row">
+          <div class="col-xs-8">
+            <span>年龄：{{patientDetail.age}}</span><br>
+            <span>性别：{{patientDetail.displaySex}}</span><br>
+            <span>地区：{{patientDetail.province}}  {{patient.city}}</span><br>
+            <span>疾病：{{patientDetail.displaySickness}}</span>
+          </div>
+          <div class="col-xs-4">
+            <button type="button" class="btn btn-primary btn-block" ng-click="showCases(patientDetail)">病历</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

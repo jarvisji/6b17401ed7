@@ -30,11 +30,7 @@ angular.module('ylbWxApp')
         $http.get('/api/patients/' + patientId)
           .success(function (resp) {
             var patient = resp.data;
-            patient.age = commonUtils.calculateAge(patient.birthday);
-            patient.displaySex = resources.sex[patient.sex];
-            patient.displayLevel = resources.patientLevel[patient.level];
-            patient.displaySickness = patient.sickness.join('<br>');
-            $rootScope.checkAvatar(patient);
+            $rootScope.generatePatientDisplayData(patient);
             $scope.patient = patient;
           }).error(function (resp, status) {
             $rootScope.alertError(null, resp, status);
@@ -114,7 +110,7 @@ angular.module('ylbWxApp')
     };
 
     $scope.doctorAcceptBookingTime = function () {
-      $http.put('/api/orders/' + orderId, {status: resources.orderStatus.confirmed.value})
+      $http.put('/api/orders/' + orderId + '/status/' + resources.orderStatus.confirmed.value, {})
         .success(function (resp) {
           $scope.order.status = resources.orderStatus.confirmed.value;
           handleUIFlags($scope.order);

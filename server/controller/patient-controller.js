@@ -938,7 +938,7 @@ module.exports = function (app, api) {
       }).then(function (data) {
         if (data instanceof Array) {
           if (operatorRole == app.consts.role.doctor) {
-            // orders
+            // relations
             if (data.length > 0) {
               debug('checkRelationship(), doctor and patient has order relationship.');
               hasRelation = true;
@@ -966,7 +966,7 @@ module.exports = function (app, api) {
   };
 
   var getRelationBetweenDoctorAndPatient = function (doctorId, patientId, callback) {
-    var query = DPRelation.find({'doctors.id': doctorId, 'patient.id': patientId});
+    var query = DPRelation.find({'doctor.id': doctorId, 'patient.id': patientId});
     if (callback) {
       query.exec(callback);
     } else {

@@ -17,7 +17,7 @@
 var should = require('should');
 var test = require('../testUtils');
 var dateUtil = require('../../../server/utils/date-utils');
-describe.only('Test order APIs. ', function () {
+describe('Test order APIs. ', function () {
   var testPatient = test.conf.testData.patients[0];
   var testDoctor = test.conf.testData.doctors[0];
   var testPatient2 = test.conf.testData.patients[1];  // no relation to order

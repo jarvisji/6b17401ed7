@@ -39,11 +39,23 @@ angular.module('ylbWxApp')
      * Show doctor profile.
      * @param openid
      */
-    $scope.showDetails = function (openid) {
-      $state.go('profile-patient', {openid: openid});
+    $scope.showDetails = function (patientId) {
+      //$state.go('profile-patient', {openid: openid});
+      $http.get('/api/patients/' + patientId)
+        .success(function (resp) {
+          var patient = resp.data;
+          $rootScope.generatePatientDisplayData(patient);
+          $scope.patientDetail = patient;
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
     };
 
-    $scope.displayPatients = function (type) {
+    $scope.showCases = function (patient) {
+      $state.go('patient-cases', {id: patient._id});
+    };
+
+    $scope.switchPatients = function (type) {
       $scope.uiFlags.type = type;
       if (type == 'suizhen') {
         $scope.patients = suizhen;

@@ -12,6 +12,7 @@ module.exports = function (app) {
   var ServiceStock = app.models.ServiceStock;
   var Patient = app.models.Patient;
   var Doctor = app.models.Doctor;
+  var DPRelation = app.models.DoctorPatientRelation;
 
   var orderStatus = app.consts.orderStatus;
   var serviceType = app.consts.doctorServices;
@@ -54,7 +55,12 @@ module.exports = function (app) {
         var orderDoctors = [];
         for (var i = 0; i < doctors.length; i++) {
           var tmpDoctor = doctors[i];
-          orderDoctors.push({id: tmpDoctor.id, name: tmpDoctor.name, avatar: tmpDoctor.wechat.headimgurl});
+          orderDoctors.push({
+            id: tmpDoctor.id,
+            name: tmpDoctor.name,
+            avatar: tmpDoctor.wechat.headimgurl,
+            hospital: tmpDoctor.hospital
+          });
         }
         newOrder.doctors = orderDoctors;
         return Patient.findById(newOrder.patientId).exec();
@@ -173,7 +179,9 @@ module.exports = function (app) {
     var openid = req.query.openid; // operator
     debug('updateOrderStatus(), new status: %s, user role: %s, openid: %s, updating order: %s', newStatus, role, openid, orderId);
     var validStatus = Object.keys(app.consts.orderStatus);
-    if (validStatus.indexOf(newStatus) == -1 /*TODO: uncomment || newStatus == orderStatus.paid*/) {
+    // TODO: uncomment following validStatus when development finished.
+    //var validStatus = [orderStatus.confirmed, orderStatus.rejected, orderStatus.doctorFinished, orderStatus.finished, orderStatus.cancel()];
+    if (validStatus.indexOf(newStatus) == -1) {
       debug('updateOrderStatus(), invalid status.');
       return res.status(400).json(utils.jsonResult(new Error('invalid status')));
     }
@@ -209,75 +217,150 @@ module.exports = function (app) {
             res.json('success');
 
             // after order status changed.
-            updateServiceStock(order.serviceId);
-
-            //TODO: this should be invoke when wechat server callback.
-            if (newStatus == orderStatus.paid) {
+            if (newStatus == orderStatus.cancelled) {
+              restoreServiceStock(order.serviceId);
+            } else if (newStatus == orderStatus.paid) {
+              //TODO: this should be invoke when wechat server callback.
               handlePaymentSuccess(order);
+            } else if (newStatus == orderStatus.confirmed && order.serviceType == serviceType.suizhen.type) {
+              handleSuizhenConfirmed(order);
             }
-            //updatePatientDoctorRelation(order);
           });
+          //updatePatientDoctorRelation(order);
         }).then(null, function (err) {
           utils.handleError(err, 'updateOrderStatus()', debug, res);
         });
     });
 
-    var updateServiceStock = function (serviceId) {
-      if (newStatus == orderStatus.cancelled) {
-        // increase stock
-        var date = dateUtils.getTodayStartDate();
-        debug('updateOrderStatus(), updateServiceStock(), new status is %s, increase stock for %s', newStatus, date.toISOString());
-        ServiceStock.update({
-          serviceId: serviceId,
-          date: date
-        }, {'$inc': {stock: 1}}, function (err, result) {
-          if (err) debug('updateServiceStock(), error: %o', err);
-        });
-      }
+    var restoreServiceStock = function (serviceId) {
+      // increase stock
+      var date = dateUtils.getTodayStartDate();
+      debug('updateOrderStatus(), updateServiceStock(), new status is %s, increase stock for %s', newStatus, date.toISOString());
+      ServiceStock.update({
+        serviceId: serviceId,
+        date: date
+      }, {'$inc': {stock: 1}}, function (err, result) {
+        if (err) debug('updateServiceStock(), error: %o', err);
+      });
+    };
+
+    /**
+     * 随诊订单以医生确认为节点，转为关系状态为随诊。
+     * @param order
+     */
+    var handleSuizhenConfirmed = function (order) {
+      debug('handleSuizhenConfirmed(), update patient and doctor relations for order: %o', order);
+      var orderDoctorIds = _getOrderDoctorIds(order);
+      DPRelation.find({'doctor.id': {'$in': orderDoctorIds}, 'patient.id': order.patient.id}).exec()
+        .then(function (relations) {
+          // Suizhen confirmed should always after order was paid, so if cannot get relation data, will trade it as error instead of create new one.
+          if (relations.length == 0) {
+            debug('handleSuizhenConfirmed(), error, relation not exist.');
+            throw new Error('relation not found');
+          }
+          for (var i = 0; i < relations.length; i++) {
+            var relation = relations[i];
+            debug('handleSuizhenConfirmed(), updating relation: %s status to 3', relation.id);
+            relation.status = app.consts.relationStatus.suizhen.value;
+            relation.save(function (err) {
+              if (err) throw err;
+            });
+          }
+        }).then(null, function (err) {
+          if (err) return utils.handleError(err, 'handleSuizhenConfirmed()', debug);
+        })
     };
 
     /**
      * When patient payment success, we should:
      * 1. update patient and doctor relationship.
-     *    If it is 'suizhen' order, the doctor should be push to 'doctorInService', otherwise, the doctor should
-     *    be push to 'doctorPast'.
+     *    所有订单以支付成功为节点：
+     *    ○ 如果没有关系存在，创建新的关系，状态为既往。
+     *    ○ 如果已有普通关系，转换关系状态为既往。
+     *    ○ 如果已有既往关系，保持关系状态不变。
+     *    ○ 如果已有随诊关系，保持关系状态不变。
      * 2. send wechat message to doctor and patient.
      * @param order
      */
     var handlePaymentSuccess = function (order, callback) {
-      // update doctor and patient relationship. To make sure new order doctor will be positioned on top, we pull and unshift doctorId.
       var error = null;
-      debug('handlePaymentSuccess(), update patient and doctor relations for order: %s, type: %s', order.id, order.serviceType);
-      Patient.findById(order.patient.id).exec()
-        .then(function (patient) {
-          if (order.serviceType == serviceType.jiahao.type) {
-            var doctorId = order.doctors[0].id;
-            debug('handlePaymentSuccess(), pull and push doctor: %s to [doctorPast] of patient: %s', doctorId, order.patient.id);
-            patient.doctorPast.pull(doctorId);
-            // push is faster than push, so here we save ids in reverse order, will reverse it again when get doctors.( in patientCtrl.getDoctors());
-            patient.doctorPast.push(doctorId);
-          } else if (order.serviceType == serviceType.suizhen.type) {
-            var doctorId = order.doctors[0].id;
-            debug('handlePaymentSuccess(), pull and push doctor: %s to [doctorInService] of patient: %s', doctorId, order.patient.id);
-            patient.doctorInService.pull(doctorId);
-            patient.doctorInService.push(doctorId);
-          } else if (order.serviceType == serviceType.huizhen.type) {
-            var doctorIds = [];
-            for (var idx in order.doctors) {
-              doctorIds.push(order.doctors[idx].id);
+      debug('handlePaymentSuccess(), update patient and doctor relations for order: %o', order);
+      var orderDoctorIds = _getOrderDoctorIds(order);
+      DPRelation.find({'doctor.id': {'$in': orderDoctorIds}, 'patient.id': order.patient.id}).exec()
+        .then(function (relations) {
+          if (relations.length == 0) {
+            debug('handlePaymentSuccess(), no relations exist, create new.');
+            var newDpr = [];
+            for (var i = 0; i < order.doctors.length; i++) {
+              newDpr.push({
+                doctor: order.doctors[i].toObject(),
+                patient: order.patient.toObject(),
+                status: app.consts.relationStatus.jiwang.value
+              });
             }
-            debug('handlePaymentSuccess(), pull and push doctor: %o to [doctorPast] of patient: %s', doctorIds, order.patient.id);
-            patient.doctorPast.pull(doctorIds.join(','));
-            patient.doctorPast.push(doctorIds);
+            DPRelation.create(newDpr, function (err, created) {
+              if (err) {
+                debug('handlePaymentSuccess(), crate relation error: %o', err);
+                if (callback) callback(err);
+              } else {
+                debug('handlePaymentSuccess(), create relation success: %s', created);
+                if (callback) callback(null);
+              }
+            });
+          } else {
+            for (var i = 0; i < relations.length; i++) {
+              var relation = relations[i];
+              debug('handlePaymentSuccess(), updating relation: %s status to 2', relation.id);
+              if (relation.status == app.consts.relationStatus.putong.value) {
+                relation.status = app.consts.relationStatus.jiwang.value;
+                relation.save(function (err) {
+                  if (err) {
+                    debug('handlePaymentSuccess(), update relation status error: %o', err);
+                    if (callback) callback(err);
+                  } else {
+                    debug('handlePaymentSuccess(), update relation status success');
+                    if (callback) callback(null);
+                  }
+                });
+              }
+            }
           }
-          return patient.save();
-        }).then(function (savedPatient) {
-          debug('handlePaymentSuccess(), save patient success');
-          if (callback) callback(null, savedPatient);
         }).then(null, function (err) {
           debug('handlePaymentSuccess(), error: %o', err);
           if (callback) callback(err);
         });
+
+
+      //Patient.findById(order.patient.id).exec()
+      //  .then(function (patient) {
+      //    if (order.serviceType == serviceType.jiahao.type) {
+      //      var doctorId = order.doctors[0].id;
+      //      debug('handlePaymentSuccess(), pull and push doctor: %s to [doctorPast] of patient: %s', doctorId, order.patient.id);
+      //      patient.doctorPast.pull(doctorId);
+      //      // push is faster than push, so here we save ids in reverse order, will reverse it again when get doctors.( in patientCtrl.getDoctors());
+      //      patient.doctorPast.push(doctorId);
+      //    } else if (order.serviceType == serviceType.suizhen.type) {
+      //      var doctorId = order.doctors[0].id;
+      //      debug('handlePaymentSuccess(), pull and push doctor: %s to [doctorInService] of patient: %s', doctorId, order.patient.id);
+      //      patient.doctorInService.pull(doctorId);
+      //      patient.doctorInService.push(doctorId);
+      //    } else if (order.serviceType == serviceType.huizhen.type) {
+      //      var doctorIds = [];
+      //      for (var idx in order.doctors) {
+      //        doctorIds.push(order.doctors[idx].id);
+      //      }
+      //      debug('handlePaymentSuccess(), pull and push doctor: %o to [doctorPast] of patient: %s', doctorIds, order.patient.id);
+      //      patient.doctorPast.pull(doctorIds.join(','));
+      //      patient.doctorPast.push(doctorIds);
+      //    }
+      //    return patient.save();
+      //  }).then(function (savedPatient) {
+      //    debug('handlePaymentSuccess(), save patient success');
+      //    if (callback) callback(null, savedPatient);
+      //  }).then(null, function (err) {
+      //    debug('handlePaymentSuccess(), error: %o', err);
+      //    if (callback) callback(err);
+      //  });
     };
 
     /**
@@ -625,4 +708,5 @@ module.exports = function (app) {
     createComment: createOrderComment,
     deleteComment: deleteOrderComment
   }
-};
+}
+;

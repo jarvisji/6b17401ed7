@@ -104,7 +104,8 @@ module.exports = function () {
     doctors: [{
       id: {type: String, required: true},
       name: String,
-      avatar: String
+      avatar: String,
+      hospital: String
     }],
     patient: {
       id: {type: String, required: true},
@@ -222,7 +223,9 @@ module.exports = function () {
       avatar: String,
       hospital: String
     },
-    status: Number, // 1-putong, 2-jiwang, 3-suizhen, they have priority.
+    status: {
+      type: Number, required: true
+    }, // 1-putong, 2-jiwang, 3-suizhen, they have priority.
     memo: String,
     created: {type: Date, default: Date.now},
     lastModified: {type: Date, default: Date.now}
@@ -264,4 +267,5 @@ module.exports = function () {
     doctorPatientRelationSchema: doctorPatientRelationSchema,
     wechatOAuthSchema: wechatOAuthSchema
   };
-};
+}
+;

@@ -5,7 +5,7 @@
 angular.module('ylbWxApp')
   .controller('wxMyDoctorsCtrl', ['$scope', '$rootScope', '$http', '$state', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, resources, commonUtils) {
     var currentUser = $rootScope.checkUserVerified();
-    $scope.uiFlags = {type: 'putong'};
+    $scope.uiFlags = {type: 'suizhen'};
     var rStatus = resources.relationStatus;
     var putong = [];
     var jiwang = [];
@@ -27,8 +27,12 @@ angular.module('ylbWxApp')
           $rootScope.checkAvatar(putong);
           $rootScope.checkAvatar(jiwang);
           $rootScope.checkAvatar(suizhen);
-          //commonUtils.checkDoctorVIcon(resp.data.doctorInService);
+          commonUtils.checkDoctorVIcon(putong);
+          commonUtils.checkDoctorVIcon(jiwang);
+          commonUtils.checkDoctorVIcon(suizhen);
           $scope.doctors = suizhen;
+
+          console.log(putong);
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });

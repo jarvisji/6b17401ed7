@@ -109,7 +109,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
     });
     //$urlRouterProvider.otherwise('entry');
   }])
-  .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', '$timeout', '$alert', 'ylb.resources', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log, $timeout, $alert, resources) {
+  .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', '$timeout', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log, $timeout, $alert, resources, commonUtils) {
     $rootScope.verify = function (openid, access_token, redirect) {
       $http.get('/api/verify', {params: {openid: openid, access_token: access_token}})
         .success(function (resp) {
@@ -306,17 +306,28 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       return title;
     };
 
+    $rootScope.generatePatientDisplayData = function (patient) {
+      patient.age = commonUtils.calculateAge(patient.birthday);
+      patient.displaySex = resources.sex[patient.sex];
+      patient.displayLevel = resources.patientLevel[patient.level];
+      patient.displaySickness = patient.sickness.join('<br>');
+      $rootScope.checkAvatar(patient);
+    };
+
     /**
      * If doctor/patient doesn't have avatar set in wechat, use default.
      * @param user
      */
     $rootScope.checkAvatar = function (user) {
+      if (!user) {
+        return;
+      }
       if (user instanceof Array) {
         for (var i = 0; i < user.length; i++) {
           $rootScope.checkAvatar(user[i]);
         }
       } else {
-        if (user.wechat.headimgurl) {
+        if (user.wechat && user.wechat.headimgurl) {
           user.displayAvatar = user.wechat.headimgurl;
         } else if (user.avatar) {
           user.displayAvatar = user.avatar;

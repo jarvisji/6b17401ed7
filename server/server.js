@@ -127,9 +127,6 @@ var registerRoutes = function () {
    */
   //app.get('/api/patients/:id/follows', patientCtrl.getFollows);
 
-
-
-
   /* -- Patient APIs - Cases ------------------------------------------------------------------------------*/
   app.post('/api/patients/:id/cases', patientCtrl.createCase);
   /**
