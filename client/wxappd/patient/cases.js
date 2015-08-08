@@ -181,10 +181,10 @@ angular.module('ylbWxApp')
       var newLink = {linkType: linkType, avatar: item.avatar, title: item.name};
 
       if (linkType == resources.linkTypes.patient.value) {
-        target = {targetType: 'state', name: 'profile-patient', params: {openid: item.wechat.openid}};
+        target = {targetType: 'state', name: 'profile-patient', params: {openid: item.id}};
       }
       if (linkType == resources.linkTypes.doctor.value) {
-        target = {targetType: 'state', name: 'profile', params: {openid: item.wechat.openid}};
+        target = {targetType: 'state', name: 'profile', params: {openid: item.id}};
       }
       if (linkType == resources.linkTypes.shop.value) {
       }
@@ -229,7 +229,7 @@ angular.module('ylbWxApp')
           var currentUserId = currentUser.patient._id;
           $http.get('/api/patients/' + currentUserId + '/friends')
             .success(function (resp) {
-              modalData.data = handleUserDisplayData(resp.data);
+              modalData.data = $rootScope.generatePatientDisplayData(resp.data);
               $scope.modalData = modalData;
               showAddLinkModal();
             }).error(function (resp, status) {
@@ -244,22 +244,27 @@ angular.module('ylbWxApp')
         modalData.title = '选择医生';
         if (currentUser.isPatient) {
           var currentUserId = currentUser.patient._id;
-          $http.get('/api/patients/' + currentUserId + '/follows?expand=true')
+          $http.get('/api/patients/' + currentUserId + '/doctorRelations')
             .success(function (resp) {
-              modalData.data = handleUserDisplayData(resp.data);
+              var doctors = [];
+              for (var i = 0; i < resp.data.length; i++) {
+                var relation = resp.data[i];
+                doctors.push(relation.doctor);
+              }
+              modalData.data = $rootScope.generateDoctorDisplayData(doctors);
+              console.log(modalData);
               $scope.modalData = modalData;
               showAddLinkModal();
             }).error(function (resp, status) {
               $rootScope.alertError(null, resp, status);
             });
-          //TODO: get doctors those have orders
         }
 
         if (currentUser.isDoctor) {
           var currentUserId = currentUser.doctor._id;
           $http.get('/api/doctors/' + currentUserId + '/friends')
             .success(function (resp) {
-              modalData.data = handleUserDisplayData(resp.data);
+              modalData.data = $rootScope.generatePatientDisplayData(resp.data);
               $scope.modalData = modalData;
               showAddLinkModal();
             }).error(function (resp, status) {
@@ -284,14 +289,14 @@ angular.module('ylbWxApp')
       }
     };
 
-    var handleUserDisplayData = function (users) {
-      angular.forEach(users, function (user) {
-        user.age = commonUtils.calculateAge(user.birthday);
-        user.displaySex = resources.sex[user.sex];
-        user.avatar = user.wechat.headimgurl ? user.wechat.headimgurl : resources.defaultAvatar;
-      });
-      return users;
-    };
+    //var handleUserDisplayData = function (users) {
+    //  angular.forEach(users, function (user) {
+    //    user.age = commonUtils.calculateAge(user.birthday);
+    //    user.displaySex = resources.sex[user.sex];
+    //    user.avatar = user.wechat.headimgurl ? user.wechat.headimgurl : resources.defaultAvatar;
+    //  });
+    //  return users;
+    //};
 
     $scope.showLinkTarget = function (target) {
       $scope.test = {target: 'true'};

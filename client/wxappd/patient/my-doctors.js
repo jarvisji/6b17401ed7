@@ -12,7 +12,7 @@ angular.module('ylbWxApp')
     var suizhen = [];
 
     var getDoctorRelations = function () {
-      $http.get('/api/patients/' + currentUser.id + '/doctors')
+      $http.get('/api/patients/' + currentUser.id + '/doctorRelations')
         .success(function (resp) {
           for (var i = 0; i < resp.data.length; i++) {
             var data = resp.data[i];

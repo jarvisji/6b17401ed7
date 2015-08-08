@@ -116,10 +116,10 @@ var registerRoutes = function () {
   app.get('/api/patients/friends/:id1/:id2', patientCtrl.getFriendsRequestsStatus);
   app.get('/api/patients/:id/friends', patientCtrl.getFriends);
   /**
-   * Get the doctors those have relations with the given patient.
-   * Response: List of doctors.
+   * Get the relations for all doctors those have relations with the given patient.
+   * Response: List of DoctorPatientRelation.
    */
-  app.get('/api/patients/:id/doctors', patientCtrl.getDoctorRelations);
+  app.get('/api/patients/:id/doctorRelations', patientCtrl.getDoctorRelations);
 
   /**
    * GET '/api/patients/:id/follows?[expand=true]'
