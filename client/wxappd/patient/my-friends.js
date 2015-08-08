@@ -11,8 +11,8 @@ angular.module('ylbWxApp')
       $http.get('/api/patients/' + currentUserId + '/friends')
         .success(function (resp) {
           for (var i = 0; i < resp.data.length; i++) {
-            resp.data[i].age = commonUtils.calculateAge(resp.data[i].birthday);
-            resp.data[i].displaySex = resources.sex[resp.data[i].sex];
+            var patient = resp.data[i];
+            $rootScope.generatePatientDisplayData(patient);
           }
           $scope.friends = resp.data;
         }).error(function (resp, status) {
@@ -45,7 +45,7 @@ angular.module('ylbWxApp')
     // accept friend request
     $scope.accept = function (idx) {
       var reqId = $scope.requests[idx]._id;
-      $http.put('/api/patients/friends/requests/' + reqId + '/acceptance')
+      $http.put('/api/patients/friends/requests/' + reqId + '/acceptance', {})
         .success(function (resp) {
           $scope.requests.splice(idx, 1);
         }).error(function (resp, status) {
@@ -56,7 +56,7 @@ angular.module('ylbWxApp')
     // reject friend request
     $scope.reject = function (idx) {
       var reqId = $scope.requests[idx]._id;
-      $http.put('/api/patients/friends/requests/' + reqId + '/rejection')
+      $http.put('/api/patients/friends/requests/' + reqId + '/rejection', {})
         .success(function (resp) {
           $scope.requests.splice(idx, 1);
         }).error(function (resp, status) {

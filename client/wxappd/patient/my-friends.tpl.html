@@ -36,16 +36,17 @@
           </div>
           <span class="item-status"></span>
         </div>
-        <div ng-if="$index == showDetailIndex">
+
+        <div class="item-body" ng-if="$index == showDetailIndex">
           <div class="row">
-            <div class="col-xs-3">年龄：{{patient.age}}</div>
-            <div class="col-xs-3">性别：{{patient.displaySex}}</div>
-            <div class="col-xs-6">地区：{{patient.city}}</div>
-          </div>
-          <div class="row">
-            <div class="col-xs-10">疾病：{{patient.sickness}}</div>
-            <div class="col-xs-2">
-              <button class="btn btn-success btn-sm" ng-click="showCases(patient._id)">病历</button>
+            <div class="col-xs-8">
+              <span>年龄：{{patient.age}}</span><br>
+              <span>性别：{{patient.displaySex}}</span><br>
+              <span>地区：{{patient.province}}  {{patient.city}}</span><br>
+              <span>疾病：{{patient.displaySickness}}</span>
+            </div>
+            <div class="col-xs-4">
+              <button type="button" class="btn btn-primary btn-block" ng-click="showCases(patient._id)">病历</button>
             </div>
           </div>
         </div>
