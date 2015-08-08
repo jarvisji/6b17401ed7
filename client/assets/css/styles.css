@@ -13,10 +13,16 @@ section {
 .bg-disabled {
   background-color: lightgray;
 }
+
 .btn-yellow {
   color: #996633 !important;
   text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.4) !important;
 }
+
+.space-10 {
+  margin-top: 10px;
+}
+
 .avatar-md {
   width: 64px;
   height: 64px;

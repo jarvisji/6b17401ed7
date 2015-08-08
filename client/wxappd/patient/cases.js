@@ -157,7 +157,7 @@ angular.module('ylbWxApp')
         if (currentUser.isPatient && (value.forPatient && currentUser.isPatient)) {
           ddLinkTypes.push({'text': value.label, 'click': 'onLinkTypeSelected("' + key + '")'});
         }
-        if (currentUser.isDoctor && (value.forPatient && currentUser.isDoctor)) {
+        if (currentUser.isDoctor && (value.forDoctor && currentUser.isDoctor)) {
           ddLinkTypes.push({'text': value.label, 'click': 'onLinkTypeSelected("' + key + '")'});
         }
       });
@@ -193,6 +193,17 @@ angular.module('ylbWxApp')
       if (linkType == resources.linkTypes.shop.value) {
       }
       if (linkType == resources.linkTypes.medicalImaging.value) {
+        if (!item.url) {
+          $scope.modalData.isShowWarning = true;
+          //$rootScope.alertWarn('', '请输入完整的URL（以HTTP或HTTPS开头）');
+          return;
+        }
+        $scope.modalData.isShowWarning = false;
+        if (!item.name) {
+          newLink.title = resources.defaultMedicalImagingTitle;
+        }
+        target = item.url;
+        addLinkModal.$promise.then(addLinkModal.hide);
       }
       if (linkType == resources.linkTypes.serviceJiahao.value) {
       }
@@ -202,7 +213,7 @@ angular.module('ylbWxApp')
       }
       newLink.target = target;
       $scope.newCase.link = newLink;
-      console.log($scope.newCase);
+      console.log('new case object:', $scope.newCase);
     };
 
     $scope.onLinkTypeSelected = function (linkType) {
@@ -291,6 +302,9 @@ angular.module('ylbWxApp')
       }
       if (linkType == resources.linkTypes.medicalImaging.value) {
         modalData.title = '输入影像链接';
+        modalData.data = {name: '', url: '', displayAvatar: '/assets/image/icon-medical-imaging.png'};
+        $scope.modalData = modalData;
+        showAddLinkModal();
       }
       if (linkType == resources.linkTypes.serviceJiahao.value) {
         modalData.title = '选择加号服务';
@@ -312,23 +326,21 @@ angular.module('ylbWxApp')
     //  return users;
     //};
 
-    $scope.showLinkTarget = function (target) {
-      $scope.test = {target: 'true'};
-      if (target) {
-        if (typeof(target) === 'string') {
-          var port = $location.port();
-          var link = $location.protocol() + '://' + $location.host();
-          if (port) {
-            link = link + ':' + port;
-          }
-          wx.previewImage({
-            current: link + target, // 当前显示图片的http链接
-            urls: [link + target] // 需要预览的图片http链接列表
-          });
-        } else if (target.targetType == 'state') {
-          $state.go(target.name, target.params);
+    $scope.showLinkTarget = function (linkObj) {
+      if (linkObj.linkType == resources.linkTypes.image.value) {
+        var port = $location.port();
+        var link = $location.protocol() + '://' + $location.host();
+        if (port) {
+          link = link + ':' + port;
         }
-
+        wx.previewImage({
+          current: link + linkObj.target, // 当前显示图片的http链接
+          urls: [link + linkObj.target] // 需要预览的图片http链接列表
+        });
+      } else if (linkObj.linkType == resources.linkTypes.medicalImaging.value) {
+        window.location.href = linkObj.target;
+      } else if (linkObj.target.targetType == 'state') {
+        $state.go(target.name, target.params);
       }
     };
   }]);

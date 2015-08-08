@@ -8,8 +8,31 @@
         <h4 class="modal-title">{{modalData.title}}</h4>
       </div>
       <div class="modal-body">
-        <div class="general-item-list">
-          <div class="item" ng-repeat="item in modalData.data" ng-click="onLinkItemSelected(modalData.type, item);$hide()">
+        <!-- add medicalImaging-->
+        <div ng-if="modalData.type == 'medicalImaging'">
+          <form class="form-horizontal" name="frmMedicalImaging">
+            <div class="form-group">
+              <div class="col-xs-10 col-xs-offset-1">
+                <input type="text" class="form-control" name="title" ng-model="modalData.data.name" placeholder="影像学资料"
+                       required>
+              </div>
+            </div>
+            <div class="form-group"
+                 ng-class="{'has-error':modalData.isShowWarning}">
+              <div class="col-xs-10 col-xs-offset-1">
+                <input type="url" class="form-control" name="url" ng-model="modalData.data.url" placeholder="输入链接"
+                       required>
+
+                <div class="alert alert-warning space-10" role="alert" ng-show="modalData.isShowWarning">
+                  请输入完整的URL（以HTTP或HTTPS开头）
+                </div>
+              </div>
+          </form>
+        </div>
+        <!-- add doctor or patient -->
+        <div class="general-item-list" ng-if="modalData.type == 'doctor' || modalData.type == 'patient'">
+          <div class="item" ng-repeat="item in modalData.data"
+               ng-click="onLinkItemSelected(modalData.type, item);$hide()">
             <div class="item-head">
               <div class="item-details">
                 <img class="item-pic" ng-src="{{item.displayAvatar}}">
@@ -25,7 +48,10 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" ng-click="$hide()">取消</button>
-        <!--<button type="button" class="btn btn-success" ng-click="addFriend(message);$hide()">发送</button>-->
+        <button type="button" class="btn btn-success" ng-show="modalData.type == 'medicalImaging'"
+                ng-click="onLinkItemSelected(modalData.type, modalData.data)">
+          确定
+        </button>
       </div>
     </div>
   </div>
