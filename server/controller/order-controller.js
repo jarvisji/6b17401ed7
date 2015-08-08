@@ -222,8 +222,14 @@ module.exports = function (app) {
             } else if (newStatus == orderStatus.paid) {
               //TODO: this should be invoke when wechat server callback.
               handlePaymentSuccess(order);
+            } else if (newStatus = orderStatus.finished) {
+
             } else if (newStatus == orderStatus.confirmed && order.serviceType == serviceType.suizhen.type) {
               handleSuizhenConfirmed(order);
+              //TODO:
+              // 1. send wechat message to doctor and patient.
+              // 2. calculate 医生提成和收益
+
             }
           });
           //updatePatientDoctorRelation(order);
