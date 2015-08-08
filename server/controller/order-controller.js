@@ -222,7 +222,7 @@ module.exports = function (app) {
             } else if (newStatus == orderStatus.paid) {
               //TODO: this should be invoke when wechat server callback.
               handlePaymentSuccess(order);
-            } else if (newStatus = orderStatus.finished) {
+            } else if (newStatus == orderStatus.finished) {
 
             } else if (newStatus == orderStatus.confirmed && order.serviceType == serviceType.suizhen.type) {
               handleSuizhenConfirmed(order);
