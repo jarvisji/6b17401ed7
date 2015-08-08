@@ -30,9 +30,12 @@ angular.module('ylbWxApp')
 
     var oStatus = resources.orderStatus;
     var finishStatus = [oStatus.finished.value, oStatus.expired.value, oStatus.cancelled.value];
-    var successStatus = [oStatus.paid.value, oStatus.confirmed.value, oStatus.doctorFinished.value];
     var warnStatus = [oStatus.init.value];
     var failStatus = [oStatus.rejected.value];
+    var waitStatus4Doctor = [oStatus.paid.value];
+    var waitStatus4Patient = [oStatus.doctorFinished.value];
+    var successStatus4Doctor = [oStatus.confirmed.value];
+    var successStatus4Patient = [oStatus.paid.value, oStatus.confirmed.value];
     var applyStatusLabelStyle = function (order) {
       if (order instanceof Array) {
         for (var idx in order) {
@@ -42,13 +45,23 @@ angular.module('ylbWxApp')
         order.displayStatus = oStatus[order.status].label;
         if (finishStatus.indexOf(order.status) != -1) {
           order.statusClass = 'label-default';
-        } else if (successStatus.indexOf(order.status) != -1) {
-          order.statusClass = 'label-success';
         } else if (warnStatus.indexOf(order.status) != -1) {
           order.statusClass = 'label-warning';
         } else if (failStatus.indexOf(order.status) != -1) {
           order.statusClass = 'label-danger';
+        } else if (currentUser.isDoctor) {
+          if (successStatus4Doctor.indexOf(order.status) != -1) {
+            order.statusClass = 'label-success';
+          } else if (waitStatus4Doctor.indexOf(order.status) != -1) {
+            order.statusClass = 'label-primary';
+          }
+        } else if (currentUser.isPatient) {
+          if (successStatus4Patient.indexOf(order.status) != -1) {
+            order.statusClass = 'label-success';
+          } else if (waitStatus4Patient.indexOf(order.status) != -1) {
+            order.statusClass = 'label-primary';
+          }
         }
       }
-    }
+    };
   }]);
