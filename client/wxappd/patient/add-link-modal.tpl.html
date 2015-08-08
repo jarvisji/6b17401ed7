@@ -27,10 +27,11 @@
                   请输入完整的URL（以HTTP或HTTPS开头）
                 </div>
               </div>
+            </div>
           </form>
         </div>
         <!-- add doctor or patient -->
-        <div class="general-item-list" ng-if="modalData.type == 'doctor' || modalData.type == 'patient'">
+        <div class="general-item-list" ng-if="modalData.type != 'medicalImaging' && modalData.type != 'image'">
           <div class="item" ng-repeat="item in modalData.data"
                ng-click="onLinkItemSelected(modalData.type, item);$hide()">
             <div class="item-head">

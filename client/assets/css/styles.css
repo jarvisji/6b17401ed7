@@ -211,3 +211,15 @@ section {
 /**
  * ui.bootstrap end
  * ------------------------------------------------ */
+
+/**------------------------------------------------
+ * Override default bootstrap style
+ */
+
+.modal {
+  overflow-y: scroll;
+}
+
+/**
+ * Override default bootstrap style end.
+ * ------------------------------------------------ */

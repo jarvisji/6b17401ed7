@@ -7,6 +7,8 @@ var debug = require('debug')('ylb.wechatCtrl');
 
 module.exports = function (app, api, oauth) {
   var authUtils = require('../utils/auth-utils')(app);
+  var excludeFields = app.models.doctorExcludeFields;
+
   return {
     createMenu: function (req, res) {
       //TODO: need authorization before update menu
@@ -48,12 +50,12 @@ module.exports = function (app, api, oauth) {
       //    debug('Verify openid: %s, access_token: %s failed: %o', openid, access_token, err);
       //    return res.status(401).json(utils.jsonResult(err));
       //  }
-      app.models.Doctor.findOne({'wechat.openid': openid}, 'id name level', function (err, doctor) {
+      app.models.Doctor.findOne({'wechat.openid': openid}, 'id name level wechat.headimgurl', function (err, doctor) {
         if (err) {
           debug('Get user information error: %o', err);
           return res.status(500).json(utils.jsonResult(err));
         }
-        app.models.Patient.findOne({'wechat.openid': openid}, 'id name level', function (err, patient) {
+        app.models.Patient.findOne({'wechat.openid': openid}, 'id name level wechat.headimgurl', function (err, patient) {
           if (err) {
             debug('Get user information error: %o', err);
             return res.status(500).json(utils.jsonResult(err));

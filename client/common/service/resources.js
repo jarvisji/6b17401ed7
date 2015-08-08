@@ -47,6 +47,9 @@ angular.module('ylbWxApp')
       serviceHuizhen: {value: 'serviceHuizhen', label: '会诊', forPatient: false, forDoctor: true}
     },
     defaultAvatar: '/assets/image/avatar-64.jpg',
+    iconJiahao: '/assets/image/icon-jiahao.png',
+    iconSuizhen: '/assets/image/icon-suizhen.png',
+    iconHuizhen: '/assets/image/icon-huizhen.png',
     defaultMedicalImagingTitle: '影像学资料',
     days: {
       d0: '周日',

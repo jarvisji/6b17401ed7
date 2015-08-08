@@ -115,6 +115,16 @@ angular.module('ylbWxApp')
             $rootScope.alertError('', res.errMsg);
           }
         });
+      } else if ($scope.newCase.link && $scope.newCase.link.order) {
+        // for jiahao, huizhen, suizhen such service link, we need create order first, then save link with created orderId.
+        var newOrder = $scope.newCase.link.order;
+        $http.post('/api/orders', newOrder)
+          .success(function (resp) {
+            $scope.newCase.link.target.params.id = resp.data._id;
+            callCreateApi();
+          }).error(function (resp, status) {
+            $rootScope.alertError(null, resp, status);
+          });
       } else {
         callCreateApi();
       }
@@ -173,7 +183,55 @@ angular.module('ylbWxApp')
       addLinkModal.$promise.then(addLinkModal.show);
     };
 
-    /**
+    var addJiahaoModal = $modal({scope: $scope, template: 'wxappd/doctor/add-jiahao-modal.tpl.html', show: false});
+    $scope.showAddJiahaoModal = function (doctorId) {
+      $http.get('/api/doctors/' + doctorId + '/serviceStock')
+        .success(function (resp) {
+          $scope.serviceStock = [];
+          if (resp.data.jiahao) {
+            var today = commonUtils.date.getTodayStartDate();
+            var thisWeek = resp.data.jiahao.thisWeek;
+            for (var i = 0; i < thisWeek.length; i++) {
+              if (new Date(thisWeek[i].date) < today) {
+                thisWeek[i].isPast = true;
+              }
+            }
+            $scope.serviceStock = resp.data.jiahao;
+          }
+          addJiahaoModal.$promise.then(addJiahaoModal.show);
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
+    $scope.buyJiahao = function (item) {
+      if (item.stock <= 0 || item.isPast) {
+        return;
+      }
+      var newOrder = {
+        serviceId: item.serviceId,
+        serviceType: resources.doctorServices.jiahao.type,
+        doctorId: item.doctorId,
+        patientId: patientId,
+        price: $scope.serviceStock.price,
+        quantity: 1,
+        bookingTime: item.date,
+        referee: {
+          id: currentUser.doctor._id,
+          name: currentUser.doctor.name,
+          effectDate: new Date()
+        }
+      };
+
+      var newLink = $scope.newLink;
+      newLink.avatar = resources.iconJiahao;
+      newLink.title += '的加号';
+      newLink.target = {targetType: 'state', name: 'order-detail', params: {}};
+      newLink.order = newOrder;
+      $scope.newCase.link = newLink;
+      addJiahaoModal.$promise.then(addJiahaoModal.hide);
+    };
+
+    /********************************************************************************
      * When user select item on the dialog of add link, we generate target data.
      * @param linkType
      * @param item
@@ -206,6 +264,9 @@ angular.module('ylbWxApp')
         addLinkModal.$promise.then(addLinkModal.hide);
       }
       if (linkType == resources.linkTypes.serviceJiahao.value) {
+        var doctorId = item.id;
+        $scope.showAddJiahaoModal(doctorId);
+        $scope.newLink = newLink;
       }
       if (linkType == resources.linkTypes.serviceSuizhen.value) {
       }
@@ -216,6 +277,10 @@ angular.module('ylbWxApp')
       console.log('new case object:', $scope.newCase);
     };
 
+    /********************************************************************************
+     * Show modal when user select to add a link of any type.
+     * @param linkType
+     */
     $scope.onLinkTypeSelected = function (linkType) {
       var modalData = {type: linkType, title: '', data: []};
       if (linkType == resources.linkTypes.image.value) {
@@ -284,17 +349,13 @@ angular.module('ylbWxApp')
               $rootScope.alertError(null, resp, status);
             });
         }
-
+        // doctor friends
         if (currentUser.isDoctor) {
-          var currentUserId = currentUser.doctor._id;
-          $http.get('/api/doctors/' + currentUserId + '/friends')
-            .success(function (resp) {
-              modalData.data = $rootScope.generatePatientDisplayData(resp.data);
-              $scope.modalData = modalData;
-              showAddLinkModal();
-            }).error(function (resp, status) {
-              $rootScope.alertError(null, resp, status);
-            });
+          _getDoctorFriends(function (resp) {
+            modalData.data = $rootScope.generatePatientDisplayData(resp.data);
+            $scope.modalData = modalData;
+            showAddLinkModal();
+          })
         }
       }
       if (linkType == resources.linkTypes.shop.value) {
@@ -308,6 +369,13 @@ angular.module('ylbWxApp')
       }
       if (linkType == resources.linkTypes.serviceJiahao.value) {
         modalData.title = '选择加号服务';
+        _getDoctorFriends(function (resp) {
+          resp.data.unshift(currentUser.doctor);
+          modalData.data = $rootScope.generatePatientDisplayData(resp.data);
+          $scope.modalData = modalData;
+          console.log(modalData);
+          showAddLinkModal();
+        })
       }
       if (linkType == resources.linkTypes.serviceSuizhen.value) {
         modalData.title = '选择随诊服务';
@@ -315,6 +383,16 @@ angular.module('ylbWxApp')
       if (linkType == resources.linkTypes.serviceHuizhen.value) {
         modalData.title = '选择会诊服务';
       }
+    };
+
+    var _getDoctorFriends = function (callback) {
+      var currentUserId = currentUser.doctor._id;
+      $http.get('/api/doctors/' + currentUserId + '/friends')
+        .success(function (resp) {
+          callback(resp);
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
     };
 
     //var handleUserDisplayData = function (users) {
@@ -327,6 +405,7 @@ angular.module('ylbWxApp')
     //};
 
     $scope.showLinkTarget = function (linkObj) {
+      var target = linkObj.target;
       if (linkObj.linkType == resources.linkTypes.image.value) {
         var port = $location.port();
         var link = $location.protocol() + '://' + $location.host();
@@ -334,12 +413,12 @@ angular.module('ylbWxApp')
           link = link + ':' + port;
         }
         wx.previewImage({
-          current: link + linkObj.target, // 当前显示图片的http链接
-          urls: [link + linkObj.target] // 需要预览的图片http链接列表
+          current: link + target, // 当前显示图片的http链接
+          urls: [link + target] // 需要预览的图片http链接列表
         });
       } else if (linkObj.linkType == resources.linkTypes.medicalImaging.value) {
-        window.location.href = linkObj.target;
-      } else if (linkObj.target.targetType == 'state') {
+        window.location.href = target;
+      } else if (target.targetType == 'state') {
         $state.go(target.name, target.params);
       }
     };
