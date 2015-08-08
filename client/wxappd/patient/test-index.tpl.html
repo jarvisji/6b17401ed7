@@ -1,34 +1,7 @@
 <div class="page-header">
-  <h1>患者端测试页面</h1>
+  <h1>患者端欢迎页面</h1>
 </div>
 
-患者：{{currentUser.patient.name}}
-
-<ul class="list-group">
-  <li class="list-group-item">
-    <a ng-href="/wxindex.html#/profile/patient/{{currentUser.openid}}">个人设置</a>
-  </li>
-  <li class="list-group-item">
-    <a ui-sref="search-doctor">搜索医生</a>
-  </li>
-  <li class="list-group-item">
-    <a ui-sref="patient-my-doctors">我的医生</a>
-  </li>
-  <li class="list-group-item">
-    <a ui-sref="search-patient">搜索患者</a>
-  </li>
-  <li class="list-group-item">
-    <a ui-sref="patient-my-friends">我的病友</a>
-  </li>
-  <li class="list-group-item">
-    <a ui-sref="patient-cases">我的病历</a>
-  </li>
-  <li class="list-group-item">
-    <a ui-sref="patient-orders({type:''})">我的预约</a>
-  </li>
-  <li class="list-group-item">
-    <a ui-sref="patient-orders({type:'history'})">我的订单</a>
-  </li>
-</ul>
-
-{{currentUser|json}}
+当前患者：{{currentUser.patient.name}}
+<p></p>
+<code>{{currentUser|json}}</code>

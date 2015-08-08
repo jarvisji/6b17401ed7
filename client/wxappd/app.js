@@ -123,7 +123,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           $cookies.remove('currentUser');
           if (status == 404) {
             // user not registered
-            $rootScope.alertError('', 'Äú»¹Î´¹Ø×¢ÎÒÃÇµÄ¹«ÖÚºÅ¡£');
+            $rootScope.alertError('', '用户尚未注册。');
           } else {
             $rootScope.alertError(null, resp.error.message, status);
           }
