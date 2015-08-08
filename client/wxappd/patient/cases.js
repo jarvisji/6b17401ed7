@@ -37,6 +37,7 @@ angular.module('ylbWxApp')
               curCase.canDelete = true;
             }
             checkCommentDeletable(curCase.comments);
+            $rootScope.checkAvatar(curCase.creator);
           }
           commonUtils.date.convert2FriendlyDate(cases);
           $scope.cases = cases;
@@ -92,7 +93,7 @@ angular.module('ylbWxApp')
           }).error(function (resp, status) {
             $rootScope.alertError(null, resp, status);
           });
-      }
+      };
 
       // upload loacl image to wechat server before create case.
       if ($scope.newCase.link && $scope.newCase.link.linkType == resources.linkTypes.image.value) {
@@ -183,7 +184,7 @@ angular.module('ylbWxApp')
       var newLink = {linkType: linkType, avatar: item.displayAvatar, title: item.name};
 
       if (linkType == resources.linkTypes.patient.value) {
-        target = {targetType: 'state', name: 'profile-patient', params: {openid: item._id}};
+        target = {targetType: 'state', name: 'profile-patient', params: {openid: item.id}};
       }
       if (linkType == resources.linkTypes.doctor.value) {
         target = {targetType: 'state', name: 'profile', params: {openid: item.id}};
@@ -228,8 +229,7 @@ angular.module('ylbWxApp')
       if (linkType == resources.linkTypes.patient.value) {
         modalData.title = '选择患者';
         if (currentUser.isPatient) {
-          var currentUserId = currentUser.patient._id;
-          $http.get('/api/patients/' + currentUserId + '/friends')
+          $http.get('/api/patients/' + currentUser.id + '/friends')
             .success(function (resp) {
               modalData.data = $rootScope.generatePatientDisplayData(resp.data);
               $scope.modalData = modalData;
@@ -239,7 +239,19 @@ angular.module('ylbWxApp')
             });
         }
         if (currentUser.isDoctor) {
-          //TODO: get patients those have orders
+          $http.get('/api/doctors/' + currentUser.id + '/patientRelations')
+            .success(function (resp) {
+              var patients = [];
+              for (var i = 0; i < resp.data.length; i++) {
+                var relation = resp.data[i];
+                patients.push(relation.patient);
+              }
+              modalData.data = $rootScope.generatePatientDisplayData(patients);
+              $scope.modalData = modalData;
+              showAddLinkModal();
+            }).error(function (resp, status) {
+              $rootScope.alertError(null, resp, status);
+            });
         }
       }
       if (linkType == resources.linkTypes.doctor.value) {

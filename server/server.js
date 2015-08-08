@@ -92,7 +92,7 @@ var registerRoutes = function () {
    * Get the patients those have relations with the given doctor.
    * Response: List of patients.
    */
-  app.get('/api/doctors/:id/patients', doctorCtrl.getPatientRelations);
+  app.get('/api/doctors/:id/patientRelations', doctorCtrl.getPatientRelations);
 
   /* Patient APIs ----------------------------------------------------------------------------------------*/
   app.get('/api/patients', patientCtrl.find);

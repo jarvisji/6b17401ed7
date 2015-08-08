@@ -312,10 +312,21 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           $rootScope.generatePatientDisplayData(patient[i]);
         }
       } else {
-        patient.age = commonUtils.calculateAge(patient.birthday);
-        patient.displaySex = resources.sex[patient.sex];
-        patient.displayLevel = resources.patientLevel[patient.level];
-        patient.displaySickness = patient.sickness.join('<br>');
+        if (patient._id) {
+          patient.id = patient._id;
+        }
+        if (patient.birthday) {
+          patient.age = commonUtils.calculateAge(patient.birthday);
+        }
+        if (patient.sex != undefined) {
+          patient.displaySex = resources.sex[patient.sex];
+        }
+        if (patient.level != undefined) {
+          patient.displayLevel = resources.patientLevel[patient.level];
+        }
+        if (patient.sickness) {
+          patient.displaySickness = patient.sickness.join('<br>');
+        }
         $rootScope.checkAvatar(patient);
       }
       return patient;
@@ -327,6 +338,9 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           $rootScope.generateDoctorDisplayData(doctor[i]);
         }
       } else {
+        if (doctor._id) {
+          doctor.id = doctor._id;
+        }
         if (doctor.birthday) {
           doctor.age = commonUtils.calculateAge(doctor.birthday);
         }
