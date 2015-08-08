@@ -89,6 +89,7 @@ angular.module('ylbWxApp')
             var createdCase = resp.data;
             createdCase.canDelete = true;
             commonUtils.date.convert2FriendlyDate(createdCase);
+            $rootScope.checkAvatar(createdCase.creator);
             $scope.cases.unshift(createdCase);
           }).error(function (resp, status) {
             $rootScope.alertError(null, resp, status);
