@@ -177,11 +177,13 @@ angular.module('ylbWxApp')
      * @param item
      */
     $scope.onLinkItemSelected = function (linkType, item) {
+      console.log('onLinkItemSelected(), ', item);
+
       var target;
-      var newLink = {linkType: linkType, avatar: item.avatar, title: item.name};
+      var newLink = {linkType: linkType, avatar: item.displayAvatar, title: item.name};
 
       if (linkType == resources.linkTypes.patient.value) {
-        target = {targetType: 'state', name: 'profile-patient', params: {openid: item.id}};
+        target = {targetType: 'state', name: 'profile-patient', params: {openid: item._id}};
       }
       if (linkType == resources.linkTypes.doctor.value) {
         target = {targetType: 'state', name: 'profile', params: {openid: item.id}};
@@ -252,7 +254,6 @@ angular.module('ylbWxApp')
                 doctors.push(relation.doctor);
               }
               modalData.data = $rootScope.generateDoctorDisplayData(doctors);
-              console.log(modalData);
               $scope.modalData = modalData;
               showAddLinkModal();
             }).error(function (resp, status) {

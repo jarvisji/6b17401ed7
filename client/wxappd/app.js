@@ -318,6 +318,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
         patient.displaySickness = patient.sickness.join('<br>');
         $rootScope.checkAvatar(patient);
       }
+      return patient;
     };
 
     $rootScope.generateDoctorDisplayData = function (doctor) {
