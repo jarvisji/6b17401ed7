@@ -17,6 +17,7 @@ angular.module('ylbWxApp')
             var data = resp.data[i];
             data.patient.relationCreated = data.created;
             if (data.status == rStatus.normal.value) {
+              data.patient.relationMemo = data.memo;
               putong.push(data.patient);
             } else if (data.status == rStatus.jiwang.value) {
               jiwang.push(data.patient);

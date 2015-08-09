@@ -68,7 +68,8 @@ angular.module('ylbWxApp')
       if (currentUser.isPatient) {
         $http.get('/api/relations/doctor/' + doctor._id + '/patient/' + currentUser.patient._id)
           .success(function (resp) {
-            if (resp.data && resp.data.status == resources.relationStatus.normal.value) {
+            if (resp.data /*&& resp.data.status == resources.relationStatus.normal.value*/) {
+              // as long as have relation, whatever is 'putong', 'jiwang' or 'huizhen', will not display follow button.
               $scope.isFollowed = resp.data._id;
             }
           });
@@ -264,13 +265,16 @@ angular.module('ylbWxApp')
     $scope.followDoctor = function () {
       var profileDoctorId = $scope.doctor._id;
       var patientId = currentUser.patient._id;
-      $http.post('/api/relations/normal', {'doctorId': profileDoctorId, 'patientId': patientId})
-        .success(function (resp) {
-          $rootScope.alertSuccess('', '已加关注。');
-          $scope.isFollowed = resp.data._id;
-        }).error(function (resp, status) {
-          $rootScope.alertError(null, resp, status);
-        });
+      $http.post('/api/relations/normal', {
+        'doctorId': profileDoctorId,
+        'patientId': patientId,
+        'memo': $scope.modalData.message
+      }).success(function (resp) {
+        $rootScope.alertSuccess('', '已加关注。');
+        $scope.isFollowed = resp.data._id;
+      }).error(function (resp, status) {
+        $rootScope.alertError(null, resp, status);
+      });
     };
 
     $scope.unfollowDoctor = function () {
@@ -288,17 +292,24 @@ angular.module('ylbWxApp')
     // Pre-fetch an external template populated with a custom scope
     var addFriendModal = $modal({scope: $scope, template: 'wxappd/profile/add-friend-modal.tpl.html', show: false});
     // Show when some event occurs (use $promise property to ensure the template has been loaded)
-    $scope.showAddFriendModal = function () {
+    $scope.showAddFriendModal = function (type) {
+      $scope.modalData = {title: '发送添加好友请求', type: type};
+      if (type == 'doctor') {
+        $scope.modalData.title = '关注医生';
+      }
       addFriendModal.$promise.then(addFriendModal.show);
     };
 
     // doctor add profile doctor as friend.
-    $scope.addFriend = function (message) {
+    $scope.addFriend = function () {
+      if ($scope.modalData.type == 'doctor') {
+        return $scope.followDoctor();
+      }
       var currentDoctorId = currentUser.doctor._id;
       var profileDoctorId = $scope.doctor._id;
       $http.post('/api/doctors/' + currentDoctorId + '/friends/requests', {
         toDoctorId: profileDoctorId,
-        message: message
+        message: $scope.modalData.message
       }).success(function (resp) {
         $rootScope.alertSuccess('', '添加好友请求已发送。');
         $scope.friendStatus = {isFromMe: true, status: 'requested'};

@@ -87,7 +87,8 @@
         <i class="fa fa-pencil-square-o profile-action-button" ng-hide="editingJiahao"> 修改</i>
         <i class="fa fa-check profile-action-button" ng-show="editingJiahao"> 保存</i>
       </button>
-      <button class="btn btn-default" type="button" ng-if="currentUser.isPatient" ng-click="showAddJiahaoModal()" ng-disabled="!jiahao.price">
+      <button class="btn btn-default" type="button" ng-if="currentUser.isPatient" ng-click="showAddJiahaoModal()"
+              ng-disabled="!jiahao.price">
         <i class="fa fa-check-square-o profile-action-button"> 购买</i>
       </button>
     </span>
@@ -147,11 +148,11 @@
   <section>
     <div class="follow-buttons" ng-show="!isSelf">
       <button type="button" class="btn btn-primary btn-block btn-lg" ng-show="currentUser.isPatient && !isFollowed"
-              ng-click="followDoctor()">关注医生
+              ng-click="showAddFriendModal('doctor')">关注医生
       </button>
-      <button type="button" class="btn btn-danger btn-block btn-lg" ng-show="currentUser.isPatient && isFollowed"
-              ng-click="unfollowDoctor()">取消关注
-      </button>
+      <!--<button type="button" class="btn btn-danger btn-block btn-lg" ng-show="currentUser.isPatient && isFollowed"-->
+      <!--ng-click="unfollowDoctor()">取消关注-->
+      <!--</button>-->
       <button type="button" class="btn btn-primary btn-block btn-lg"
               ng-show="currentUser.isDoctor && !friendStatus" ng-click="showAddFriendModal()">加为好友
       </button>
