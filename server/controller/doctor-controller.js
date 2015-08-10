@@ -533,7 +533,7 @@ module.exports = function (app) {
           debug('getServiceStock(), createdStockData for next week: %o', createdStockData);
           _retStock.jiahao.nextWeek = createdStockData;
         }
-        _retStock.jiahao.price = _serviceDef.price;
+        _retStock.jiahao.price = _serviceDef.billingPrice;
         debug('getServiceStock(), done.');
         res.json(utils.jsonResult(_retStock));
       }).then(null, function (err) {
@@ -707,6 +707,7 @@ module.exports = function (app) {
                   // if someone recommended the order, only get 80%.
                   earn = earn * 0.8;
                 }
+                debug('getDoctorOrdersSummary(), calculate order: %s, earn: %d', order.id, earn);
                 summary[order.status] += earn;
                 break;
               }

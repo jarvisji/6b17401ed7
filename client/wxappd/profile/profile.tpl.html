@@ -79,7 +79,9 @@
     <div class="input-group input-group-lg">
       <span class="input-group-addon">加号</span>
       <input type='number' class="form-control text-right" placeholder="0" ng-model="jiahao.price"
-             ng-disabled="!editingJiahao">
+             ng-disabled="!editingJiahao" ng-if="currentUser.isDoctor">
+      <input type='number' class="form-control text-right" placeholder="0" ng-model="jiahao.billingPrice"
+             ng-disabled="!editingJiahao" ng-if="currentUser.isPatient">
       <span class="input-group-addon">元/次</span>
     <span class="input-group-btn">
       <button class="btn btn-default" type="button" ng-if="isSelf" ng-click="editJiahao()"
@@ -110,7 +112,9 @@
     <div class="input-group input-group-lg">
       <span class="input-group-addon">随诊</span>
       <input type='number' class="form-control text-right" placeholder="0" ng-model="suizhen.price"
-             ng-disabled="!editingSuizhen">
+             ng-disabled="!editingSuizhen" ng-if="currentUser.isDoctor">
+      <input type='number' class="form-control text-right" placeholder="0" ng-model="suizhen.billingPrice"
+             ng-disabled="!editingSuizhen" ng-if="currentUser.isPatient">
       <span class="input-group-addon">元/月</span>
     <span class="input-group-btn">
       <button class="btn btn-default" type="button" ng-if="isSelf" ng-click="editSuizhen()"
@@ -129,7 +133,9 @@
     <div class="input-group input-group-lg">
       <span class="input-group-addon bg-danger">会诊</span>
       <input type='number' class="form-control text-right" placeholder="0" ng-model="huizhen.price"
-             ng-disabled="!editingHuizhen">
+             ng-disabled="!editingHuizhen" ng-if="currentUser.isDoctor">
+      <input type='number' class="form-control text-right" placeholder="0" ng-model="huizhen.billingPrice"
+             ng-disabled="!editingHuizhen" ng-if="currentUser.isPatient">
       <span class="input-group-addon">元/次</span>
     <span class="input-group-btn">
       <button class="btn btn-default" type="button" ng-if="isSelf" ng-click="editHuizhen()"

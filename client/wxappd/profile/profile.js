@@ -169,7 +169,11 @@ angular.module('ylbWxApp')
      * PUT '/api/doctors/:id' will overwrite services, so need put data for all services even only changed one.
      */
     var updateService = function () {
+      $scope.jiahao.billingPrice = $scope.jiahao.price.toFixed(2);
+      $scope.huizhen.billingPrice = ($scope.huizhen.price * 1.1).toFixed(2);
+      $scope.suizhen.billingPrice = ($scope.suizhen.price * 1.1).toFixed(2);
       var servicesData = [$scope.jiahao, $scope.huizhen, $scope.suizhen];
+
       $http.put('/api/doctors/' + $scope.doctor._id, {services: servicesData})
         .success(function (resp) {
           var updatedServices = resp.data.services;
@@ -236,7 +240,7 @@ angular.module('ylbWxApp')
     var addSuizhenModal = $modal({scope: $scope, template: 'wxappd/doctor/add-suizhen-modal.tpl.html', show: false});
     // Show when some event occurs (use $promise property to ensure the template has been loaded)
     $scope.showAddSuizhenModal = function () {
-      $scope.modalData = {price: $scope.suizhen.price, quantity: 1};
+      $scope.modalData = {price: $scope.suizhen.billingPrice, quantity: 1};
       addSuizhenModal.$promise.then(addSuizhenModal.show);
     };
     $scope.buySuizhen = function () {

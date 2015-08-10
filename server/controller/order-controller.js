@@ -52,17 +52,38 @@ module.exports = function (app) {
         if (doctors.length != newOrder.doctorId.length) {
           throw new Error('doctor not found');
         }
+        /**
+         * There are some conditions or price:
+         * 1. For jiahao order, orderPrice = servicePrice;
+         * 2. For suizhen order, orderPrice = servicePrice * 1.1 * quantity;
+         * 3. For huizhen order, orderPrice = sum(servicePrice of doctors) * 1.1;
+         * 4. For extracted order, orderPrice = extracted amount, servicePrice = undefined.
+         */
         var orderDoctors = [];
+        var orderPrice = 0;
         for (var i = 0; i < doctors.length; i++) {
           var tmpDoctor = doctors[i];
+          var servicePrice;
+          for (var j = 0; j < tmpDoctor.services.length; j++) {
+            if (tmpDoctor.services[j].type == newOrder.serviceType) {
+              servicePrice = tmpDoctor.services[j].price;
+              orderPrice += tmpDoctor.services[j].billingPrice;
+              break;
+            }
+          }
           orderDoctors.push({
             id: tmpDoctor.id,
             name: tmpDoctor.name,
             avatar: tmpDoctor.wechat.headimgurl,
-            hospital: tmpDoctor.hospital
+            hospital: tmpDoctor.hospital,
+            servicePrice: servicePrice
           });
         }
         newOrder.doctors = orderDoctors;
+        // if orderPrice still 0, means the order is not one of 'jiahao', 'huizhen' and 'suizhen',
+        // it should be 'extracted', use price in data to create order.
+        newOrder.orderPrice = orderPrice ? (orderPrice * newOrder.quantity).toFixed(2) : newOrder.price;
+        debug('createOrder(), calculated orderPrice is %d', newOrder.orderPrice);
         return Patient.findById(newOrder.patientId).exec();
       }).then(function (patient) {
         if (!patient) {
@@ -208,6 +229,9 @@ module.exports = function (app) {
             if (finalStatus.indexOf(order.status) != -1) {
               debug('updateOrderStatus(), order status is final, cannot change again.');
               return res.status(400).json(utils.jsonResult(new Error('order status is final')));
+            }
+            if (newStatus == orderStatus.paid && order.serviceType == serviceType.jiahao.type) {
+              newStatus = orderStatus.confirmed;
             }
           }
 
@@ -455,23 +479,23 @@ module.exports = function (app) {
     });
   };
 
-  var getHistoryOrders = function (req, res) {
-    var role = req.query.role; // operator
-    _getCommonQueryOfOrder(req, function (err, query) {
-      if (err) return utils.handleError(err, 'getHistoryOrders()', debug, res);
-      query.in('status', finalStatus).exec()
-        .then(function (orders) {
-          debug('getHistoryOrders(), found %d orders.', orders.length);
-          //_appendOrderUsers(role, orders, function (err, newOrders) {
-          //  if (err) throw err;
-          //  res.json(utils.jsonResult(newOrders));
-          //});
-          res.json(utils.jsonResult(orders));
-        }).then(null, function (err) {
-          utils.handleError(err, 'getHistoryOrders()', debug, res);
-        });
-    });
-  };
+  //var getHistoryOrders = function (req, res) {
+  //  var role = req.query.role; // operator
+  //  _getCommonQueryOfOrder(req, function (err, query) {
+  //    if (err) return utils.handleError(err, 'getHistoryOrders()', debug, res);
+  //    query.in('status', finalStatus).exec()
+  //      .then(function (orders) {
+  //        debug('getHistoryOrders(), found %d orders.', orders.length);
+  //        //_appendOrderUsers(role, orders, function (err, newOrders) {
+  //        //  if (err) throw err;
+  //        //  res.json(utils.jsonResult(newOrders));
+  //        //});
+  //        res.json(utils.jsonResult(orders));
+  //      }).then(null, function (err) {
+  //        utils.handleError(err, 'getHistoryOrders()', debug, res);
+  //      });
+  //  });
+  //};
 
   var getAllOrders = function (req, res) {
     var role = req.query.role; // operator
@@ -708,7 +732,7 @@ module.exports = function (app) {
     updateOrder: updateOrder,
     updateOrderStatus: updateOrderStatus,
     getOrders: getOrders,
-    getHistoryOrders: getHistoryOrders,
+    //getHistoryOrders: getHistoryOrders,
     getAllOrders: getAllOrders,
     getOrderDetail: getOrderDetail,
     createComment: createOrderComment,
