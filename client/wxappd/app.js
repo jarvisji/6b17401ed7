@@ -119,7 +119,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
     });
     //$urlRouterProvider.otherwise('entry');
   }])
-  .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', '$timeout', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log, $timeout, $alert, resources, commonUtils) {
+  .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$location', '$cookies', '$log', '$timeout', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $state, $stateParams, $http, $location, $cookies, $log, $timeout, $alert, resources, commonUtils) {
     // some page will cache data to avoid retrieve new data when click 'back' of browser.
     $rootScope.dataCache = {};
 
