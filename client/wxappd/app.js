@@ -79,6 +79,11 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       templateUrl: 'wxappd/common/my-orders.tpl.html',
       controller: 'wxOrdersCtrl'
     });
+    $stateProvider.state('patient-friends-cases', {
+      url: '/patient/friends/cases',
+      templateUrl: 'wxappd/patient/my-friends-cases.tpl.html',
+      controller: 'wxMyFriendsCasesCtrl'
+    });
 
 
     /* -- doctor -------------------------------------------------------------------- */
@@ -545,7 +550,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           "href": "wxindex.html#/patient/friends"
         }, {
           "text": "病友病历",
-          "href": "wxindex.html#"
+          "href": "wxindex.html#/patient/friends/cases"
         }, {
           "text": "我的病历",
           "href": "wxindex.html#/patient/cases/"

@@ -806,6 +806,63 @@ module.exports = function (app, api) {
   };
 
   /**
+   * GET '/api/patients/:id/friends/cases'
+   * Get all friends cases of given patient.
+   * @param req
+   * @param res
+   */
+  var getFriendCases = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var patientId = req.params.id;
+    debug('getFriendCases(), receive request to get friends cases of patient: %s', patientId);
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        if (!user) {
+          throw utils.responseOpUserNotFound(res, debug, openid, role);
+        }
+        if (user.id != patientId) {
+          debug('getFriendCases(), currently only support get own patients data. operate patient is %s, ', user.id);
+          throw utils.response403(res);
+        }
+        return PatientFriend.find({
+          '$or': [{from: patientId}, {to: patientId}],
+          status: app.consts.friendStatus.accepted
+        }).exec();
+      }).then(function (friends) {
+        debug('getFriendCases(), found %d patient friends.', friends.length);
+        var patientIds = [];
+        for (var i = 0; i < friends.length; i++) {
+          var f = friends[i];
+          if (f.from == patientId) {
+            patientIds.push(f.to);
+          } else {
+            patientIds.push(f.from);
+          }
+        }
+
+        // construct query.
+        var query = CaseHistory.find({
+          patientId: {'$in': patientIds}
+        }).sort({created: -1});
+        if (req.query.createdBefore) {
+          query.lt('created', new Date(req.query.createdBefore));
+        }
+        var limit = 20;
+        if (!isNaN(req.query.limit)) {
+          limit = Number(req.query.limit);
+        }
+        query.limit(limit);
+        return query.exec();
+      }).then(function (cases) {
+        debug('getFriendCases(), found %d cases.', cases.length);
+        res.json(utils.jsonResult(cases));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getFriendCases()', debug, res);
+      });
+  };
+
+  /**
    * POST '/api/patients/:id/cases/:caseId/comments'
    * @param req
    * @param res
@@ -1032,6 +1089,7 @@ module.exports = function (app, api) {
     createCase: createCase,
     getCases: getCases,
     deleteCase: deleteCase,
+    getFriendCases: getFriendCases,
     createCaseComment: createCaseComment,
     deleteCaseComment: deleteCaseComment,
     getCasesPostPrivilege: getCasesPostPrivilege,

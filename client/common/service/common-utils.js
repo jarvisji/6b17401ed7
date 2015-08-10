@@ -108,9 +108,9 @@ angular.module('ylbWxApp')
         },
         /**
          * We need display comments created date in special format, like: x秒前， x分前，x小时前
-         * @param comments
+         * @param data
          */
-        convert2FriendlyDate: function (comments) {
+        convert2FriendlyDate: function (data) {
           var convertDate = function (date) {
             var tDate = date;
             if (typeof(date) === 'string') {
@@ -136,12 +136,12 @@ angular.module('ylbWxApp')
             return ret;
           };
 
-          if (comments instanceof Array) {
-            for (var idx in comments) {
-              comments[idx].displayCreated = convertDate(comments[idx].created);
+          if (data instanceof Array) {
+            for (var idx in data) {
+              data[idx].displayCreated = convertDate(data[idx].created);
             }
           } else {
-            comments.displayCreated = convertDate(comments.created);
+            data.displayCreated = convertDate(data.created);
           }
         }
       }

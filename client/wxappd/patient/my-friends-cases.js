@@ -2,7 +2,7 @@
  * Created by Ting on 2015/8/10.
  */
 angular.module('ylbWxApp')
-  .controller('wxMyPatientsCasesCtrl', ['$scope', '$rootScope', '$http', '$state', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, resources, commonUtils) {
+  .controller('wxMyFriendsCasesCtrl', ['$scope', '$rootScope', '$http', '$state', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, resources, commonUtils) {
     var currentUser = $rootScope.checkUserVerified();
     $scope.uiFlags = {};
     var pageLimit = 20;
@@ -12,7 +12,7 @@ angular.module('ylbWxApp')
       if (isShowMore) {
         params.createdBefore = $scope.cases[$scope.cases.length - 1].created;
       }
-      $http.get('/api/doctors/' + currentUser.id + '/patients/cases', {params: params})
+      $http.get('/api/patients/' + currentUser.id + '/friends/cases', {params: params})
         .success(function (resp) {
           var cases = resp.data;
           for (var i = 0; i < cases.length; i++) {
@@ -44,7 +44,7 @@ angular.module('ylbWxApp')
 
     // $rootScope.dataCache.wxMyPatientsCasesCtrl saves retrieved data, if user back from next level page
     // (for example link target page), load data from cache will help to keep page displaying same to before.
-    if (currentUser.isDoctor) {
+    if (currentUser.isPatient) {
       //if ($rootScope.dataCache.wxMyPatientsCasesCtrl) {
       //  $scope.cases = $rootScope.dataCache.wxMyPatientsCasesCtrl;
       //} else {

@@ -143,7 +143,7 @@ var registerRoutes = function () {
   app.delete('/api/patients/:id/cases/:caseId/comments/:commentId', patientCtrl.deleteCaseComment);
   app.get('/api/patients/:id/cases/postPrivilege', patientCtrl.getCasesPostPrivilege);
   app.get('/api/patients/:id/cases/viewPrivilege', patientCtrl.getCasesViewPrivilege);
-  //app.get('/api/patients/:id/friends/cases', patientCtrl.getFriendCases);
+  app.get('/api/patients/:id/friends/cases', patientCtrl.getFriendCases);
 
   /* -- Order APIs ------------------------------------------------------------------------------*/
   app.post('/api/orders', orderCtrl.createOrder);
