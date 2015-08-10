@@ -76,7 +76,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
     });
     $stateProvider.state('patient-orders', {
       url: '/patient/orders/:type',
-      templateUrl: 'wxappd/common/my-orders.tpl.html',
+      templateUrl: 'wxappd/common/my-appointments.tpl.html',
       controller: 'wxOrdersCtrl'
     });
     $stateProvider.state('patient-friends-cases', {
