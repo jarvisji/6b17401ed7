@@ -97,6 +97,11 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       templateUrl: 'wxappd/common/my-orders.tpl.html',
       controller: 'wxOrdersCtrl'
     });
+    $stateProvider.state('doctor-patients-cases', {
+      url: '/doctor/patients/cases',
+      templateUrl: 'wxappd/doctor/my-patients-cases.tpl.html',
+      controller: 'wxMyPatientsCasesCtrl'
+    });
 
     /* -- common -------------------------------------------------------------------- */
     $stateProvider.state('order-detail', {
@@ -110,6 +115,14 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
     //$urlRouterProvider.otherwise('entry');
   }])
   .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$cookies', '$log', '$timeout', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $state, $stateParams, $http, $cookies, $log, $timeout, $alert, resources, commonUtils) {
+    // some page will cache data to avoid retrieve new data when click 'back' of browser.
+    $rootScope.dataCache = {};
+
+    $rootScope.$on('$stateChangeSuccess',
+      function (event, toState, toParams, fromState, fromParams) {
+      });
+
+
     $rootScope.verify = function (openid, access_token, redirect) {
       $http.get('/api/verify', {params: {openid: openid, access_token: access_token}})
         .success(function (resp) {
@@ -438,6 +451,39 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       }
     };
 
+    $rootScope.checkCommentDeletable = function (comments, currentUser) {
+      for (var j = 0; j < comments.length; j++) {
+        var comment = comments[j];
+        if ((currentUser.doctor && currentUser.doctor._id == comment.creator.id) ||
+          (currentUser.patient && currentUser.patient._id == comment.creator.id)) {
+          comment.canDelete = true;
+        }
+      }
+    };
+
+    /**
+     * Show the links content of patient cases.
+     * @param linkObj
+     */
+    $rootScope.showLinkTarget = function (linkObj) {
+      var target = linkObj.target;
+      if (linkObj.linkType == resources.linkTypes.image.value) {
+        var port = $location.port();
+        var link = $location.protocol() + '://' + $location.host();
+        if (port) {
+          link = link + ':' + port;
+        }
+        wx.previewImage({
+          current: link + target, // 当前显示图片的http链接
+          urls: [link + target] // 需要预览的图片http链接列表
+        });
+      } else if (linkObj.linkType == resources.linkTypes.medicalImaging.value) {
+        window.location.href = target;
+      } else if (target.targetType == 'state') {
+        $state.go(target.name, target.params);
+      }
+    };
+
 
     $scope.menu = [
       {label: 'dashboard', location: 'dashboard', icon: 'fa-tachometer'},
@@ -452,8 +498,8 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           "text": "全部患者",
           "href": "wxindex.html#/doctor/patients"
         }, {
-          "text": "随访病历",
-          "href": "wxindex.html#/doctor/index"
+          "text": "随诊病历",
+          "href": "wxindex.html#/doctor/patients/cases"
         }, {
           "text": "我的预约",
           "href": "wxindex.html#/doctor/orders/"

@@ -13,6 +13,7 @@ module.exports = function (app) {
   var DoctorFriend = app.models.DoctorFriend;
   var ServiceStock = app.models.ServiceStock;
   var DPRelation = app.models.DoctorPatientRelation;
+  var CaseHistory = app.models.CaseHistory;
   var excludeFields = app.models.doctorExcludeFields;
 
   var login = function (req, res) {
@@ -573,6 +574,54 @@ module.exports = function (app) {
   };
 
   /**
+   * GET '/api/doctors/:id/patients/cases'
+   * @param req
+   * @param res
+   */
+  var getPatientsCases = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var doctorId = req.params.id;
+    debug('getPatientsCases(), receive request to get related patients cases of doctor: %s', doctorId);
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        if (!user) {
+          throw utils.responseOpUserNotFound(res, debug, openid, role);
+        }
+        if (user.id != doctorId) {
+          debug('getPatientsCases(), currently only support get own patients data. operate doctor is %s, ', user.id);
+          throw utils.response403(res);
+        }
+        return DPRelation.find({'doctor.id': doctorId, status: app.consts.relationStatus.suizhen.value}).exec();
+      }).then(function (relations) {
+        debug('getPatientsCases(), found %d patient relations.', relations.length);
+        var patientIds = [];
+        for (var i = 0; i < relations.length; i++) {
+          patientIds.push(relations[i].patient.id);
+        }
+
+        // construct query.
+        var query = CaseHistory.find({
+          patientId: {'$in': patientIds}
+        }).sort({created: -1});
+        if (req.query.createdBefore) {
+          query.lt('created', new Date(req.query.createdBefore));
+        }
+        var limit = 20;
+        if (!isNaN(req.query.limit)) {
+          limit = Number(req.query.limit);
+        }
+        query.limit(limit);
+        return query.exec();
+      }).then(function (cases) {
+        debug('getPatientsCases(), found %d cases.', cases.length);
+        res.json(utils.jsonResult(cases));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getPatientsCases()', debug, res);
+      });
+  };
+
+  /**
    * Remove some data not tend to expose to user.
    * @param doctor
    */
@@ -599,7 +648,8 @@ module.exports = function (app) {
     getFriendsRequestsStatus: getFriendsRequestsBetween2Doctors,
     getFriends: getFriends,
     getServiceStock: getServiceStock,
-    getPatientRelations: getPatientRelations
+    getPatientRelations: getPatientRelations,
+    getPatientsCases: getPatientsCases
   };
 };
 

@@ -93,6 +93,11 @@ var registerRoutes = function () {
    * Response: List of patients.
    */
   app.get('/api/doctors/:id/patientRelations', doctorCtrl.getPatientRelations);
+  /**
+   * GET '/api/doctors/:id/patients/cases'
+   * Get the cases of all the related patients, order by time desc.
+   */
+  app.get('/api/doctors/:id/patients/cases', doctorCtrl.getPatientsCases);
 
   /* Patient APIs ----------------------------------------------------------------------------------------*/
   app.get('/api/patients', patientCtrl.find);
@@ -138,6 +143,7 @@ var registerRoutes = function () {
   app.delete('/api/patients/:id/cases/:caseId/comments/:commentId', patientCtrl.deleteCaseComment);
   app.get('/api/patients/:id/cases/postPrivilege', patientCtrl.getCasesPostPrivilege);
   app.get('/api/patients/:id/cases/viewPrivilege', patientCtrl.getCasesViewPrivilege);
+  //app.get('/api/patients/:id/friends/cases', patientCtrl.getFriendCases);
 
   /* -- Order APIs ------------------------------------------------------------------------------*/
   app.post('/api/orders', orderCtrl.createOrder);

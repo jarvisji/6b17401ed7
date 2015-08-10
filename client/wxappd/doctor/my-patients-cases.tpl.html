@@ -1,0 +1,66 @@
+<div class="page-header">
+  <h3>随诊病历</h3>
+</div>
+<section ng-if="cases">
+  <div class="row" ng-show="cases.length > 0">
+    <div class="col-xs-12 media" ng-repeat="case in cases">
+      <div class="media-left">
+        <a href="#">
+          <img class="media-object avatar-md" ng-src="{{case.creator.displayAvatar}}">
+        </a>
+      </div>
+      <div class="media-body">
+        <h4 class="media-heading">{{case.creator.name}}</h4>
+        {{case.content}}
+        <div>
+          <small>{{case.displayCreated}}</small>
+          <span class="pull-right">
+            <span ng-show="case.canDelete">
+              <a href="" ng-click="deleteCase($index)">删除</a> |
+            </span>
+            <a href="" ng-click="showCommentInput($index)">评论</a>
+          </span>
+        </div>
+        <p></p>
+
+        <div class="general-item-list" ng-if="case.link" ng-click="showLinkTarget(case.link)">
+          <div class="item">
+            <div class="item-head">
+              <div class="item-details">
+                <img class="item-pic" ng-src="{{case.link.avatar}}">
+                <span class="item-name">{{case.link.title}}</span>
+              </div>
+              <span class="item-status"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group" ng-show="case.isShowCommentInput">
+          <input type="text" class="form-control" placeholder="评论..." ng-model="newComment.comment">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button" ng-click="createComment($index)">发布</button>
+          </span>
+        </div>
+
+        <ul class="list-group">
+          <li class="list-group-item disabled" ng-repeat="comment in case.comments">
+            {{comment.creator.name}}：{{comment.comment}} <a href="" ng-show="comment.canDelete"
+                                                            ng-click="deleteComment(case, $index)"
+                                                            class="pull-right">删除</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <button type="button" class="btn btn-success btn-lg btn-block" ng-hide="uiFlags.isNoMoreCases"
+              ng-click="getPatientCases('showMore')">
+        显示更多
+      </button>
+    </div>
+  </div>
+  <div class="row" ng-show="cases.length == 0">
+    <h4 class="text-center">暂无病历</h4>
+  </div>
+</section>

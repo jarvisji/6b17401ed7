@@ -36,7 +36,7 @@ angular.module('ylbWxApp')
               (currentUser.patient && currentUser.patient._id == curCase.creator.id)) {
               curCase.canDelete = true;
             }
-            checkCommentDeletable(curCase.comments);
+            $rootScope.checkCommentDeletable(curCase.comments, currentUser);
             $rootScope.checkAvatar(curCase.creator);
           }
           commonUtils.date.convert2FriendlyDate(cases);
@@ -61,15 +61,7 @@ angular.module('ylbWxApp')
         });
     };
 
-    var checkCommentDeletable = function (comments) {
-      for (var j = 0; j < comments.length; j++) {
-        var comment = comments[j];
-        if ((currentUser.doctor && currentUser.doctor._id == comment.creator.id) ||
-          (currentUser.patient && currentUser.patient._id == comment.creator.id)) {
-          comment.canDelete = true;
-        }
-      }
-    };
+
 
     $scope.deleteCase = function (index) {
       $http.delete('/api/patients/' + patientId + '/cases/' + $scope.cases[index]._id)
@@ -143,7 +135,7 @@ angular.module('ylbWxApp')
       $http.post('/api/patients/' + patientId + '/cases/' + curCase._id + '/comments', $scope.newComment)
         .success(function (resp) {
           // return data is the updated case.
-          checkCommentDeletable(resp.data.comments);
+          $rootScope.checkCommentDeletable(resp.data.comments, currentUser);
           commonUtils.date.convert2FriendlyDate(resp.data.comments);
           $scope.cases[caseIndex] = resp.data;
           $scope.newComment = {};
@@ -461,23 +453,4 @@ angular.module('ylbWxApp')
     //  });
     //  return users;
     //};
-
-    $scope.showLinkTarget = function (linkObj) {
-      var target = linkObj.target;
-      if (linkObj.linkType == resources.linkTypes.image.value) {
-        var port = $location.port();
-        var link = $location.protocol() + '://' + $location.host();
-        if (port) {
-          link = link + ':' + port;
-        }
-        wx.previewImage({
-          current: link + target, // 当前显示图片的http链接
-          urls: [link + target] // 需要预览的图片http链接列表
-        });
-      } else if (linkObj.linkType == resources.linkTypes.medicalImaging.value) {
-        window.location.href = target;
-      } else if (target.targetType == 'state') {
-        $state.go(target.name, target.params);
-      }
-    };
   }]);

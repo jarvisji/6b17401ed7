@@ -34,7 +34,14 @@ module.exports = {
 
   response403: function (res, message) {
     var msg = message ? message : 'no privilege';
-    res.status(403).json(utils.jsonResult(new Error(msg)));
+    res.status(403).json(this.jsonResult(new Error(msg)));
+    return new Error('responded');
+  },
+
+  responseOpUserNotFound: function (res, debug, openid, role) {
+    var theDebug = debug ? debug : _debug;
+    theDebug('getPatientsCases(), cannot find operate user, openid: %s, role: %s.', openid, role);
+    res.status(404).json(this.jsonResult(new Error('user not found')));
     return new Error('responded');
   },
 
