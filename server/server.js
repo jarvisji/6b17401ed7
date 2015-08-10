@@ -99,6 +99,15 @@ var registerRoutes = function () {
    */
   app.get('/api/doctors/:id/patients/cases', doctorCtrl.getPatientsCases);
 
+  /**
+   * Get order history of doctor.
+   */
+  app.get('/api/doctors/:id/orders', doctorCtrl.getDoctorOrders);
+  /**
+   * Get account summary of doctor. Include balance of in trading, finished, and extracted.
+   */
+  app.get('/api/doctors/:id/orders/summary', doctorCtrl.getDoctorOrdersSummary);
+
   /* Patient APIs ----------------------------------------------------------------------------------------*/
   app.get('/api/patients', patientCtrl.find);
   app.get('/api/patients/:id', patientCtrl.getPatient);

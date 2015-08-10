@@ -8,7 +8,8 @@ var Mixed = mongoose.Schema.Types.Mixed;
 module.exports = function () {
   var serviceSchema = new Schema({
     type: {type: String, index: true}, // jiahao, suizhen, huizhen
-    price: Number,
+    price: Number, // price that doctor set.
+    billingPrice: Number, // price for patient, added rate of platform.
     weekQuantity: {
       d1: Number,
       d2: Number,
@@ -98,6 +99,13 @@ module.exports = function () {
   commentSchema.index({created: 1});
 
 
+  /**
+   * There are some conditions or price:
+   * 1. For jiahao order, orderPrice = servicePrice;
+   * 2. For suizhen order, orderPrice = servicePrice * quantity * 1.1;
+   * 3. For huizhen order, orderPrice = sum(servicePrice of doctors) * 1.1;
+   * 4. For extracted order, orderPrice = extracted amount, servicePrice = undefined.
+   */
   var serviceOrderSchema = new Schema({
     serviceId: {type: String, index: true, required: true},
     serviceType: String, //jiahao, huizhen, suizhen
@@ -105,15 +113,16 @@ module.exports = function () {
       id: {type: String, required: true},
       name: String,
       avatar: String,
-      hospital: String
+      hospital: String,
+      servicePrice: Number // for 'huizhen', we need each doctor's service price.
     }],
     patient: {
       id: {type: String, required: true},
       name: String,
       avatar: String
     },
-    price: {type: Number, required: true},
     quantity: {type: Number, required: true},
+    orderPrice: {type: Number, required: true}, // for patient payment.
     bookingTime: Date,
     status: {type: String, default: 'init'}, // check consts.orderStatus
     referee: {
@@ -129,7 +138,7 @@ module.exports = function () {
   serviceOrderSchema.pre('update', function () {
     this.update({}, {$set: {lastModified: new Date()}});
   });
-  serviceOrderSchema.index({'doctors.id': 1, 'patient.id': 1, lastModified: -1, status: 1});
+  serviceOrderSchema.index({'doctors.id': 1, 'patient.id': 1, 'referee.id': 1, lastModified: -1, status: 1});
 
 
   var patientSchema = new Schema({

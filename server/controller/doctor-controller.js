@@ -14,7 +14,9 @@ module.exports = function (app) {
   var ServiceStock = app.models.ServiceStock;
   var DPRelation = app.models.DoctorPatientRelation;
   var CaseHistory = app.models.CaseHistory;
+  var ServiceOrder = app.models.ServiceOrder;
   var excludeFields = app.models.doctorExcludeFields;
+  var orderStatus = app.consts.orderStatus;
 
   var login = function (req, res) {
     var loginUser = req.body;
@@ -622,6 +624,102 @@ module.exports = function (app) {
   };
 
   /**
+   * Get order history of doctor.
+   * GET '/api/doctors/:id/orders'
+   * @param req
+   * @param res
+   */
+  var getDoctorOrders = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var doctorId = req.params.id;
+
+    debug('getDoctorOrders(), receive request to get orders of doctor: %s', doctorId);
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        if (!user) {
+          throw utils.responseOpUserNotFound(res, debug, openid, role);
+        }
+        if (user.id != doctorId) {
+          debug('getDoctorOrders(), currently only support get own data. operate doctor is %s, ', user.id);
+          throw utils.response403(res);
+        }
+
+        var status = [orderStatus.confirmed, orderStatus.rejected, orderStatus.finished, orderStatus.extracted];
+        return ServiceOrder.find({
+          '$or': [{'doctors.id': doctorId}, {'referee.id': doctorId}],
+          status: {'$in': status}
+        }).sort({created: -1}).exec();
+      }).then(function (orders) {
+        debug('getDoctorOrders(), found %d orders.', orders.length);
+        res.json(utils.jsonResult(orders));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getDoctorOrders()', debug, res);
+      });
+  };
+
+  /**
+   * Get account summary of doctor. Include balance of in trading, finished, and extracted.
+   * GET '/api/doctors/:id/orders/summary'
+   * @param req
+   * @param res
+   */
+  var getDoctorOrdersSummary = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var doctorId = req.params.id;
+
+    debug('getDoctorOrdersSummary(), receive request to get orders summary of doctor: %s', doctorId);
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        if (!user) {
+          throw utils.responseOpUserNotFound(res, debug, openid, role);
+        }
+        if (user.id != doctorId) {
+          debug('getDoctorOrdersSummary(), currently only support get own data. operate doctor is %s, ', user.id);
+          throw utils.response403(res);
+        }
+
+        var status = [orderStatus.confirmed, orderStatus.finished, orderStatus.extracted];
+        return ServiceOrder.find({
+          '$or': [{'doctors.id': doctorId}, {'referee.id': doctorId}],
+          status: {'$in': status}
+        }).exec();
+      }).then(function (orders) {
+        debug('getDoctorOrdersSummary(), found %d orders.', orders.length);
+        var summary = {confirmed: 0, finished: 0, extracted: 0, recommended: 0};
+        for (var i = 0; i < orders.length; i++) {
+          var order = orders[i];
+          if (order.referee && order.referee.id && order.referee.id == doctorId) {
+            // calculate recommend fee.
+            var totalServicePrice = 0;
+            for (var idx in order.doctors) {
+              totalServicePrice += order.doctors[idx].servicePrice;
+            }
+            earn = totalServicePrice * order.quantity * 0.2;
+            summary['recommended'] += earn;
+          } else {
+            // calculate self orders.
+            for (var idx in order.doctors) {
+              if (order.doctors[idx].id == doctorId) {
+                var earn = order.doctors[idx].servicePrice * order.quantity;
+                if (order.referee && order.referee.id) {
+                  // if someone recommended the order, only get 80%.
+                  earn = earn * 0.8;
+                }
+                summary[order.status] += earn;
+                break;
+              }
+            }
+          }
+        }
+        res.json(utils.jsonResult(summary));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getDoctorOrders()', debug, res);
+      });
+  };
+
+  /**
    * Remove some data not tend to expose to user.
    * @param doctor
    */
@@ -649,7 +747,9 @@ module.exports = function (app) {
     getFriends: getFriends,
     getServiceStock: getServiceStock,
     getPatientRelations: getPatientRelations,
-    getPatientsCases: getPatientsCases
+    getPatientsCases: getPatientsCases,
+    getDoctorOrders: getDoctorOrders,
+    getDoctorOrdersSummary: getDoctorOrdersSummary
   };
 };
 

@@ -34,7 +34,8 @@ module.exports = {
     doctorFinished: 'doctorFinished',
     finished: 'finished',   // patient accept 'doctorFinished' status.
     expired: 'expired',
-    cancelled: 'cancelled'  // only can be cancel before 'confirmed'.
+    cancelled: 'cancelled',  // only can be cancel before 'confirmed'.
+    extracted: 'extracted'  // user extracted from account balance.
   },
   // for doctor and patient relation.
   relationStatus: {
