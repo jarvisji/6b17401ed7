@@ -217,7 +217,7 @@ angular.module('ylbWxApp')
       };
 
       var newLink = $scope.newLink;
-      newLink.avatar = resources.iconJiahao;
+      newLink.avatar = resources.defaultIcon.jiahao;
       newLink.title += '的加号';
       newLink.target = {targetType: 'state', name: 'order-detail', params: {}};
       newLink.order = newOrder;
@@ -266,7 +266,7 @@ angular.module('ylbWxApp')
         }
       };
       var newLink = $scope.newLink;
-      newLink.avatar = resources.iconSuizhen;
+      newLink.avatar = resources.defaultIcon.suizhen;
       newLink.title += '的随诊';
       newLink.target = {targetType: 'state', name: 'order-detail', params: {}};
       newLink.order = newOrder;
@@ -409,7 +409,7 @@ angular.module('ylbWxApp')
       }
       if (linkType == resources.linkTypes.medicalImaging.value) {
         modalData.title = '输入影像链接';
-        modalData.data = {name: '', url: '', displayAvatar: '/assets/image/icon-medical-imaging.png'};
+        modalData.data = {name: '', url: '', displayAvatar: resources.defaultIcon.medicalImaging};
         $scope.modalData = modalData;
         showAddLinkModal();
       }

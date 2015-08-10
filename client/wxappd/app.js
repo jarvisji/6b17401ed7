@@ -98,9 +98,14 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       controller: 'wxMyPatientsCtrl'
     });
     $stateProvider.state('doctor-orders', {
-      url: '/doctor/orders/:type',
-      templateUrl: 'wxappd/common/my-orders.tpl.html',
+      url: '/doctor/orders',
+      templateUrl: 'wxappd/common/my-appointments.tpl.html',
       controller: 'wxOrdersCtrl'
+    });
+    $stateProvider.state('doctor-orders-history', {
+      url: '/doctor/orders/history',
+      templateUrl: 'wxappd/doctor/my-orders-history.tpl.html',
+      controller: 'wxDoctorOrderHistoryCtrl'
     });
     $stateProvider.state('doctor-patients-cases', {
       url: '/doctor/patients/cases',
@@ -410,6 +415,16 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       }
     };
 
+    $rootScope.setOrderIcon = function (order) {
+      if (order instanceof Array) {
+        for (var i = 0; i < order.length; i++) {
+          $rootScope.setOrderIcon(order[i]);
+        }
+      } else {
+        order.icon = resources.defaultIcon[order.serviceType];
+      }
+    };
+
     /**
      * Generate display booking time of order for showing on order list page and order detail page.
      * @param order
@@ -507,7 +522,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           "href": "wxindex.html#/doctor/patients/cases"
         }, {
           "text": "我的预约",
-          "href": "wxindex.html#/doctor/orders/"
+          "href": "wxindex.html#/doctor/orders"
         }],
       sub2: [
         {
@@ -523,7 +538,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           "href": "wxindex.html#/doctor/index"
         }, {
           "text": "交易记录",
-          "href": "wxindex.html#/doctor/index"
+          "href": "wxindex.html#/doctor/orders/history"
         }, {
           "text": "个人设置",
           "href": "wxindex.html#/profile/doctor/"

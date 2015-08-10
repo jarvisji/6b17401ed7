@@ -4,9 +4,9 @@
 angular.module('ylbWxApp')
   .controller('wxOrdersCtrl', ['$scope', '$rootScope', '$http', '$state', '$stateParams', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, $stateParams, resources, commonUtils) {
     var currentUser = $scope.currentUser = $rootScope.checkUserVerified();
-    var type = $stateParams.type;
+    //var type = $stateParams.type;
     var getOrders = function () {
-      $http.get('/api/orders/my/' + type)
+      $http.get('/api/orders/my')
         .success(function (resp) {
           for (var i = 0; i < resp.data.length; i++) {
             var order = resp.data[i];
@@ -14,6 +14,7 @@ angular.module('ylbWxApp')
             order.displayStatus = resources.orderStatus[order.status].label;
             applyStatusLabelStyle(order);
             $rootScope.handleDisplayBookingTime(order, /*noLabel*/true);
+            $rootScope.setOrderIcon(order);
           }
           $scope.orders = resp.data;
         }).error(function (resp, status) {

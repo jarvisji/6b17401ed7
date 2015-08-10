@@ -1,0 +1,58 @@
+<div class="page-header">
+  <h3>交易记录</h3>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">我的积分</div>
+  <ul class="list-group">
+    <li class="list-group-item">交易中积分：{{summary.confirmed}}</li>
+    <li class="list-group-item">已完成积分：{{summary.finished}}</li>
+    <li class="list-group-item">推荐积分：{{summary.recommended}}</li>
+    <li class="list-group-item">可提取积分：{{summary.available}}
+    </li>
+    <li class="list-group-item">已提取积分：{{summary.extracted}}</li>
+  </ul>
+  <div class="panel-body">
+    <div class="row">
+      <div class="col-xs-6"><a href="#">积分提现说明</a></div>
+      <div class="col-xs-6">
+        <button type="button" class="btn btn-success btn-block">提现</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">交易记录</div>
+  <div class="panel-body">
+
+    <div class="row" ng-if="orders.length == 0">
+      <div class="col-xs-12">
+        <div class="alert alert-info" role="alert">没有订单</div>
+      </div>
+    </div>
+
+    <div class="row" ng-if="orders.length > 0">
+      <div class="col-xs-12">
+        <div class="general-item-list">
+          <div class="item" ng-repeat="order in orders">
+            <div class="item-head" ng-click="showOrderDetail($index)">
+              <div class="item-details">
+                <img class="item-pic" ng-src="{{order.icon}}">
+                <span class="item-name">{{order.displayType}}  {{order.displayBookingTime}}</span>
+                <span class="item-label" ng-show="currentUser.isDoctor">{{order.patient.name}}</span>
+                <span class="item-label" ng-show="currentUser.isPatient">{{order.doctors[0].name}}</span>
+              </div>
+          <span class="item-status">
+            <span class="label" ng-class="order.statusClass">{{order.displayStatus}}</span>
+            <!--<button type="button" class="btn btn-danger" ng-click="reject($index)">拒绝</button>-->
+            <!--<button type="button" class="btn btn-success" ng-click="accept($index)">同意</button>-->
+          </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

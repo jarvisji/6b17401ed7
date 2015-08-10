@@ -101,8 +101,9 @@ var registerRoutes = function () {
 
   /**
    * Get order history of doctor.
+   * Get unfinished orders is implemented in orderCtrl.
    */
-  app.get('/api/doctors/:id/orders', doctorCtrl.getDoctorOrders);
+  app.get('/api/doctors/:id/orders/history', doctorCtrl.getDoctorOrders);
   /**
    * Get account summary of doctor. Include balance of in trading, finished, and extracted.
    */
@@ -159,8 +160,8 @@ var registerRoutes = function () {
   app.put('/api/orders/:id', orderCtrl.updateOrder);
   app.put('/api/orders/:id/status/:status', orderCtrl.updateOrderStatus);
   app.get('/api/orders/my', orderCtrl.getOrders); // all unfinished orders.
-  app.get('/api/orders/my/history', orderCtrl.getHistoryOrders);
-  app.get('/api/orders/my/all', orderCtrl.getAllOrders);
+  //app.get('/api/orders/my/history', orderCtrl.getHistoryOrders);
+  //app.get('/api/orders/my/all', orderCtrl.getAllOrders);
   app.get('/api/orders/:id', orderCtrl.getOrderDetail);
   app.post('/api/orders/:id/comments', orderCtrl.createComment);
   app.delete('/api/orders/:id/comments/:commentId', orderCtrl.deleteComment);

@@ -14,7 +14,7 @@
       <div class="item" ng-repeat="order in orders">
         <div class="item-head"  ng-click="showOrderDetail($index)">
           <div class="item-details">
-            <!--<img class="item-pic" ng-src="{{request.fromAvatar}}">-->
+            <img class="item-pic" ng-src="{{order.icon}}">
             <span class="item-name">{{order.displayType}}  {{order.displayBookingTime}}</span>
             <span class="item-label" ng-show="currentUser.isDoctor">{{order.patient.name}}</span>
             <span class="item-label" ng-show="currentUser.isPatient">{{order.doctors[0].name}}</span>
