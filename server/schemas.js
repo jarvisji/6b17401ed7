@@ -33,6 +33,7 @@ module.exports = function () {
     mobile: {type: String, index: true, unique: true},
     birthday: Date,
     sex: String, // 1-male, 2-female, same to wechat
+    avatar: String,
     password: String,
     salt: String,
     services: [serviceSchema],
@@ -151,6 +152,7 @@ module.exports = function () {
     mobile: {type: String, index: true, unique: true},
     birthday: Date,
     sex: String, // male, female
+    avatar: String,
     password: String,
     salt: String,
     wechat: {

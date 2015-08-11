@@ -4,7 +4,7 @@
 angular.module('ylbWxApp')
   .controller('wxProfileEditCtrl', ['$scope', '$rootScope', '$stateParams', '$state', '$timeout', '$http', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $stateParams, $state, $timeout, $http, $alert, resources, commonUtils) {
     var currentUser = $rootScope.checkUserVerified();
-    var openid = $stateParams.openid;
+    var openid = $stateParams.openid ? $stateParams.openid : currentUser.openid;
     $scope.firstTime = $stateParams.firstTime;
     // load doctor data on page init.
     var loadDoctorData = function () {
@@ -151,17 +151,19 @@ angular.module('ylbWxApp')
       if (!$rootScope.validateForm(form))
         return;
 
-      $scope.birthdayInvalid = !$scope.doctor.birthday;
-      $scope.provinceInvalid = !$scope.doctor.province;
-      $scope.cityInvalid = !$scope.doctor.city;
-      $scope.sexInvalid = !$scope.doctor.sex;
+      var doctor = $scope.doctor;
+      $scope.birthdayInvalid = !doctor.birthday;
+      $scope.provinceInvalid = !doctor.province;
+      $scope.cityInvalid = !doctor.city;
+      $scope.sexInvalid = !doctor.sex;
       if ($scope.birthdayInvalid || $scope.provinceInvalid || $scope.cityInvalid || $scope.sexInvalid) {
         return;
       }
+      doctor.avatar = doctor.wechat.headimgurl ? doctor.wechat.headimgurl : resources.defaultAvatar;
 
-      var openid = $scope.doctor.wechat.openid;
-      delete $scope.doctor.wechat; // won't change wechat data.
-      $http.put('/api/doctors/' + $scope.doctor._id, $scope.doctor)
+      var openid = doctor.wechat.openid;
+      delete doctor.wechat; // won't change wechat data.
+      $http.put('/api/doctors/' + doctor._id, doctor)
         .success(function (res) {
           $alert({content: '保存成功。', placement: 'top', type: 'success', container: 'form'});
           $timeout(function () {
