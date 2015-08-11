@@ -698,19 +698,19 @@ module.exports = function (app) {
             }
             earn = totalServicePrice * order.quantity * 0.2;
             summary['recommended'] += earn;
-          } else {
-            // calculate self orders.
-            for (var idx in order.doctors) {
-              if (order.doctors[idx].id == doctorId) {
-                var earn = order.doctors[idx].servicePrice * order.quantity;
-                if (order.referee && order.referee.id) {
-                  // if someone recommended the order, only get 80%.
-                  earn = earn * 0.8;
-                }
-                debug('getDoctorOrdersSummary(), calculate order: %s, earn: %d', order.id, earn);
-                summary[order.status] += earn;
-                break;
+          }
+
+          // calculate self orders.
+          for (var idx in order.doctors) {
+            if (order.doctors[idx].id == doctorId) {
+              var earn = order.doctors[idx].servicePrice * order.quantity;
+              if (order.referee && order.referee.id) {
+                // if someone recommended the order, only get 80%.
+                earn = earn * 0.8;
               }
+              debug('getDoctorOrdersSummary(), calculate order: %s, earn: %d', order.id, earn);
+              summary[order.status] += earn;
+              break;
             }
           }
         }
