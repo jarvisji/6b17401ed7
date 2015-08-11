@@ -7,7 +7,7 @@ angular.module('ylbWxApp')
   .controller('wxProfileCtrl', ['$scope', '$rootScope', '$stateParams', '$http', '$alert', '$modal', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $stateParams, $http, $alert, $modal, resources, commonUtils) {
     var currentUser = $scope.currentUser = $rootScope.checkUserVerified();
     var snapshot = {}; // snapshot data to compare changes.
-    var openid = $stateParams.openid ? $stateParams.openid : currentUser.openid
+    var openid = $stateParams.openid ? $stateParams.openid : currentUser.openid;
 
     var loadDoctorData = function () {
       var filter = {filter: {'wechat.openid': openid}};
@@ -281,6 +281,10 @@ angular.module('ylbWxApp')
       if (!currentUser.isPatient) {
         return;
       }
+      if (!$scope.huizhen.billingPrice) {
+        $rootScope.alertWarn('', '医生没有设置会诊服务价格。');
+        return;
+      }
       var currentUserId = currentUser.patient._id;
       $http.get('/api/patients/' + currentUserId + '/doctors')
         .success(function (resp) {
@@ -290,10 +294,21 @@ angular.module('ylbWxApp')
           // if user click 'cancel' button, will clean '$scope.modalData.huizhenDoctors', and refresh all doctors data.
           modalData.huizhenDoctors = $rootScope.generateDoctorDisplayData(resp.data);
           // get huizhen service price.
+          var currentDoctorInList = false;
+          var profileDoctorId = $scope.doctor._id;
           for (var idx in modalData.huizhenDoctors) {
             var doctor = modalData.huizhenDoctors[idx];
             var huizhenService = $rootScope.getDoctorServiceByType(doctor, resources.doctorServices.huizhen.type);
             doctor.servicePrice = huizhenService.billingPrice;
+            if (doctor._id == profileDoctorId) {
+              currentDoctorInList = true;
+            }
+          }
+          if (!currentDoctorInList) {
+            // add current doctor to top of list.
+            var currentDoctor = angular.copy($scope.doctor);
+            currentDoctor.servicePrice = $scope.huizhen.billingPrice;
+            modalData.huizhenDoctors.unshift(currentDoctor);
           }
           // init order price;
           modalData.orderPrice = 0;
