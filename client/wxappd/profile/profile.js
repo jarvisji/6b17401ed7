@@ -82,7 +82,7 @@ angular.module('ylbWxApp')
         snapshot[doctor.services[i].type] = angular.copy(doctor.services[i]);
       }
 
-      if (!$scope.jiahao) {
+      if (!$scope.jiahao || !$scope.jiahao.weekQuantity) {
         $scope.jiahao = resources.doctorServices.jiahao;
         $scope.jiahao.weekQuantity = {d1: '', d2: '', d3: '', d4: '', d5: ''};
       } else {
@@ -203,8 +203,11 @@ angular.module('ylbWxApp')
             }
             $scope.serviceStock = resp.data.jiahao;
           }
-          console.log($scope.serviceStock);
-          addJiahaoModal.$promise.then(addJiahaoModal.show);
+          if (!$scope.serviceStock.price) {
+            $rootScope.alertWarn('', '医生没有设置加号服务价格。');
+          } else {
+            addJiahaoModal.$promise.then(addJiahaoModal.show);
+          }
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });
@@ -232,6 +235,27 @@ angular.module('ylbWxApp')
     };
 
 
+    var addHuizhenModal = $modal({scope: $scope, template: 'wxappd/doctor/add-huizhen-modal.tpl.html', show: false});
+    $scope.showAddHuizhenModal = function () {
+      $http.get('/api/doctors/' + $scope.doctor._id + '/serviceStock')
+        .success(function (resp) {
+          $scope.serviceStock = [];
+          if (resp.data.jiahao) {
+            var today = commonUtils.date.getTodayStartDate();
+            var thisWeek = resp.data.jiahao.thisWeek;
+            for (var i = 0; i < thisWeek.length; i++) {
+              if (new Date(thisWeek[i].date) < today) {
+                thisWeek[i].isPast = true;
+              }
+            }
+            $scope.serviceStock = resp.data.jiahao;
+          }
+          console.log($scope.serviceStock);
+          addHuizhenModal.$promise.then(addHuizhenModal.show);
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
     $scope.buyHuizhen = function () {
 
     };
@@ -240,8 +264,12 @@ angular.module('ylbWxApp')
     var addSuizhenModal = $modal({scope: $scope, template: 'wxappd/doctor/add-suizhen-modal.tpl.html', show: false});
     // Show when some event occurs (use $promise property to ensure the template has been loaded)
     $scope.showAddSuizhenModal = function () {
-      $scope.modalData = {price: $scope.suizhen.billingPrice, quantity: 1};
-      addSuizhenModal.$promise.then(addSuizhenModal.show);
+      if (!$scope.suizhen.billingPrice) {
+        $rootScope.alertWarn('', '医生没有设置随诊服务价格。');
+      } else {
+        $scope.modalData = {price: $scope.suizhen.billingPrice, quantity: 1};
+        addSuizhenModal.$promise.then(addSuizhenModal.show);
+      }
     };
     $scope.buySuizhen = function () {
       if ($scope.modalData.quantity < 1 || $scope.modalData.quantity > 12) {

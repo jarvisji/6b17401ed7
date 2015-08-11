@@ -259,7 +259,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
      * Common method to alert error.
      * @param err
      */
-    $rootScope.alertError = function (_title, content, status, duration) {
+    $rootScope.alertError = function (_title, content, status, duration, container) {
       var title = generateAlertTitle('错误 ', _title, status);
       var content;
       if (status == 403) {
@@ -267,24 +267,28 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       } else {
         content = parseContent(content);
       }
-      $alert({
+      var opt = {
         title: title,
         content: content,
         placement: 'top',
         type: 'danger',
         duration: duration != undefined ? duration : 5,
         animation: 'am-fade-and-slide-top'
-      });
+      };
+      if (container) {
+        opt.container = container;
+      }
+      $alert(opt);
     };
 
-    $rootScope.alertWarn = function (_title, content, status) {
+    $rootScope.alertWarn = function (_title, content, status, duration) {
       var title = generateAlertTitle('警告 ', _title, status);
       $alert({
         title: title,
         content: parseContent(content),
         placement: 'top',
         type: 'warning',
-        duration: 3,
+        duration: duration != undefined ? duration : 3,
         animation: 'am-fade-and-slide-top'
       });
     };

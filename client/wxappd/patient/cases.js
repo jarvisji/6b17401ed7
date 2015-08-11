@@ -89,11 +89,13 @@ angular.module('ylbWxApp')
       };
 
       if (!$scope.newCase.link && !$scope.newCase.content) {
-        $scope.uiFlags.isInvalidContent = true;
+        $rootScope.alertError('', '请输入内容或添加链接。', '', 1);
+        //$scope.uiFlags.isInvalidContent = true;
         return;
-      } else {
-        $scope.uiFlags.isInvalidContent = false;
       }
+      //else {
+      //  $scope.uiFlags.isInvalidContent = false;
+      //}
       // upload loacl image to wechat server before create case.
       if ($scope.newCase.link && $scope.newCase.link.linkType == resources.linkTypes.image.value) {
         wx.uploadImage({
@@ -197,7 +199,12 @@ angular.module('ylbWxApp')
             }
             $scope.serviceStock = resp.data.jiahao;
           }
-          addJiahaoModal.$promise.then(addJiahaoModal.show);
+          if (!$scope.serviceStock.price) {
+            $rootScope.alertWarn('', '医生没有设置加号服务价格。', '', 1);
+            $scope.newCase.link = undefined;
+          } else {
+            addJiahaoModal.$promise.then(addJiahaoModal.show);
+          }
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });
@@ -213,13 +220,15 @@ angular.module('ylbWxApp')
         patientId: patientId,
         price: $scope.serviceStock.price,
         quantity: 1,
-        bookingTime: item.date,
-        referee: {
+        bookingTime: item.date
+      };
+      if (currentUser.doctor._id != item.doctorId) {
+        newOrder.referee = {
           id: currentUser.doctor._id,
           name: currentUser.doctor.name,
           effectDate: new Date()
         }
-      };
+      }
 
       var newLink = $scope.newLink;
       newLink.avatar = resources.defaultIcon.jiahao;
@@ -243,10 +252,15 @@ angular.module('ylbWxApp')
             }
           }
 
-          $scope.modalData = {price: suizhen.price, quantity: 1};
-          $scope.suizhen = suizhen;
-          $scope.suizhenDoctor = resp.data;
-          addSuizhenModal.$promise.then(addSuizhenModal.show);
+          if (!suizhen.billingPrice) {
+            $rootScope.alertWarn('', '医生没有设置随诊服务价格。', '', 1);
+            $scope.newCase.link = undefined;
+          } else {
+            $scope.modalData = {price: suizhen.billingPrice, quantity: 1};
+            $scope.suizhen = suizhen;
+            $scope.suizhenDoctor = resp.data;
+            addSuizhenModal.$promise.then(addSuizhenModal.show);
+          }
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });
@@ -334,6 +348,7 @@ angular.module('ylbWxApp')
      */
     $scope.onLinkTypeSelected = function (linkType) {
       var modalData = {type: linkType, title: '', data: []};
+      //$scope.uiFlags.isInvalidContent = false;
       if (linkType == resources.linkTypes.image.value) {
         // refer to: http://mp.weixin.qq.com/wiki/7/aaa137b55fb2e0456bf8dd9148dd613f.html#.E9.A2.84.E8.A7.88.E5.9B.BE.E7.89.87.E6.8E.A5.E5.8F.A3
         wx.chooseImage({
