@@ -143,7 +143,7 @@
         <i class="fa fa-pencil-square-o profile-action-button" ng-hide="editingHuizhen"> 修改</i>
         <i class="fa fa-check profile-action-button" ng-show="editingHuizhen"> 保存</i>
       </button>
-      <button class="btn btn-default" type="button" ng-if="currentUser.isPatient" ng-click="buyHuizhen()"
+      <button class="btn btn-default" type="button" ng-if="currentUser.isPatient" ng-click="showAddHuizhenModal()"
               ng-disabled="!huizhen.price">
         <i class="fa fa-check-square-o profile-action-button"> 购买</i>
       </button>

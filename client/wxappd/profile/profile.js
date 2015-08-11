@@ -186,6 +186,9 @@ angular.module('ylbWxApp')
         });
     };
 
+    /**************************************
+     * jiahao
+     */
     // Pre-fetch an external template populated with a custom scope
     var addJiahaoModal = $modal({scope: $scope, template: 'wxappd/doctor/add-jiahao-modal.tpl.html', show: false});
     // Show when some event occurs (use $promise property to ensure the template has been loaded)
@@ -234,32 +237,9 @@ angular.module('ylbWxApp')
         });
     };
 
-
-    var addHuizhenModal = $modal({scope: $scope, template: 'wxappd/doctor/add-huizhen-modal.tpl.html', show: false});
-    $scope.showAddHuizhenModal = function () {
-      $http.get('/api/doctors/' + $scope.doctor._id + '/serviceStock')
-        .success(function (resp) {
-          $scope.serviceStock = [];
-          if (resp.data.jiahao) {
-            var today = commonUtils.date.getTodayStartDate();
-            var thisWeek = resp.data.jiahao.thisWeek;
-            for (var i = 0; i < thisWeek.length; i++) {
-              if (new Date(thisWeek[i].date) < today) {
-                thisWeek[i].isPast = true;
-              }
-            }
-            $scope.serviceStock = resp.data.jiahao;
-          }
-          console.log($scope.serviceStock);
-          addHuizhenModal.$promise.then(addHuizhenModal.show);
-        }).error(function (resp, status) {
-          $rootScope.alertError(null, resp, status);
-        });
-    };
-    $scope.buyHuizhen = function () {
-
-    };
-
+    /**************************************
+     * suizhen
+     */
     // Pre-fetch an external template populated with a custom scope
     var addSuizhenModal = $modal({scope: $scope, template: 'wxappd/doctor/add-suizhen-modal.tpl.html', show: false});
     // Show when some event occurs (use $promise property to ensure the template has been loaded)
@@ -291,6 +271,86 @@ angular.module('ylbWxApp')
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });
+    };
+
+    /**************************************
+     * huizhen
+     */
+    var addHuizhenModal = $modal({scope: $scope, template: 'wxappd/doctor/add-huizhen-modal.tpl.html', show: false});
+    $scope.showAddHuizhenModal = function () {
+      if (!currentUser.isPatient) {
+        return;
+      }
+      var currentUserId = currentUser.patient._id;
+      $http.get('/api/patients/' + currentUserId + '/doctors')
+        .success(function (resp) {
+          var modalData = {title: '购买会诊服务'};
+          // for better experience, when user selected some doctor, and click 'ok' button, we will not refresh doctors data,
+          // so user may open the dialog again to modify selections.
+          // if user click 'cancel' button, will clean '$scope.modalData.huizhenDoctors', and refresh all doctors data.
+          modalData.huizhenDoctors = $rootScope.generateDoctorDisplayData(resp.data);
+          // get huizhen service price.
+          for (var idx in modalData.huizhenDoctors) {
+            var doctor = modalData.huizhenDoctors[idx];
+            var huizhenService = $rootScope.getDoctorServiceByType(doctor, resources.doctorServices.huizhen.type);
+            doctor.servicePrice = huizhenService.billingPrice;
+          }
+          // init order price;
+          modalData.orderPrice = 0;
+          $scope.modalData = modalData;
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+      addSuizhenModal.$promise.then(addHuizhenModal.show);
+    };
+    $scope.buyHuizhen = function () {
+      var serviceId;
+      var doctorIds = [];
+      for (var i = 0; i < $scope.modalData.huizhenDoctors.length; i++) {
+        var doctor = $scope.modalData.huizhenDoctors[i];
+        if (doctor.isSelected) {
+          doctorIds.push(doctor._id);
+          if (!serviceId) {
+            // for huizhen, serviceId actually no use since there more than one doctor. Just set it to make sure data validate pass.
+            var huizhenService = $rootScope.getDoctorServiceByType(doctor, resources.doctorServices.huizhen.type);
+            serviceId = huizhenService._id;
+          }
+        }
+      }
+      if (doctorIds.length < 2) {
+        $rootScope.alertError('', '至少选择2位医生。', '', 1);
+        return;
+      }
+
+      var newOrder = {
+        serviceId: serviceId,
+        serviceType: resources.doctorServices.huizhen.type,
+        doctorId: doctorIds,
+        patientId: currentUser.id,
+        price: $scope.modalData.orderPrice,
+        quantity: 1
+      };
+      $http.post('/api/orders', newOrder)
+        .success(function (resp) {
+          addSuizhenModal.$promise.then(addHuizhenModal.hide);
+          $rootScope.alertSuccess('', '订单已生成，请查看“我的订单”并尽快支付。');
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
+
+    $scope.cancelHuizhen = function () {
+      $scope.modalData.huizhenDoctors = undefined;
+      addSuizhenModal.$promise.then(addHuizhenModal.hide);
+    };
+
+    $scope.huizhenDoctorChanges = function (idx) {
+      var doctor = $scope.modalData.huizhenDoctors[idx];
+      if (doctor.isSelected) {
+        $scope.modalData.orderPrice += doctor.servicePrice;
+      } else {
+        $scope.modalData.orderPrice -= doctor.servicePrice;
+      }
     };
 
     // patient follow profile doctor.

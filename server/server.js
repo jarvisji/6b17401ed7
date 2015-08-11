@@ -135,6 +135,11 @@ var registerRoutes = function () {
    * Response: List of DoctorPatientRelation.
    */
   app.get('/api/patients/:id/doctorRelations', patientCtrl.getDoctorRelations);
+  /**
+   * Get all doctors those have relations with the given patient.
+   * Response: List of Doctor.
+   */
+  app.get('/api/patients/:id/doctors', patientCtrl.getDoctors);
 
   /**
    * GET '/api/patients/:id/follows?[expand=true]'

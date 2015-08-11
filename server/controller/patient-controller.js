@@ -17,7 +17,7 @@ module.exports = function (app, api) {
   var ServiceOrder = app.models.ServiceOrder;
   var DPRelation = app.models.DoctorPatientRelation;
   var Comment = app.models.Comment;
-  var doctorExcludeFields = app.models.doctorExcludeFields + ' -services';
+  var doctorExcludeFields = app.models.doctorExcludeFields;
   var patientExcludeFields = app.models.patientExcludeFields;
 
   /**
@@ -523,18 +523,18 @@ module.exports = function (app, api) {
     var role = req.query.role; // operator
     var patientId = req.params.id;
 
-    debug('getDoctors(), receive request to get doctors of patient: %s', patientId);
+    debug('getDoctorRelations(), receive request to get doctors of patient: %s', patientId);
     utils.getUserByOpenid(openid, role)
       .then(function (user) {
         if (user.id != patientId) {
-          debug('getDoctors(), currently only support get own relations. operate user is %s, ', user.id);
+          debug('getDoctorRelations(), currently only support get own relations. operate user is %s, ', user.id);
           throw utils.response403(res);
         }
         return DPRelation.find({'patient.id': patientId}).sort({created: -1}).exec();
       }).then(function (relations) {
         res.json(utils.jsonResult(relations));
       }).then(null, function (err) {
-        utils.handleError(err, 'getDoctors()', debug, res);
+        utils.handleError(err, 'getDoctorRelations()', debug, res);
       });
 
     //checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasOrder, opUser) {
@@ -566,6 +566,39 @@ module.exports = function (app, api) {
     //};
   };
 
+  /**
+   * Get all doctors those have relations with the given patient.
+   * Response: List of Doctor.
+   *
+   * GET '/api/patients/:id/doctors'
+   * @param req
+   * @param res
+   */
+  var getDoctors = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var patientId = req.params.id;
+
+    debug('getDoctors(), receive request to get doctors of patient: %s', patientId);
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        if (user.id != patientId) {
+          debug('getDoctors(), currently only support get own relations. operate user is %s, ', user.id);
+          throw utils.response403(res);
+        }
+        return DPRelation.find({'patient.id': patientId}).sort({created: -1}).exec();
+      }).then(function (relations) {
+        var doctorIds = [];
+        for (var i = 0; i < relations.length; i++) {
+          doctorIds.push(relations[i].doctor.id);
+        }
+        return Doctor.find({'_id': {'$in': doctorIds}}).select(doctorExcludeFields + ' -wechat').exec();
+      }).then(function (doctors) {
+        res.json(utils.jsonResult(doctors));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getDoctors()', debug, res);
+      });
+  };
 
   // use '$in' to find doctors return order is not as we want, need reorder them.
   var handleDoctorOrder = function (doctors, idsInOrderWillBeReversed) {
@@ -1086,6 +1119,7 @@ module.exports = function (app, api) {
     getFriendsRequestsStatus: getFriendsRequestsBetween2Patients,
     getFriends: getFriends,
     getDoctorRelations: getDoctorRelations,
+    getDoctors: getDoctors,
     createCase: createCase,
     getCases: getCases,
     deleteCase: deleteCase,
