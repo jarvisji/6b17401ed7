@@ -74,7 +74,9 @@ module.exports = function (app) {
           orderDoctors.push({
             id: tmpDoctor.id,
             name: tmpDoctor.name,
-            avatar: tmpDoctor.wechat.headimgurl,
+            avatar: tmpDoctor.avatar,
+            title: tmpDoctor.title,
+            department: tmpDoctor.department,
             hospital: tmpDoctor.hospital,
             servicePrice: servicePrice
           });
@@ -230,15 +232,52 @@ module.exports = function (app) {
               debug('updateOrderStatus(), order status is final, cannot change again.');
               return res.status(400).json(utils.jsonResult(new Error('order status is final')));
             }
+            //TODO: this should be invoke when wechat server callback.
             if (newStatus == orderStatus.paid && order.serviceType == serviceType.jiahao.type) {
               newStatus = orderStatus.confirmed;
             }
           }
 
-          order.status = newStatus;
+          // for 'huizhen' orders, one doctor 'confirmed' will not update order status.
+          if (order.serviceType == serviceType.huizhen.type) {
+            debug('updateOrderStatus(), update status of "huizhen" order.');
+            if (newStatus == orderStatus.confirmed) {
+              // Only when all doctors 'confirmed', order status become 'confirmed'.
+              var checkAllDoctorsConfirmed = true;
+              for (var i = 0; i < order.doctors.length; i++) {
+                console.log('idx:', i);
+                var tmpDoctor = order.doctors[i];
+                if (tmpDoctor.id == currentUserId) {
+                  debug('updateOrderStatus(), doctor confirmed. doctorId: %s', currentUserId);
+                  tmpDoctor.isConfirmed = true;
+                }
+                console.log(tmpDoctor.id, tmpDoctor.isConfirmed);
+                checkAllDoctorsConfirmed = checkAllDoctorsConfirmed && tmpDoctor.isConfirmed;
+              }
+              if (checkAllDoctorsConfirmed) {
+                debug('updateOrderStatus(), all doctor confirmed, update order status.');
+                order.status = newStatus;
+              }
+            } else if (newStatus == orderStatus.rejected) {
+              // one doctor 'rejected', the order status will be rejected.
+              for (var idx in order.doctors) {
+                if (order.doctors[idx].id == currentUserId) {
+                  debug('updateOrderStatus(), doctor rejected, the order was rejected too. doctorId: %s', currentUserId);
+                  order.doctors[idx].isConfirmed = false;
+                  order.status = newStatus;
+                  break;
+                }
+              }
+            } else {
+              order.status = newStatus;
+            }
+          } else {
+            order.status = newStatus;
+          }
+
           order.save(function (err) {
             if (err) return utils.handleError(err, 'updateOrderStatus()', debug, res);
-            res.json('success');
+            res.json(utils.jsonResult(order));
 
             // after order status changed.
             if (newStatus == orderStatus.cancelled) {
@@ -257,7 +296,9 @@ module.exports = function (app) {
             }
           });
           //updatePatientDoctorRelation(order);
-        }).then(null, function (err) {
+        }
+      ).
+        then(null, function (err) {
           utils.handleError(err, 'updateOrderStatus()', debug, res);
         });
     });

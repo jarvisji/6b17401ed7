@@ -114,8 +114,11 @@ module.exports = function () {
       id: {type: String, required: true},
       name: String,
       avatar: String,
+      title: String,
+      department: String,
       hospital: String,
-      servicePrice: Number // for 'huizhen', we need each doctor's service price.
+      servicePrice: Number, // for 'huizhen', we need each doctor's service price.
+      isConfirmed: Boolean  // for 'huizhen', order will be confirmed only when all doctor confirmed.
     }],
     patient: {
       id: {type: String, required: true},

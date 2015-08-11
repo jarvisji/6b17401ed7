@@ -24,13 +24,13 @@ section {
 }
 
 .avatar-md {
-  width: 64px;
-  height: 64px;
+  width: 64px !important;
+  height: 64px !important;
 }
 
 .avatar-lg {
-  width: 128px;
-  height: 128px;
+  width: 128px !important;
+  height: 128px !important;
 }
 
 .page-content {

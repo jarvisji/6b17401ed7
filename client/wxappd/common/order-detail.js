@@ -37,6 +37,7 @@ angular.module('ylbWxApp')
           });
       }
     };
+
     $scope.newComment = {};
     $scope.createComment = function () {
       $http.post('/api/orders/' + orderId + '/comments', $scope.newComment)
@@ -104,9 +105,14 @@ angular.module('ylbWxApp')
     };
 
     $scope.doctorRejectBookingTime = function () {
-      $http.put('/api/orders/' + orderId, {status: resources.orderStatus.rejected.value})
+      $http.put('/api/orders/' + orderId + '/status/' + resources.orderStatus.rejected.value, {})
         .success(function (resp) {
-          $scope.order.status = resources.orderStatus.rejected.value;
+          for (var idx in $scope.order.doctors) {
+            if ($scope.order.doctors[idx].id == currentUser.id) {
+              $scope.order.doctors[idx].isConfirmed = false;
+              break;
+            }
+          }
           handleUIFlags($scope.order);
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
@@ -116,7 +122,12 @@ angular.module('ylbWxApp')
     $scope.doctorAcceptBookingTime = function () {
       $http.put('/api/orders/' + orderId + '/status/' + resources.orderStatus.confirmed.value, {})
         .success(function (resp) {
-          $scope.order.status = resources.orderStatus.confirmed.value;
+          for (var idx in $scope.order.doctors) {
+            if ($scope.order.doctors[idx].id == currentUser.id) {
+              $scope.order.doctors[idx].isConfirmed = true;
+              break;
+            }
+          }
           handleUIFlags($scope.order);
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
@@ -133,21 +144,30 @@ angular.module('ylbWxApp')
 
     var handleUIFlags = function (order) {
       var flags = {};
+      if (order.serviceType == sType.huizhen.type) {
+        flags.isShowHuizhenDoctors = true;
+      }
       if (currentUser.isDoctor) {
-        if (order.serviceType != sType.jiahao.type && order.status == resources.orderStatus.paid.value) {
-          flags.isShowDoctorConfirmButtons = true;
-        }
-        if (flags.isShowDoctorConfirmButtons && !order.bookingTime && !order.serviceType == sType.suizhen.type) {
-          flags.isDisableDoctorConfirmButtons = true;
+        if (order.serviceType == sType.huizhen.type) {
+          for (var idx in order.doctors) {
+            var doctor = order.doctors[idx];
+            if (doctor.id == currentUser.id && doctor.isConfirmed == undefined) {
+              flags.isShowDoctorConfirmButtons = true;
+              break;
+            }
+          }
         }
       }
+
       if (currentUser.isPatient) {
         flags.isShowPaymentButtons = true;
-        if (!order.bookingTime && !order.serviceType == sType.suizhen.type) {
-          flags.isShowBookingButtons = true;
+        if (order.serviceType == sType.huizhen.type) {
+          if (order.status == resources.orderStatus.init.value || order.status == resources.orderStatus.paid.value)
+            flags.isShowBookingButtons = true;
         }
       }
 
       $scope.uiFlags = flags;
     }
-  }]);
+  }])
+;
