@@ -293,6 +293,68 @@ angular.module('ylbWxApp')
       addSuizhenModal.$promise.then(addSuizhenModal.hide);
     };
 
+
+    var addHuizhenModal = $modal({scope: $scope, template: 'wxappd/doctor/add-huizhen-modal.tpl.html', show: false});
+    var showAddHuizhenModal = function (doctorId) {
+      addSuizhenModal.$promise.then(addHuizhenModal.show);
+    };
+    $scope.buyHuizhen = function () {
+      var serviceId;
+      var doctorIds = [];
+      for (var i = 0; i < $scope.modalData.huizhenDoctors.length; i++) {
+        var doctor = $scope.modalData.huizhenDoctors[i];
+        if (doctor.isSelected) {
+          doctorIds.push(doctor._id);
+          if (!serviceId) {
+            // for huizhen, serviceId actually no use since there more than one doctor. Just set it to make sure data validate pass.
+            var huizhenService = $rootScope.getDoctorServiceByType(doctor, resources.doctorServices.huizhen.type);
+            serviceId = huizhenService._id;
+          }
+        }
+      }
+      if (doctorIds.length < 2) {
+        $rootScope.alertError('', '至少选择2位医生。', '', 1);
+        return;
+      }
+
+      var newOrder = {
+        serviceId: serviceId,
+        serviceType: resources.doctorServices.huizhen.type,
+        doctorId: doctorIds,
+        patientId: patientId,
+        price: $scope.modalData.orderPrice,
+        quantity: 1,
+        referee: {
+          id: currentUser.doctor._id,
+          name: currentUser.doctor.name,
+          effectDate: new Date()
+        }
+      };
+      var newLink = {
+        linkType: resources.linkTypes.serviceHuizhen.value,
+        avatar: resources.defaultIcon.huizhen,
+        title: '会诊订单（共' + doctorIds.length + '位医生）',
+        target: {targetType: 'state', name: 'order-detail', params: {}},
+        order: newOrder
+      };
+      $scope.newCase.link = newLink;
+      addSuizhenModal.$promise.then(addHuizhenModal.hide);
+    };
+
+    $scope.cancelHuizhen = function () {
+      $scope.modalData.huizhenDoctors = undefined;
+      addSuizhenModal.$promise.then(addHuizhenModal.hide);
+    };
+
+    $scope.huizhenDoctorChanges = function (idx) {
+      var doctor = $scope.modalData.huizhenDoctors[idx];
+      if (doctor.isSelected) {
+        $scope.modalData.orderPrice += doctor.servicePrice;
+      } else {
+        $scope.modalData.orderPrice -= doctor.servicePrice;
+      }
+    };
+
     /********************************************************************************
      * When user select item on the dialog of add link, we generate target data.
      * @param linkType
@@ -336,6 +398,7 @@ angular.module('ylbWxApp')
         $scope.newLink = newLink;
       }
       if (linkType == resources.linkTypes.serviceHuizhen.value) {
+        // not goes here. Check huizhenDoctorChanges(). And newLink is set at end of buyHuizhen().
       }
       newLink.target = target;
       $scope.newCase.link = newLink;
@@ -437,7 +500,7 @@ angular.module('ylbWxApp')
         modalData.title = '选择加号服务';
         _getDoctorFriends(function (resp) {
           resp.data.unshift(currentUser.doctor);
-          modalData.data = $rootScope.generatePatientDisplayData(resp.data);
+          modalData.data = $rootScope.generateDoctorDisplayData(resp.data);
           $scope.modalData = modalData;
           showAddLinkModal();
         })
@@ -446,13 +509,32 @@ angular.module('ylbWxApp')
         modalData.title = '选择随诊服务';
         _getDoctorFriends(function (resp) {
           resp.data.unshift(currentUser.doctor);
-          modalData.data = $rootScope.generatePatientDisplayData(resp.data);
+          modalData.data = $rootScope.generateDoctorDisplayData(resp.data);
           $scope.modalData = modalData;
           showAddLinkModal();
         })
       }
       if (linkType == resources.linkTypes.serviceHuizhen.value) {
         modalData.title = '选择会诊服务';
+        if (!$scope.modalData || !$scope.modalData.huizhenDoctors) {
+          // for better experience, when user selected some doctor, and click 'ok' button, we will not refresh doctors data,
+          // so user may open the dialog again to modify selections.
+          // if user click 'cancel' button, will clean '$scope.modalData.huizhenDoctors', and refresh all doctors data.
+          _getDoctorFriends(function (resp) {
+            resp.data.unshift(angular.copy(currentUser.doctor));
+            modalData.huizhenDoctors = $rootScope.generateDoctorDisplayData(resp.data);
+            // get huizhen service price.
+            for (var idx in modalData.huizhenDoctors) {
+              var doctor = modalData.huizhenDoctors[idx];
+              var huizhenService = $rootScope.getDoctorServiceByType(doctor, resources.doctorServices.huizhen.type);
+              doctor.servicePrice = huizhenService.billingPrice;
+            }
+            // init order price;
+            modalData.orderPrice = 0;
+            $scope.modalData = modalData;
+          });
+        }
+        showAddHuizhenModal();
       }
     };
 

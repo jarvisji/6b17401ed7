@@ -382,6 +382,25 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       return doctor;
     };
 
+
+    /**
+     * Get the special type of service of doctor object.
+     * @param doctor
+     * @param serviceType
+     * @returns {{}}
+     */
+    $rootScope.getDoctorServiceByType = function (doctor, serviceType) {
+      var ret = {};
+      if (doctor.services) {
+        for (var i = 0; i < doctor.services.length; i++) {
+          if (doctor.services[i].type == serviceType) {
+            ret = doctor.services[i];
+            break;
+          }
+        }
+      }
+      return ret;
+    };
     /**
      * If doctor/patient doesn't have avatar set in wechat, use default.
      * @param user

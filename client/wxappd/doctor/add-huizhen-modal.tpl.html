@@ -1,0 +1,40 @@
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" ng-click="$hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title">{{modalData.title}}</h3>
+      </div>
+      <div class="modal-body">
+        <h4>服务价格：{{modalData.orderPrice}} 元</h4>
+
+        <h4>请选择邀请会诊的医生</h4>
+
+        <div class="general-item-list">
+          <div class="item" ng-repeat="doctor in modalData.huizhenDoctors">
+            <div class="item-head">
+              <div class="item-details">
+                <input type="checkbox" ng-disabled="!doctor.servicePrice" ng-model="doctor.isSelected"
+                       ng-change="huizhenDoctorChanges($index)">
+                <img class="item-pic" ng-src="{{doctor.avatar}}">
+                <span class="item-name">{{doctor.name}}</span>
+                <span class="item-label">{{doctor.hospital}}</span>
+              </div>
+              <span class="item-status">会诊价格：{{doctor.servicePrice ? doctor.servicePrice : '未设置'}}</span>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" ng-click="cancelHuizhen()">取消
+          </button>
+          <button type="button" class="btn btn-success" ng-disabled="!modalData.orderPrice" ng-click="buyHuizhen()">确定
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
