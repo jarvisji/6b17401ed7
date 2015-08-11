@@ -162,8 +162,16 @@ angular.module('ylbWxApp')
       if (currentUser.isPatient) {
         flags.isShowPaymentButtons = true;
         if (order.serviceType == sType.huizhen.type) {
-          if (order.status == resources.orderStatus.init.value || order.status == resources.orderStatus.paid.value)
+          if (order.status == resources.orderStatus.init.value || order.status == resources.orderStatus.paid.value) {
             flags.isShowBookingButtons = true;
+            // check if anyone doctor confirmed.
+            var checkAnyDoctorConfirmed = false;
+            for (var i = 0; i < order.doctors.length; i++) {
+              checkAnyDoctorConfirmed = checkAnyDoctorConfirmed || order.doctors[i].isConfirmed;
+            }
+            // if any doctor confirmed,the booking time cannot be changed again.
+            flags.isShowBookingButtons = flags.isShowBookingButtons && !checkAnyDoctorConfirmed;
+          }
         }
       }
 
