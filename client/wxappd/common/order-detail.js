@@ -90,6 +90,10 @@ angular.module('ylbWxApp')
       if (!currentUser.isPatient) {
         return;
       }
+      if (!$scope.order.bookingTime) {
+        $rootScope.alertWarn('', '请先预约时间。', '', 1);
+        return;
+      }
       //TODO: this will be replace by wechat payment. Currently update status directly.
       $http.put('/api/orders/' + orderId + '/status/' + resources.orderStatus.paid.value, {})
         .success(function (resp) {
