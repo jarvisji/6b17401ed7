@@ -19,6 +19,7 @@ module.exports = function (app, api) {
   var Comment = app.models.Comment;
   var doctorExcludeFields = app.models.doctorExcludeFields;
   var patientExcludeFields = app.models.patientExcludeFields;
+  var orderStatus = app.consts.orderStatus;
 
   /**
    * GET /api/patients
@@ -766,6 +767,73 @@ module.exports = function (app, api) {
   };
 
   /**
+   * GET '/api/patients/:id/orders/history'
+   * Get order history of patient.
+   * Get unfinished orders is implemented in orderCtrl.
+   */
+  var getPatientFinishedOrders = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var patientId = req.params.id;
+
+    debug('getPatientFinishedOrders(), receive request to get orders of patient: %s', patientId);
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        if (!user) {
+          throw utils.responseOpUserNotFound(res, debug, openid, role);
+        }
+        if (user.id != patientId) {
+          debug('getPatientFinishedOrders(), currently only support get own data. operate patient is %s, ', user.id);
+          throw utils.response403(res);
+        }
+
+        var status = [orderStatus.rejected, orderStatus.finished, orderStatus.expired, orderStatus.extracted];
+        return ServiceOrder.find({'patient.id': patientId, status: {'$in': status}}).sort({created: -1}).exec();
+      }).then(function (orders) {
+        debug('getPatientFinishedOrders(), found %d orders.', orders.length);
+        res.json(utils.jsonResult(orders));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getPatientFinishedOrders()', debug, res);
+      });
+  };
+
+  /**
+   * GET '/api/patients/:id/orders/summary'
+   * Get account summary of patient. Include balance of in rejected orders and extracted amount.
+   */
+  var getPatientOrdersSummary = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var patientId = req.params.id;
+
+    debug('getPatientOrdersSummary(), receive request to get orders summary of patient: %s', patientId);
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        if (!user) {
+          throw utils.responseOpUserNotFound(res, debug, openid, role);
+        }
+        if (user.id != patientId) {
+          debug('getPatientOrdersSummary(), currently only support get own data. operate patient is %s, ', user.id);
+          throw utils.response403(res);
+        }
+
+        var status = [orderStatus.rejected, orderStatus.extracted];
+        return ServiceOrder.find({'patient.id': patientId, status: {'$in': status}}).exec();
+      }).then(function (orders) {
+        debug('getPatientOrdersSummary(), found %d orders.', orders.length);
+        var summary = {rejected: 0, extracted: 0};
+        for (var i = 0; i < orders.length; i++) {
+          var order = orders[i];
+          summary[order.status] += order.orderPrice;
+        }
+        res.json(utils.jsonResult(summary));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getPatientOrdersSummary()', debug, res);
+      });
+  };
+
+
+  /**
    * GET '/api/patients/:id/cases'
    * @param req
    * @param res
@@ -1127,7 +1195,9 @@ module.exports = function (app, api) {
     createCaseComment: createCaseComment,
     deleteCaseComment: deleteCaseComment,
     getCasesPostPrivilege: getCasesPostPrivilege,
-    getCasesViewPrivilege: getCasesViewPrivilege
+    getCasesViewPrivilege: getCasesViewPrivilege,
+    getPatientFinishedOrders: getPatientFinishedOrders,
+    getPatientOrdersSummary: getPatientOrdersSummary
   };
 };
 

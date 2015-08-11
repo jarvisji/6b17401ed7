@@ -75,7 +75,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       controller: 'wxPatientCasesCtrl'
     });
     $stateProvider.state('patient-orders', {
-      url: '/patient/orders/:type',
+      url: '/patient/orders',
       templateUrl: 'wxappd/common/my-appointments.tpl.html',
       controller: 'wxOrdersCtrl'
     });
@@ -83,6 +83,11 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       url: '/patient/friends/cases',
       templateUrl: 'wxappd/patient/my-friends-cases.tpl.html',
       controller: 'wxMyFriendsCasesCtrl'
+    });
+    $stateProvider.state('patient-orders-history', {
+      url: '/patient/orders/history',
+      templateUrl: 'wxappd/patient/my-orders-history.tpl.html',
+      controller: 'wxPatientOrderHistoryCtrl'
     });
 
 

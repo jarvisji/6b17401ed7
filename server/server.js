@@ -140,6 +140,15 @@ var registerRoutes = function () {
    * Response: List of Doctor.
    */
   app.get('/api/patients/:id/doctors', patientCtrl.getDoctors);
+  /**
+   * Get order history of patient.
+   * Get unfinished orders is implemented in orderCtrl.
+   */
+  app.get('/api/patients/:id/orders/history', patientCtrl.getPatientFinishedOrders);
+  /**
+   * Get account summary of patient. Include balance of in rejected orders and extracted amount.
+   */
+  app.get('/api/patients/:id/orders/summary', patientCtrl.getPatientOrdersSummary);
 
   /**
    * GET '/api/patients/:id/follows?[expand=true]'
