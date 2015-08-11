@@ -99,4 +99,16 @@ angular.module('ylbWxApp')
           $rootScope.alertError(null, resp, status);
         });
     };
+
+    /**
+     * Show detail page for creato.
+     * @param user
+     */
+    $scope.showDetails = function (user) {
+      if (user.role == resources.role.doctor) {
+        $state.go('profile', {openid: user.id});
+      } else {
+        $state.go('profile-patient', {openid: user.id});
+      }
+    };
   }]);

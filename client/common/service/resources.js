@@ -7,6 +7,10 @@ angular.module('ylbWxApp')
       1: '男',
       2: '女'
     },
+    role: {
+      doctor: 'doctor',
+      patient: 'patient'
+    },
     doctorLevel: {
       1: '普通',
       2: '正式',
