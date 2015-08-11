@@ -600,7 +600,7 @@ module.exports = function (app, api) {
       return res.status(400).json(utils.jsonResult(new Error('Invalid link type')));
     }
 
-    if (!newCase.content) {
+    if (!newCase.content && !newCase.link) {
       debug('createCase(), invalid content: %s', newCase.content);
       return res.status(400).json(utils.jsonResult(new Error('Invalid content')));
     }
