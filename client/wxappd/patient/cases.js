@@ -9,6 +9,7 @@ angular.module('ylbWxApp')
       $rootScope.alertError('', '输入错误，无法显示患者病历。');
     }
     $scope.newCase = $scope.newComment = {};
+    $scope.uiFlags = {};
 
 
     //var checkViewCasePrivilege = function () {
@@ -62,7 +63,6 @@ angular.module('ylbWxApp')
     };
 
 
-
     $scope.deleteCase = function (index) {
       $http.delete('/api/patients/' + patientId + '/cases/' + $scope.cases[index]._id)
         .success(function (resp) {
@@ -88,6 +88,12 @@ angular.module('ylbWxApp')
           });
       };
 
+      if (!$scope.newCase.link && !$scope.newCase.content) {
+        $scope.uiFlags.isInvalidContent = true;
+        return;
+      } else {
+        $scope.uiFlags.isInvalidContent = false;
+      }
       // upload loacl image to wechat server before create case.
       if ($scope.newCase.link && $scope.newCase.link.linkType == resources.linkTypes.image.value) {
         wx.uploadImage({
@@ -112,7 +118,6 @@ angular.module('ylbWxApp')
         var newOrder = $scope.newCase.link.order;
         $http.post('/api/orders', newOrder)
           .success(function (resp) {
-            console.log(resp);
             $scope.newCase.link.target.params.id = resp.data._id;
             callCreateApi();
           }).error(function (resp, status) {
