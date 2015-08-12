@@ -37,7 +37,7 @@ angular.module('ylbWxApp')
       rejected: {value: 'rejected', label: '已拒绝'},   //doctor rejected
       doctorFinished: {value: 'doctorFinished', label: '医生已完成'},
       finished: {value: 'finished', label: '已完成'},   // patient accept 'doctorFinished' status.
-      expired: {value: 'expired', label: '已过期'},
+      expired: {value: 'expired', label: '已失效'},
       cancelled: {value: 'cancelled', label: '已取消'}
     },
     linkTypes: {

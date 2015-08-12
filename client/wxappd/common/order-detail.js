@@ -152,9 +152,12 @@ angular.module('ylbWxApp')
     };
 
     var handleUIFlags = function (order) {
-      var flags = {};
+      var flags = {isShowCommentInput: true};
       if (order.serviceType == sType.huizhen.type) {
         flags.isShowHuizhenDoctors = true;
+      }
+      if (order.status == resources.orderStatus.expired.value) {
+        flags.isShowCommentInput = false;
       }
       if (currentUser.isDoctor) {
         if (order.serviceType == sType.huizhen.type) {
