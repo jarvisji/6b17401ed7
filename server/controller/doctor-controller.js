@@ -690,29 +690,40 @@ module.exports = function (app) {
         var summary = {confirmed: 0, finished: 0, extracted: 0, recommended: 0};
         for (var i = 0; i < orders.length; i++) {
           var order = orders[i];
-          if (order.referee && order.referee.id && order.referee.id == doctorId) {
-            // calculate recommend fee.
-            var totalServicePrice = 0;
-            for (var idx in order.doctors) {
-              totalServicePrice += order.doctors[idx].servicePrice;
+          // income of doctor was calculated when order confirmed. Now only sum the numbers;
+          for (var idx in order.doctors) {
+            var orderDoctor = order.doctors[idx];
+            if (orderDoctor.id == doctorId) {
+              summary[order.status] += orderDoctor.income;
             }
-            earn = totalServicePrice * order.quantity * 0.2;
-            summary['recommended'] += earn;
+          }
+          if (order.referee && order.referee.id && order.referee.id == doctorId) {
+            summary['recommended'] += order.referee.income;
           }
 
-          // calculate self orders.
-          for (var idx in order.doctors) {
-            if (order.doctors[idx].id == doctorId) {
-              var earn = order.doctors[idx].servicePrice * order.quantity;
-              if (order.referee && order.referee.id) {
-                // if someone recommended the order, only get 80%.
-                earn = earn * 0.8;
-              }
-              debug('getDoctorOrdersSummary(), calculate order: %s, earn: %d', order.id, earn);
-              summary[order.status] += earn;
-              break;
-            }
-          }
+          //if (order.referee && order.referee.id && order.referee.id == doctorId) {
+          //  // calculate recommend fee.
+          //  var totalServicePrice = 0;
+          //  for (var idx in order.doctors) {
+          //    totalServicePrice += order.doctors[idx].servicePrice;
+          //  }
+          //  earn = totalServicePrice * order.quantity * 0.2;
+          //  summary['recommended'] += earn;
+          //}
+          //
+          //// calculate self orders.
+          //for (var idx in order.doctors) {
+          //  if (order.doctors[idx].id == doctorId) {
+          //    var earn = order.doctors[idx].servicePrice * order.quantity;
+          //    if (order.referee && order.referee.id) {
+          //      // if someone recommended the order, only get 80%.
+          //      earn = earn * 0.8;
+          //    }
+          //    debug('getDoctorOrdersSummary(), calculate order: %s, earn: %d', order.id, earn);
+          //    summary[order.status] += earn;
+          //    break;
+          //  }
+          //}
         }
         res.json(utils.jsonResult(summary));
       }).then(null, function (err) {

@@ -44,6 +44,8 @@
                 <span class="item-label" ng-show="currentUser.isPatient">{{order.doctors[0].name}}</span>
               </div>
           <span class="item-status">
+            <span ng-show="order.income || !order.refereeIncome">订单积分：{{order.income}}</span>
+            <span ng-show="order.refereeIncome">推荐积分：{{order.refereeIncome}}</span>
             <span class="label" ng-class="order.statusClass">{{order.displayStatus}}</span>
             <!--<button type="button" class="btn btn-danger" ng-click="reject($index)">拒绝</button>-->
             <!--<button type="button" class="btn btn-success" ng-click="accept($index)">同意</button>-->

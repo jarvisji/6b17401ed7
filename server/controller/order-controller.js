@@ -42,10 +42,17 @@ module.exports = function (app) {
       return res.status(400).json(utils.jsonResult(new Error('invalid data')));
     }
 
+
     // fill doctor/patient information to order.
     if (typeof(newOrder.doctorId) === 'string') {
       newOrder.doctorId = [newOrder.doctorId];
     }
+    // set bookingTime of 'suizhen'
+    if (newOrder.serviceType == app.consts.doctorServices.suizhen.type && !newOrder.bookingTime) {
+      newOrder.bookingTime = new Date();
+    }
+
+
     debug('createOrder(), fill doctor information for ids: %o', newOrder.doctorId);
     Doctor.find({_id: {'$in': newOrder.doctorId}}).exec()
       .then(function (doctors) {
@@ -220,6 +227,8 @@ module.exports = function (app) {
           if (_getOrderDoctorIds(order).indexOf(currentUserId) == -1 && currentUserId != order.patient.id) {
             throw new Error('no privilege');
           }
+
+          /* --------------- deal with new status ------------------------------------ */
           if (order.status == newStatus) {
             debug('updateOrderStatus(), newStatus is same to current status: %s, do not change anything.', newStatus);
             return res.json('success');
@@ -275,6 +284,11 @@ module.exports = function (app) {
             order.status = newStatus;
           }
 
+          // calculate order income for doctor.
+          if (newStatus == orderStatus.confirmed) {
+            calculateDoctorIncome(order);
+          }
+
           order.save(function (err) {
             if (err) return utils.handleError(err, 'updateOrderStatus()', debug, res);
             res.json(utils.jsonResult(order));
@@ -284,14 +298,13 @@ module.exports = function (app) {
               restoreServiceStock(order.serviceId);
             } else if (newStatus == orderStatus.paid) {
               //TODO: this should be invoke when wechat server callback.
-              handlePaymentSuccess(order);
+              handleRelations4PaymentSuccess(order);
             } else if (newStatus == orderStatus.finished) {
 
             } else if (newStatus == orderStatus.confirmed && order.serviceType == serviceType.suizhen.type) {
-              handleSuizhenConfirmed(order);
+              handleRelations4SuizhenConfirmed(order);
               //TODO:
               // 1. send wechat message to doctor and patient.
-              // 2. calculate 医生提成和收益
 
             }
           });
@@ -302,6 +315,40 @@ module.exports = function (app) {
           utils.handleError(err, 'updateOrderStatus()', debug, res);
         });
     });
+
+    /**
+     * 订单确认时计算收益。
+     * （因为在要显示交易中的金额给医生，所以所有订单类型的收益都立即计算。但是随诊收益立即可得，其它订单收益完成时可得， 这个逻辑在summary中计算）
+     * @param order
+     */
+    var calculateDoctorIncome = function (order) {
+      var totalServicePrice = 0;
+      var refereeId;
+      if (order.referee && order.referee.id) {
+        refereeId = order.referee.id;
+      }
+      for (var i = 0; i < order.doctors.length; i++) {
+        var doctor = order.doctors[i];
+        var servicePrice = doctor.servicePrice;
+        if (refereeId) {
+          // 有推荐人
+          if (refereeId != doctor.id) {
+            // 推荐人不是医生自己，医生得80%，累加订单服务金额，最后推荐人得20%，
+            totalServicePrice += servicePrice;
+            doctor.income = (servicePrice * 0.8).toFixed(2);
+          } else {
+            // 推荐人是医生自己，不计算推荐所得，医生得100%。
+            doctor.income = servicePrice.toFixed(2);
+          }
+        } else {
+          // 无推荐人，每个医生得100%
+          doctor.income = servicePrice.toFixed(2);
+        }
+      }
+      if (refereeId) {
+        order.referee.income = (totalServicePrice * 0.2).toFixed(2);
+      }
+    };
 
     var restoreServiceStock = function (serviceId) {
       // increase stock
@@ -319,7 +366,7 @@ module.exports = function (app) {
      * 随诊订单以医生确认为节点，转为关系状态为随诊。
      * @param order
      */
-    var handleSuizhenConfirmed = function (order) {
+    var handleRelations4SuizhenConfirmed = function (order) {
       debug('handleSuizhenConfirmed(), update patient and doctor relations for order: %o', order);
       var orderDoctorIds = _getOrderDoctorIds(order);
       DPRelation.find({'doctor.id': {'$in': orderDoctorIds}, 'patient.id': order.patient.id}).exec()
@@ -353,7 +400,7 @@ module.exports = function (app) {
      * 2. send wechat message to doctor and patient.
      * @param order
      */
-    var handlePaymentSuccess = function (order, callback) {
+    var handleRelations4PaymentSuccess = function (order, callback) {
       var error = null;
       debug('handlePaymentSuccess(), update patient and doctor relations for order: %o', order);
       var orderDoctorIds = _getOrderDoctorIds(order);
@@ -502,12 +549,12 @@ module.exports = function (app) {
     _getCommonQueryOfOrder(req, function (err, query) {
       if (err) return utils.handleError(err, 'getOrders()', debug, res);
 
-      var queryPromise = query.nin('status', finalStatus).exec();
+      query.nin('status', finalStatus);
       if (role == app.consts.role.doctor) {
         // don't display not paid orders for doctor.
-        queryPromise = query.nin('status', finalStatus.concat(orderStatus.init)).exec();
+        query.nin('status', finalStatus.concat(orderStatus.init)).exec();
       }
-      queryPromise.then(function (orders) {
+      query.exec().then(function (orders) {
         debug('getOrders(), found %d orders.', orders.length);
         //_appendOrderUsers(role, orders, function (err, newOrders) {
         //  if (err) throw err;

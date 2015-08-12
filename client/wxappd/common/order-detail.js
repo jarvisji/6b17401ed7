@@ -19,7 +19,11 @@ angular.module('ylbWxApp')
           $scope.order = order;
           getPatientInfo();
         }).error(function (resp, status) {
-          $rootScope.alertError(null, resp, status);
+          if (status == 403) {
+            $rootScope.alertError('', '不能查看他人的订单。');
+          } else {
+            $rootScope.alertError(null, resp, status);
+          }
         });
     };
     getOrderInfo();
@@ -107,12 +111,15 @@ angular.module('ylbWxApp')
     $scope.doctorRejectBookingTime = function () {
       $http.put('/api/orders/' + orderId + '/status/' + resources.orderStatus.rejected.value, {})
         .success(function (resp) {
-          for (var idx in $scope.order.doctors) {
-            if ($scope.order.doctors[idx].id == currentUser.id) {
-              $scope.order.doctors[idx].isConfirmed = false;
-              break;
-            }
-          }
+          $scope.order.status = resp.data.status;
+          $scope.order.doctors = resp.data.doctors;
+          //$scope.order = resp.data;
+          //for (var idx in $scope.order.doctors) {
+          //  if ($scope.order.doctors[idx].id == currentUser.id) {
+          //    $scope.order.doctors[idx].isConfirmed = false;
+          //    break;
+          //  }
+          //}
           handleUIFlags($scope.order);
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
@@ -122,12 +129,14 @@ angular.module('ylbWxApp')
     $scope.doctorAcceptBookingTime = function () {
       $http.put('/api/orders/' + orderId + '/status/' + resources.orderStatus.confirmed.value, {})
         .success(function (resp) {
-          for (var idx in $scope.order.doctors) {
-            if ($scope.order.doctors[idx].id == currentUser.id) {
-              $scope.order.doctors[idx].isConfirmed = true;
-              break;
-            }
-          }
+          $scope.order.status = resp.data.status;
+          $scope.order.doctors = resp.data.doctors;
+          //for (var idx in $scope.order.doctors) {
+          //  if ($scope.order.doctors[idx].id == currentUser.id) {
+          //    $scope.order.doctors[idx].isConfirmed = true;
+          //    break;
+          //  }
+          //}
           handleUIFlags($scope.order);
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
@@ -155,6 +164,10 @@ angular.module('ylbWxApp')
               flags.isShowDoctorConfirmButtons = true;
               break;
             }
+          }
+        } else if (order.serviceType == sType.suizhen.type) {
+          if (order.status == resources.orderStatus.paid.value) {
+            flags.isShowDoctorConfirmButtons = true;
           }
         }
       }

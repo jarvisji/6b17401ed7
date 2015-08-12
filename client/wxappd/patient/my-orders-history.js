@@ -14,6 +14,7 @@ angular.module('ylbWxApp')
             var order = resp.data[i];
             order.displayType = resources.doctorServices[order.serviceType].label;
             order.displayStatus = resources.orderStatus[order.status].label;
+            $rootScope.applyStatusLabelStyle(order, currentUser.isDoctor, currentUser.isPatient);
             $rootScope.handleDisplayBookingTime(order, /*noLabel*/true);
             $rootScope.setOrderIcon(order);
           }

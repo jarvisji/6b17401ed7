@@ -118,7 +118,8 @@ module.exports = function () {
       department: String,
       hospital: String,
       servicePrice: Number, // for 'huizhen', we need each doctor's service price.
-      isConfirmed: Boolean  // for 'huizhen', order will be confirmed only when all doctor confirmed.
+      isConfirmed: Boolean, // for 'huizhen', order will be confirmed only when all doctor confirmed.
+      income: {type: Number, default: 0}  // in most cases, income equals servicePrice. Only except there is referee, income = servicePrice * 0.8
     }],
     patient: {
       id: {type: String, required: true},
@@ -132,7 +133,8 @@ module.exports = function () {
     referee: {
       id: String,
       name: String,
-      effectDate: Date
+      effectDate: Date,
+      income: {type: Number, default: 0}
     },
     comments: [commentSchema],
     rank: Number,

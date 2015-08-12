@@ -14,8 +14,20 @@ angular.module('ylbWxApp')
             var order = resp.data[i];
             order.displayType = resources.doctorServices[order.serviceType].label;
             order.displayStatus = resources.orderStatus[order.status].label;
+            $rootScope.applyStatusLabelStyle(order, currentUser.isDoctor, currentUser.isPatient);
             $rootScope.handleDisplayBookingTime(order, /*noLabel*/true);
             $rootScope.setOrderIcon(order);
+
+            // set doctor income, will display on page.
+            for (var j = 0; j < order.doctors.length; j++) {
+              if (order.doctors[j].id == currentUser.id) {
+                order.income = order.doctors[j].income;
+                break;
+              }
+            }
+            if (order.referee && order.referee.id && order.referee.id == currentUser.id) {
+              order.refereeIncome = order.referee.income;
+            }
           }
           $scope.orders = resp.data;
         }).error(function (resp, status) {

@@ -532,6 +532,43 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       }
     };
 
+    var oStatus = resources.orderStatus;
+    var finishStatus = [oStatus.finished.value, oStatus.expired.value, oStatus.cancelled.value];
+    var warnStatus = [oStatus.init.value];
+    var failStatus = [oStatus.rejected.value];
+    var waitStatus4Doctor = [oStatus.paid.value];
+    var waitStatus4Patient = [oStatus.doctorFinished.value];
+    var successStatus4Doctor = [oStatus.confirmed.value];
+    var successStatus4Patient = [oStatus.paid.value, oStatus.confirmed.value];
+    $rootScope.applyStatusLabelStyle = function (order, isDoctor, isPatient) {
+      if (order instanceof Array) {
+        for (var idx in order) {
+          $rootScope.applyStatusLabelStyle(order[idx]);
+        }
+      } else {
+        order.displayStatus = oStatus[order.status].label;
+        if (finishStatus.indexOf(order.status) != -1) {
+          order.statusClass = 'label-default';
+        } else if (warnStatus.indexOf(order.status) != -1) {
+          order.statusClass = 'label-warning';
+        } else if (failStatus.indexOf(order.status) != -1) {
+          order.statusClass = 'label-danger';
+        } else if (isDoctor) {
+          if (successStatus4Doctor.indexOf(order.status) != -1) {
+            order.statusClass = 'label-success';
+          } else if (waitStatus4Doctor.indexOf(order.status) != -1) {
+            order.statusClass = 'label-primary';
+          }
+        } else if (isPatient) {
+          if (successStatus4Patient.indexOf(order.status) != -1) {
+            order.statusClass = 'label-success';
+          } else if (waitStatus4Patient.indexOf(order.status) != -1) {
+            order.statusClass = 'label-primary';
+          }
+        }
+      }
+    };
+
 
     $scope.menu = [
       {label: 'dashboard', location: 'dashboard', icon: 'fa-tachometer'},
@@ -582,7 +619,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           "href": "wxindex.html#/patient/doctors"
         }, {
           "text": "我的预约",
-          "href": "wxindex.html#/patient/orders/"
+          "href": "wxindex.html#/patient/orders"
         }],
       sub2: [
         {
