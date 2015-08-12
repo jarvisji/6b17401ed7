@@ -332,13 +332,46 @@ module.exports = function (app) {
    */
   var acceptFriendsRequests = function (req, res) {
     var reqId = req.params.reqId;
-    DoctorFriend.findByIdAndUpdate(reqId, {status: 'accepted'}, function (err, ret) {
+    DoctorFriend.findById(reqId, function (err, friend) {
       if (err) {
         debug('acceptFriendsRequests(), error:%o', err);
         return res.status(500).json(utils.jsonResult(err));
       }
-      res.end();
+      friend.status = 'accepted';
+      friend.save(function (err) {
+        if (err) {
+          debug('acceptFriendsRequests(), error:%o', err);
+          return res.status(500).json(utils.jsonResult(err));
+        }
+        debug('acceptFriendsRequests(), updated status to "accepted", requestId: %s', reqId);
+        res.json('success');
+      });
+
+      // if doctor have 5 friends, set level = 2.
+      updateDoctorLevel(friend.from);
+      updateDoctorLevel(friend.to);
     });
+
+    var updateDoctorLevel = function (doctorId) {
+      debug('acceptFriendsRequests(), updateDoctorLevel(), checking doctor level..., doctorId: %s', doctorId);
+      var _doctor;
+      Doctor.findById(doctorId).exec()
+        .then(function (doctor) {
+          if (doctor && doctor.level < 2) {
+            debug('acceptFriendsRequests(), updateDoctorLevel(), checking doctor friends count..., doctorId: %s', doctorId);
+            _doctor = doctor;
+            return DoctorFriend.count({'$or': [{from: doctor.id}, {to: doctor.id}], status: 'accepted'}).exec();
+          }
+        }).then(function (count) {
+          if (count >= 5) {
+            debug('acceptFriendsRequests(),updateDoctorLevel(), updating doctor level to 2, doctorId: %s', doctorId);
+            _doctor.level = 2;
+            return _doctor.save();
+          }
+        }).then(null, function (err) {
+          debug('acceptFriendsRequests(), update doctor level error: %o', err);
+        })
+    }
   };
 
   /**
