@@ -186,7 +186,7 @@ var registerRoutes = function () {
    * @Data: {"doctorId":"string", "patientId":"string"}
    */
   app.post('/api/relations/normal', patientCtrl.createFollow);
-  app.delete('/api/relations/normal/:relationId', patientCtrl.deleteFollow);
+  app.delete('/api/relations/:relationId', patientCtrl.deleteRelation);
 
   /**
    * GET '/api/relations/doctor/:doctorId/patient/:patientId'

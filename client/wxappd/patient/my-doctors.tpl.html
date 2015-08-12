@@ -26,10 +26,9 @@
   <span ng-show="doctors.length == 0">没有数据</span>
 
   <div class="general-item-list">
-    <div class="item" ng-repeat="doctor in doctors" ng-click="showDetails(doctor.id)"
-         ng-swipe-left="itemButton=$index">
+    <div class="item" ng-repeat="doctor in doctors" ng-swipe-left="onSwipeLeft($index)">
       <div class="item-head">
-        <div class="item-details">
+        <div class="item-details" ng-click="showDetails(doctor.id)">
           <div class="item-pic-container">
             <img class="item-pic" ng-src="{{doctor.displayAvatar}}">
             <span class="item-pic-v-icon" ng-show="doctor.isShowVIcon"><i class="fa fa-vimeo-square"></i></span>
@@ -37,8 +36,9 @@
           <span class="item-name">{{doctor.name}}</span>
           <span class="item-label"></span>
         </div>
-        <!--<button type="button" class="btn btn-danger pull-right" ng-if="itemButton == $index"></button>-->
-        <span class="item-status">{{doctor.hospital}}&nbsp;&nbsp;</span>
+        <span class="item-status">{{doctor.hospital}}&nbsp;&nbsp;
+          <button type="button" class="btn btn-danger" ng-show="doctor.isShowDeleteButton" ng-click="deleteRelation($index)">删除</button>
+        </span>
       </div>
     </div>
   </div>

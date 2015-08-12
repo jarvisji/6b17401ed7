@@ -292,33 +292,33 @@ module.exports = function (app, api) {
   };
 
   /**
-   * DELETE /api/relations/normal/:relationId
+   * DELETE /api/relations/:relationId
    * Delete normal relationship that a patient follows a doctor.
    *
    * Only patient can delete his follow relation.
    * @param req
    * @param res
    */
-  var deleteFollow = function (req, res) {
+  var deleteRelation = function (req, res) {
     var relationId = req.params.relationId;
     var role = req.query.role;
     var openid = req.query.openid;
 
-    debug('deleteFollow(), receive request to delete normal relation: %s', relationId);
+    debug('deleteRelation(), receive request to delete relation: %s', relationId);
     if (role != app.consts.role.patient) {
-      debug('deleteFollow(), only patient can delete normal relation.');
+      debug('deleteRelation(), only patient can delete normal relation.');
       return res.status(403).json(utils.jsonResult(new Error('no privilege')));
     }
     var _relation;
     DPRelation.findById(relationId).exec()
       .then(function (relation) {
         if (!relation) {
-          debug('deleteFollow(), no relation found, response success.');
+          debug('deleteRelation(), no relation found, response success.');
           res.json(utils.jsonResult('success'));
           throw new Error('responded');
         }
-        if (relation.status != app.consts.relationStatus.putong.value) {
-          debug('deleteFollow(), cannot delete relation of status: %s', relation.status);
+        if (relation.status == app.consts.relationStatus.suizhen.value) {
+          debug('deleteRelation(), cannot delete relation of status: %s', relation.status);
           res.status(500).json(utils.jsonResult(new Error('invalid relation status')));
           throw new Error('responded');
         }
@@ -326,16 +326,16 @@ module.exports = function (app, api) {
         return utils.getUserByOpenid(openid, role);
       }).then(function (patient) {
         if (patient.id != _relation.patient.id) {
-          debug('deleteFollow(), patient only can delete own relation.');
+          debug('deleteRelation(), patient only can delete own relation.');
           res.status(403).json(utils.jsonResult(new Error('no privilege')));
           throw new Error('responded');
         }
-        return patient.remove();
+        return _relation.remove();
       }).then(function (removed) {
-        debug('deleteFollow(), delete normal relation success: %s', relationId);
+        debug('deleteRelation(), delete relation success: %s', relationId);
         res.json(utils.jsonResult('success'));
       }).then(null, function (err) {
-        utils.handleError(err, 'deleteFollow()', debug, res);
+        utils.handleError(err, 'deleteRelation()', debug, res);
       });
   };
 
@@ -1178,7 +1178,7 @@ module.exports = function (app, api) {
     //getFollows: getFollows,
     createFollow: createFollow,
     getRelation: getRelation,
-    deleteFollow: deleteFollow,
+    deleteRelation: deleteRelation,
     createFriendsRequests: createFriendsRequests,
     getFriendsRequests: getFriendsRequests,
     acceptFriendsRequests: acceptFriendsRequests,

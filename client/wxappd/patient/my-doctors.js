@@ -16,6 +16,7 @@ angular.module('ylbWxApp')
         .success(function (resp) {
           for (var i = 0; i < resp.data.length; i++) {
             var data = resp.data[i];
+            data.doctor.relationId = data._id; // save relationId for delete.
             if (data.status == rStatus.normal.value) {
               putong.push(data.doctor);
             } else if (data.status == rStatus.jiwang.value) {
@@ -58,4 +59,25 @@ angular.module('ylbWxApp')
         $scope.doctors = putong;
       }
     };
+
+    // when patient swipe left, can delete 'jiwang' and 'putong' relations.
+    $scope.onSwipeLeft = function (index) {
+      if ($scope.uiFlags.type != 'suizhen') {
+        for (var i = 0; i < $scope.doctors.length; i++) {
+          $scope.doctors[i].isShowDeleteButton = false;
+        }
+        $scope.doctors[index].isShowDeleteButton = true;
+      }
+    };
+
+    $scope.deleteRelation = function (index) {
+      var relationId = $scope.doctors[index].relationId;
+      $http.delete('/api/relations/'+ relationId)
+        .success(function(resp){
+          $scope.doctors.splice(index, 1);
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+
+    }
   }]);
