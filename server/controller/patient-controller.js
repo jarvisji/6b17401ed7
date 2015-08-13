@@ -682,52 +682,20 @@ module.exports = function (app, api) {
       // download image from wechat server and replace link.
       if (newCase.link && newCase.link.linkType == app.consts.caseLinkTypes.image) {
         var mediaId = newCase.link.target;
-        debug('createCase(), downloading image from wechat server, mediaId: %s', mediaId);
-        api.getMedia(mediaId, function (err, result, header) {
+        utils.downloadWechatMedia(mediaId, creatorUser.id, api, function (err, fileLink) {
           if (err) {
-            debug('createCase(), get media from wechat server error: %o', err);
-            //TODO: if do not throw this error to user, need consider retry or error handler.
             return;
           }
-          // generate local file name.
-          var fileName;
-          if (header.headers['content-disposition']) {
-            var tmpArr = header.headers['content-disposition'].split('filename="');
-            if (tmpArr.length > 1) {
-              fileName = tmpArr[1].substr(0, tmpArr[1].length - 1);
+          debug('createCase(), updating case data.');
+          CaseHistory.findOneAndUpdate({'_id': createdCaseId}, {
+            'link.target': fileLink,
+            'link.avatar': fileLink
+          }, function (err, result) {
+            if (err) {
+              debug('createCase(), update image link failed: %o', err);
+              return;
             }
-          } else {
-            var tmpArr = header.headers['content-type'].split('/');
-            fileName = mediaId + '.' + tmpArr[1];
-          }
-          var fileLink = '/upload/' + creatorUser.id + '/';
-          var path = __dirname + '/../..' + fileLink;
-          fs.exists(path, function (exist) {
-            if (!exist) {
-              mkdirp.sync(path);
-            }
-
-            var filePath = path + fileName;
-            fileLink += fileName;
-            debug('createCase(), writing download file to %s', filePath);
-            fs.writeFile(filePath, result, function (err) {
-              if (err) {
-                debug('createCase(), save media file error: %o', err);
-                //TODO: error handler
-                return;
-              }
-              debug('createCase(), updating case data.');
-              CaseHistory.findOneAndUpdate({'_id': createdCaseId}, {
-                'link.target': fileLink,
-                'link.avatar': fileLink
-              }, function (err, result) {
-                if (err) {
-                  debug('createCase(), update image link failed: %o', err);
-                  return;
-                }
-                debug('createCase(), update image link success: %o', result);
-              });
-            });
+            debug('createCase(), update image link success: %o', result);
           });
         });
       }
