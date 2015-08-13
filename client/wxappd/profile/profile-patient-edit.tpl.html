@@ -20,7 +20,7 @@
     <div class="form-group" ng-class="{'has-error':baseForm.mobile.$dirty && baseForm.mobile.$invalid}">
       <label class="control-label" for="mobile">手机（11位数字）</label>
       <input type="text" class="form-control" id="mobile" name="mobile" placeholder="" ng-model="patient.mobile"
-             maxlength="11" ng-pattern="/^1[3-8]\d{9}$/" required>
+             maxlength="11" ng-pattern="/^1[3-8]\d{9}$/">
     </div>
     <div class="form-group" ng-class="{'has-error':sexInvalid}">
       <label for="sex">性别</label>
@@ -33,8 +33,8 @@
         {{patient.birthdayYear?patient.birthdayYear:'年'}} <span class="caret"></span></button>
       <button type="button" class="btn btn-default" bs-dropdown="ddMonth">
         {{patient.birthdayMonth?patient.birthdayMonth:'月'}} <span class="caret"></span></button>
-      <button type="button" class="btn btn-default" bs-dropdown="ddDay">
-        {{patient.birthdayDay?patient.birthdayDay:'日'}} <span class="caret"></span></button>
+      <!--<button type="button" class="btn btn-default" bs-dropdown="ddDay">-->
+        <!--{{patient.birthdayDay?patient.birthdayDay:'日'}} <span class="caret"></span></button>-->
     </div>
     <div class="form-group" ng-class="{'has-error':provinceInvalid}">
       <label class="control-label" for="province">省份</label>

@@ -2,6 +2,8 @@
  * Created by Ting on 2015/7/15.
  */
 var _debug = require('debug')('ylb.utils');
+var fs = require('fs');
+var mkdirp = require('mkdirp');
 
 module.exports = {
   debugMongooseError: function (err, debug, message /* optional */) {
@@ -99,5 +101,53 @@ module.exports = {
       })
     }
     return queryPromise;
+  },
+
+  /**
+   * Download media from wechat server, save to local user directory.
+   * @param mediaId
+   * @param userId
+   * @param api
+   * @param callback
+   */
+  downloadWechatMedia: function (mediaId, userId, api, callback) {
+    debug('createCase(), downloading image from wechat server, mediaId: %s', mediaId);
+    api.getMedia(mediaId, function (err, result, header) {
+      if (err) {
+        debug('downloadWechatMedia(), get media from wechat server error: %o', err);
+        //TODO: if do not throw this error to user, need consider retry or error handler.
+        callback(err);
+      }
+      // generate local file name.
+      var fileName;
+      if (header.headers['content-disposition']) {
+        var tmpArr = header.headers['content-disposition'].split('filename="');
+        if (tmpArr.length > 1) {
+          fileName = tmpArr[1].substr(0, tmpArr[1].length - 1);
+        }
+      } else {
+        var tmpArr = header.headers['content-type'].split('/');
+        fileName = mediaId + '.' + tmpArr[1];
+      }
+      var fileLink = '/upload/' + userId + '/';
+      var path = __dirname + '/../..' + fileLink;
+      fs.exists(path, function (exist) {
+        if (!exist) {
+          mkdirp.sync(path);
+        }
+
+        var filePath = path + fileName;
+        fileLink += fileName;
+        debug('downloadWechatMedia(), writing download file to %s', filePath);
+        fs.writeFile(filePath, result, function (err) {
+          if (err) {
+            debug('createCase(), save media file error: %o', err);
+            //TODO: error handler
+            callback(err);
+          }
+          callback(null, fileLink);
+        });
+      });
+    });
   }
 };

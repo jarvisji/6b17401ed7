@@ -36,7 +36,7 @@ module.exports = function (app, api) {
             console.log('maxNumberPatient:', maxNumberPatient);
             Patient.create({
               mobile: 'openid_' + result.openid,
-              number: maxNumberPatient.length > 0 ? maxNumberPatient[0].number + 1 : 1,
+              number: maxNumberPatient.length > 0 ? maxNumberPatient[0].number + 10000 : 10001,
               wechat: result
             }, function (err, raw) {
               if (err) return debug('Subscribe: Save patient error: ', err);

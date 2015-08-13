@@ -8,7 +8,7 @@ var utils = require('../middleware/utils');
 var stringUtils = require('../utils/string-utils');
 var dateUtils = require('../utils/date-utils');
 
-module.exports = function (app) {
+module.exports = function (app, api) {
   var Doctor = app.models.Doctor;
   var DoctorFriend = app.models.DoctorFriend;
   var ServiceStock = app.models.ServiceStock;
@@ -124,7 +124,7 @@ module.exports = function (app) {
       var doctor = new Doctor(req.body);
       doctor.salt = Math.round((new Date().valueOf() * Math.random()));
       doctor.password = sha512(doctor.salt + doctor.password);
-      doctor.number = maxNumberDoctor.length > 0 ? maxNumberDoctor[0].number + 1 : 1;
+      doctor.number = maxNumberDoctor.length > 0 ? maxNumberDoctor[0].number + 10000 : 10001;
       doctor.save(function (err, data) {
         if (err) {
           debug('Save doctor error: ', err);
@@ -196,7 +196,23 @@ module.exports = function (app) {
         res.json(utils.jsonResult(doctor));
       });
 
+      // download avatar from wechat server, then update doctor data.
+      if (newDoctor.avatarMediaId) {
+        debug('saveDoctor(), avatar changed, downloading from wechat server, mediaId: %s', newDoctor.avatarMediaId);
+        utils.downloadWechatMedia(newDoctor.avatarMediaId, doctorId, api, function (err, avatarFileLink) {
+          if (err) {
+            return debug('saveDoctor(), download avatar from wechat server error: %o', err);
+          }
+          Doctor.findByIdAndUpdate(doctorId, {avatar: avatarFileLink}, function (err) {
+            if (err) {
+              return debug('saveDoctor(), save avatar error: %o', err);
+            }
+            debug('saveDoctor(), saved new avatar: %s', avatarFileLink);
+          });
+        });
+      }
 
+      // Update calculated service stock if jiahao price changed.
       if (!newJiahao || !oldJiahao) {
         debug('saveDoctor(), no newJiahao or oldJiahao, needn\'t update service stock.');
         return;

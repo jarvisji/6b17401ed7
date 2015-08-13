@@ -98,41 +98,44 @@ angular.module('ylbWxApp')
       for (var year = currentYear - 100; year <= currentYear - 15; year++) {
         $scope.ddYear.push({'text': year, 'click': 'onYearSelected("' + year + '")'});
       }
-    };
 
-    $scope.onYearSelected = function (year) {
-      $scope.patient.birthdayYear = year;
       $scope.ddMonth = [];
       for (var month = 1; month <= 12; month++) {
         $scope.ddMonth.push({'text': month, 'click': 'onMonthSelected("' + month + '")'});
       }
     };
 
-    $scope.onMonthSelected = function (month) {
-      $scope.patient.birthdayMonth = month;
-      $scope.ddDay = [];
-      var days = 31;
-      if (month % 2 === 0) {
-        if (month == 2) {
-          if ($scope.patient.birthdayYear % 4 === 0) {
-            days = 29;
-          } else {
-            days = 28;
-          }
-        } else {
-          days = 30;
-        }
-      }
-      for (var day = 1; day <= days; day++) {
-        $scope.ddDay.push({'text': day, 'click': 'onDaySelected("' + day + '")'});
-      }
+    $scope.onYearSelected = function (year) {
+      $scope.patient.birthdayYear = year;
+      $scope.patient.birthday = new Date(Date.UTC($scope.patient.birthdayYear, $scope.patient.birthdayMonth - 1, 1));
     };
 
-    $scope.onDaySelected = function (day) {
-      $scope.patient.birthdayDay = day;
-      $scope.patient.birthday = new Date(Date.UTC($scope.patient.birthdayYear, $scope.patient.birthdayMonth - 1, $scope.patient.birthdayDay));
-      $scope.birthdayInvalid = false;
+    $scope.onMonthSelected = function (month) {
+      $scope.patient.birthdayMonth = month;
+      //$scope.ddDay = [];
+      //var days = 31;
+      //if (month % 2 === 0) {
+      //  if (month == 2) {
+      //    if ($scope.patient.birthdayYear % 4 === 0) {
+      //      days = 29;
+      //    } else {
+      //      days = 28;
+      //    }
+      //  } else {
+      //    days = 30;
+      //  }
+      //}
+      //for (var day = 1; day <= days; day++) {
+      //  $scope.ddDay.push({'text': day, 'click': 'onDaySelected("' + day + '")'});
+      //}
+      $scope.patient.birthday = new Date(Date.UTC($scope.patient.birthdayYear, $scope.patient.birthdayMonth - 1, 1));
     };
+
+    //$scope.onDaySelected = function (day) {
+    //  $scope.patient.birthdayDay = day;
+    //  $scope.patient.birthday = new Date(Date.UTC($scope.patient.birthdayYear, $scope.patient.birthdayMonth - 1, $scope.patient.birthdayDay));
+    //  $scope.birthdayInvalid = false;
+    //};
 
     $scope.onSexSelected = function (sex) {
       $scope.patient.displaySex = resources.sex[sex];
@@ -157,6 +160,7 @@ angular.module('ylbWxApp')
         return;
 
       var patient = $scope.patient;
+      //$scope.birthdayInvalid = !$scope.patient.birthdayYear || $scope.patient.birthdayMonth == undefined;
       $scope.birthdayInvalid = !patient.birthday;
       $scope.provinceInvalid = !patient.province;
       $scope.cityInvalid = !patient.city;
@@ -164,6 +168,7 @@ angular.module('ylbWxApp')
       if ($scope.birthdayInvalid || $scope.provinceInvalid || $scope.cityInvalid || $scope.sexInvalid) {
         return;
       }
+
       patient.avatar = patient.wechat.headimgurl ? patient.wechat.headimgurl : resources.defaultAvatar;
 
       var openid = patient.wechat.openid;
