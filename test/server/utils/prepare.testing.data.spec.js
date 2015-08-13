@@ -6,103 +6,171 @@
 var mongoose = require('mongoose');
 var should = require('should');
 var util = require('../testUtils');
+var Doctor = util.app.models.Doctor;
+var Patient = util.app.models.Patient;
 
 before(function (done) {
-  console.log('Preparing test data for doctor................');
-  var testDoctorsOpenId = [];
-  var mockDoctors = util.conf.testData.doctors.concat();
-  for (var i = 0; i < mockDoctors.length; i++) {
-    testDoctorsOpenId.push(mockDoctors[i].wechat.openid);
-  }
-  var Doctor = util.app.models.Doctor;
-  // find test data, will not create again if they are exist.
-  var filter = {'wechat.openid': {'$in': testDoctorsOpenId}};
-  Doctor.find(filter, function (err, found) {
-    if (err) return done(err);
-    console.log('trying to insert %d test doctors.', mockDoctors.length);
-    console.log('found %d test doctors in db.', found.length);
-    // only create mock doctors which not in db.
-    if (found.length != mockDoctors.length) {
-      for (var i in found) {
-        for (var j in mockDoctors) {
-          if (found[i].mobile == mockDoctors[j].mobile) {
-            mockDoctors.splice(j, 1);
-            break;
-          }
-        }
-      }
+  var testData = {};
+  var prepareManualTestDoctors = function () {
+    console.log('* Preparing doctors for manual test...');
+    var mockDoctors = util.conf.testData.doctors.concat();
+    prepareDoctorsData(mockDoctors, function () {
+      prepareManualTestPatients();
+    });
+  };
 
-      Doctor.find({}, 'number').limit(1).sort({'number': -1}).exec(function (err, maxNumberDoctor) {
-        if (err) return done(err);
-        var maxNumber = maxNumberDoctor.length > 0 ? maxNumberDoctor[0].number : 0;
-        console.log('max number of doctors is: %d', maxNumber);
-        // set number.
-        for (var i = 0; i < mockDoctors.length; i++) {
-          mockDoctors[i].services = util.conf.testData.doctorService;
-          mockDoctors[i].number = maxNumber + i + 1;
-        }
+  var prepareManualTestPatients = function () {
+    console.log('* Preparing patients for manual test...');
+    var mockPatients = util.conf.testData.patients.concat();
+    preparePatientsData(mockPatients, function () {
+      prepareUnitTestDoctors();
+    });
+  };
 
-        Doctor.create(mockDoctors, function (err, createdDoctors) {
-          if (err) return done(err);
-          console.log('insert test doctors success.');
-          preparePatientData();
-          //done();
-        });
-      });
-    } else {
-      console.log('no doctor data to be inserted.');
-      preparePatientData();
+  var prepareUnitTestDoctors = function () {
+    console.log('* Preparing doctors for unit test...');
+    var mockDoctors = util.conf.testData.unitDoctors.concat();
+    prepareDoctorsData(mockDoctors, function (users) {
+      saveTestData(users, 'doctor');
+      prepareUnitTestPatients();
+    });
+  };
+
+  var prepareUnitTestPatients = function () {
+    console.log('* Preparing patients for unit test...');
+    var mockPatients = util.conf.testData.unitPatients.concat();
+    preparePatientsData(mockPatients, function (users) {
+      saveTestData(users, 'patient');
+      process.env.testData = JSON.stringify(testData);
+      done();
+    });
+  };
+
+  var saveTestData = function (users, keyPrefix) {
+    for (var i = 0; i < users.length; i++) {
+      var idx = i + 1 + '';
+      testData[keyPrefix + idx] = {id: users[i].id, openid: users[i].wechat.openid};
     }
-  });
+  };
 
-  var preparePatientData = function () {
-    console.log('Preparing test data for patient................');
-    var testPatientOpenId = [];
-    var mockPatient = util.conf.testData.patients.concat();
-    for (var j = 0; j < mockPatient.length; j++) {
-      testPatientOpenId.push(mockPatient[j].wechat.openid);
-    }
-    var Patient = util.app.models.Patient;
+  var prepareDoctorsData = function (mockDoctors, callback) {
+    var testDoctorsOpenIds = getOpenidArray(mockDoctors);
     // find test data, will not create again if they are exist.
-    var patientFilter = {'wechat.openid': {'$in': testPatientOpenId}};
-    Patient.find(patientFilter, function (err, found) {
+    var filter = {'wechat.openid': {'$in': testDoctorsOpenIds}};
+    Doctor.find(filter, function (err, doctors) {
       if (err) return done(err);
-      console.log('trying to insert %d test patients.', mockPatient.length);
-      console.log('found %d test patients in db.', found.length);
-      // only create mock patients which not in db.
-      if (found.length != mockPatient.length) {
-        for (var i in found) {
-          for (var j in mockPatient) {
-            if (found[i].mobile == mockPatient[j].mobile) {
-              mockPatient.splice(j, 1);
-              break;
-            }
-          }
-        }
-
-        Patient.find({}, 'number').limit(1).sort({'number': -1}).exec(function (err, maxNumberPatient) {
+      // only create mock doctors which not in db.
+      if (doctors.length != mockDoctors.length) {
+        removeExistsFromMock(mockDoctors, doctors);
+        getModelMaxNumber(Doctor, function (err, maxNumber) {
           if (err) return done(err);
-          var maxNumber = maxNumberPatient.length > 0 ? maxNumberPatient[0].number : 0;
-          console.log('max number of patients is: %d', maxNumber);
-          // set number.
-          for (var i = 0; i < mockPatient.length; i++) {
-            mockPatient[i].number = maxNumber + i + 1;
+          for (var i = 0; i < mockDoctors.length; i++) {
+            mockDoctors[i].services = util.conf.testData.doctorService;
+            mockDoctors[i].number = maxNumber + i + 1;
           }
 
-          Patient.create(mockPatient, function (err, createdPatients) {
+          Doctor.create(mockDoctors, function (err, created) {
             if (err) return done(err);
-            console.log('insert test patients success.');
-            done();
+            console.log('insert %d doctors data success.', mockDoctors.length);
+            callback(created);
           });
         });
       } else {
-        console.log('no patient data to be inserted.');
-        done();
+        console.log('Doctors data already exists.');
+        callback(doctors);
       }
     });
-  }
+  };
+
+  var preparePatientsData = function (mockPatients, callback) {
+    var testPatientOpenId = getOpenidArray(mockPatients);
+    // find test data, will not create again if they are exist.
+    var patientFilter = {'wechat.openid': {'$in': testPatientOpenId}};
+    Patient.find(patientFilter, function (err, patients) {
+      if (err) return done(err);
+      // only create mock patients which not in db.
+      if (patients.length != mockPatients.length) {
+        removeExistsFromMock(mockPatients, patients);
+        getModelMaxNumber(Doctor, function (err, maxNumber) {
+          if (err) return done(err);
+          for (var i = 0; i < mockPatients.length; i++) {
+            mockPatients[i].number = maxNumber + i + 1;
+          }
+          Patient.create(mockPatients, function (err, created) {
+            if (err) return done(err);
+            console.log('insert %d patients data success.', mockPatients.length);
+            callback(created);
+          });
+        });
+
+      } else {
+        console.log('Patients data already exists.');
+        callback(patients);
+      }
+    });
+  };
+
+  var removeExistsFromMock = function (mockUsers, dbUsers) {
+    for (var i in dbUsers) {
+      for (var j in mockUsers) {
+        if (mockUsers[i].wechat.openid == mockUsers[j].wechat.openid) {
+          // remove exists doctors.
+          mockUsers.splice(j, 1);
+          break;
+        }
+      }
+    }
+  };
+
+  var getOpenidArray = function (users) {
+    var openids = [];
+    for (var i = 0; i < users.length; i++) {
+      openids.push(users[i].wechat.openid);
+    }
+    return openids;
+  };
+
+  var getModelMaxNumber = function (Model, callback) {
+    Model.find({}, 'number').limit(1).sort({'number': -1}).exec(function (err, max) {
+      if (err) return callback(err);
+      var maxNumber = max.length > 0 ? max[0].number : 10000;
+      callback(null, maxNumber);
+    });
+  };
+
+  prepareManualTestDoctors();
 });
 
-after(function () {
-  //console.log('Deleting test data................');
+after(function (done) {
+  var getOpenidArray = function (users) {
+    var openids = [];
+    for (var i = 0; i < users.length; i++) {
+      openids.push(users[i].wechat.openid);
+    }
+    return openids;
+  };
+
+  var deleteUnitTestDoctors = function () {
+    console.log('* Delete doctors for unit test...');
+    var mockDoctors = util.conf.testData.unitDoctors.concat();
+    var openids = getOpenidArray(mockDoctors);
+    Doctor.remove({'wechat.openid': {'$in': openids}}, function (err) {
+      if (err) return done(err);
+      console.log('deleted %d doctors.', mockDoctors.length);
+      deleteUnitTestPatients();
+    });
+  };
+
+  var deleteUnitTestPatients = function () {
+    console.log('* Delete patients for unit test...');
+    var mockPatients = util.conf.testData.unitPatients.concat();
+    var openids = getOpenidArray(mockPatients);
+    Patient.remove({'wechat.openid': {'$in': openids}}, function (err) {
+      if (err) return done(err);
+      console.log('deleted %d doctors.', mockPatients.length);
+      done();
+    });
+  };
+
+  deleteUnitTestDoctors();
 });

@@ -41,11 +41,20 @@ module.exports = function (req, res, next) {
       var tmpArr = authArr[i].split('="');
       if (tmpArr.length = 2) {
         //auth[tmpArr[0]] = tmpArr[1].substr(0, tmpArr[1].length - 1);
-        req.query[tmpArr[0]] = tmpArr[1].substr(0, tmpArr[1].length - 1);
+        var key = tmpArr[0];
+        var value = tmpArr[1].substr(0, tmpArr[1].length - 1);
+        req.query[key] = value;
+
+        if ((key == 'openid' || key == 'role') && (!value || value == 'undefined')) {
+          debug('Missing openid or role in header');
+          return res.status(401).json(utils.jsonResult(new Error('Invalid authorization string')));
+        }
       } else {
         debug('Invalid value of authorization string: %s', authArr[i]);
       }
     }
+
+    // TODO: should verify openid and access_token.
   }
   next();
 };

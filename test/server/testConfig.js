@@ -12,24 +12,25 @@ module.exports = {
   testData: {
     doctorService: [{
       "type": "jiahao",
-      "price": 8,
+      "price": 15,
       "weekQuantity": {
-        "d5": 7,
+        "d5": 5,
         "d4": 6,
-        "d3": 5,
-        "d2": 4,
-        "d1": 2
+        "d3": 7,
+        "d2": 8,
+        "d1": 9
       }
     }, {
       "type": "huizhen",
-      "price": 496
+      "price": 500
     }, {
       "type": "suizhen",
-      "price": 93
+      "price": 200
     }],
+    // doctors, patient for manual test, unitDoctors, unitPatients for unit test cases use.
     doctors: [{
-      "name": "test1 doctor",
-      "mobile": "testDoctor1",
+      "name": "测试医生1",
+      "mobile": "13810000001",
       "level": "1",
       "province": "北京",
       "city": "朝阳区",
@@ -41,8 +42,8 @@ module.exports = {
         "headimgurl": "/assets/image/avatar-64.jpg"
       }
     }, {
-      "name": "test2 doctor",
-      "mobile": "testDoctor2",
+      "name": "测试医生2",
+      "mobile": "13810000002",
       "level": "2",
       "province": "北京",
       "city": "朝阳区",
@@ -54,8 +55,8 @@ module.exports = {
         "headimgurl": "/assets/image/avatar-64.jpg"
       }
     }, {
-      "name": "test3 doctor",
-      "mobile": "testDoctor3",
+      "name": "测试医生3",
+      "mobile": "13810000003",
       "level": "3",
       "province": "北京",
       "city": "朝阳区",
@@ -67,8 +68,8 @@ module.exports = {
         "headimgurl": "/assets/image/avatar-64.jpg"
       }
     }, {
-      "name": "test4 doctor",
-      "mobile": "testDoctor4",
+      "name": "测试医生4",
+      "mobile": "13810000004",
       "level": "3",
       "province": "北京",
       "city": "朝阳区",
@@ -79,23 +80,10 @@ module.exports = {
         "openid": "openid_testDoctor4",
         "headimgurl": "/assets/image/avatar-64.jpg"
       }
-    }, {
-      "name": "test5 doctor",
-      "mobile": "testDoctor5",
-      "level": "3",
-      "province": "北京",
-      "city": "朝阳区",
-      "password": "NotInUseNowJustForTest",
-      "services": [],
-      "doctorFriends": [],
-      "wechat": {
-        "openid": "openid_testDoctor5",
-        "headimgurl": "/assets/image/avatar-64.jpg"
-      }
     }],
     patients: [{
-      "name": "test1 patient",
-      "mobile": "testPatient1",
+      "name": "测试患者1",
+      "mobile": "13820000001",
       "level": "1",
       "province": "北京",
       "city": "朝阳区",
@@ -107,8 +95,8 @@ module.exports = {
         "headimgurl": "/assets/image/avatar-64.jpg"
       }
     }, {
-      "name": "test2 patient",
-      "mobile": "testPatient2",
+      "name": "测试患者2",
+      "mobile": "13820000002",
       "level": "2",
       "province": "北京",
       "city": "朝阳区",
@@ -120,8 +108,8 @@ module.exports = {
         "headimgurl": "/assets/image/avatar-64.jpg"
       }
     }, {
-      "name": "test3 patient",
-      "mobile": "testPatient3",
+      "name": "测试患者3",
+      "mobile": "13820000003",
       "level": "2",
       "province": "北京",
       "city": "朝阳区",
@@ -133,8 +121,8 @@ module.exports = {
         "headimgurl": "/assets/image/avatar-64.jpg"
       }
     }, {
-      "name": "test4 patient",
-      "mobile": "testPatient4",
+      "name": "测试患者4",
+      "mobile": "13820000004",
       "level": "2",
       "province": "北京",
       "city": "朝阳区",
@@ -143,6 +131,112 @@ module.exports = {
       "patientFriends": [],
       "wechat": {
         "openid": "openid_testPatient4",
+        "headimgurl": "/assets/image/avatar-64.jpg"
+      }
+    }],
+    unitDoctors: [{
+      "name": "unitDoctor1",
+      "mobile": "13910000001",
+      "level": "3",
+      "province": "北京",
+      "city": "朝阳区",
+      "password": "NotInUseNowJustForTest",
+      "services": [],
+      "doctorFriends": [],
+      "wechat": {
+        "openid": "openid_unitDoctor1",
+        "headimgurl": "/assets/image/avatar-64.jpg"
+      }
+    }, {
+      "name": "unitDoctor2",
+      "mobile": "13910000002",
+      "level": "3",
+      "province": "北京",
+      "city": "朝阳区",
+      "password": "NotInUseNowJustForTest",
+      "services": [],
+      "doctorFriends": [],
+      "wechat": {
+        "openid": "openid_unitDoctor2",
+        "headimgurl": "/assets/image/avatar-64.jpg"
+      }
+    }, {
+      "name": "unitDoctor3",
+      "mobile": "13910000003",
+      "level": "2",
+      "province": "北京",
+      "city": "朝阳区",
+      "password": "NotInUseNowJustForTest",
+      "services": [],
+      "doctorFriends": [],
+      "wechat": {
+        "openid": "openid_unitDoctor3",
+        "headimgurl": "/assets/image/avatar-64.jpg"
+      }
+    }, {
+      "name": "unitDoctor4",
+      "mobile": "13910000004",
+      "level": "1",
+      "province": "北京",
+      "city": "朝阳区",
+      "password": "NotInUseNowJustForTest",
+      "services": [],
+      "doctorFriends": [],
+      "wechat": {
+        "openid": "openid_unitDoctor4",
+        "headimgurl": "/assets/image/avatar-64.jpg"
+      }
+    }],
+    unitPatients: [{
+      "name": "unitPatient1",
+      "mobile": "13920000001",
+      "level": "2",
+      "province": "北京",
+      "city": "朝阳区",
+      "password": "NotInUseNowJustForTest",
+      "doctorFollowed": [],
+      "patientFriends": [],
+      "wechat": {
+        "openid": "openid_unitPatient1",
+        "headimgurl": "/assets/image/avatar-64.jpg"
+      }
+    }, {
+      "name": "unitPatient2",
+      "mobile": "13920000002",
+      "level": "2",
+      "province": "北京",
+      "city": "朝阳区",
+      "password": "NotInUseNowJustForTest",
+      "doctorFollowed": [],
+      "patientFriends": [],
+      "wechat": {
+        "openid": "openid_unitPatient2",
+        "headimgurl": "/assets/image/avatar-64.jpg"
+      }
+    }, {
+      "name": "unitPatient3",
+      "mobile": "13920000003",
+      "level": "2",
+      "province": "北京",
+      "city": "朝阳区",
+      "password": "NotInUseNowJustForTest",
+      "doctorFollowed": [],
+      "patientFriends": [],
+      "wechat": {
+        "openid": "openid_unitPatient3",
+        "headimgurl": "/assets/image/avatar-64.jpg"
+      }
+    }, {
+      "name": "unitPatient4",
+      "mobile": "13920000004",
+      "level": "1",
+      "province": "北京",
+      "city": "朝阳区",
+      "password": "NotInUseNowJustForTest",
+      "doctorFollowed": [],
+      "patientFriends": [],
+      "wechat": {
+        "openid": "openid_unitPatient4",
         "headimgurl": "/assets/image/avatar-64.jpg"
       }
     }]
