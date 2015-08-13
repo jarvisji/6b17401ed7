@@ -21,7 +21,6 @@ angular.module('ylbWxApp')
               curCase.canDelete = true;
             }
             $rootScope.checkCommentDeletable(curCase.comments, currentUser);
-            $rootScope.checkAvatar(curCase.creator);
           }
           commonUtils.date.convert2FriendlyDate(cases);
           if (isShowMore) {
@@ -70,7 +69,6 @@ angular.module('ylbWxApp')
         .success(function (resp) {
           // return data is the updated case.
           $rootScope.checkCommentDeletable(resp.data.comments, currentUser);
-          $rootScope.checkAvatar(resp.data.creator);
           commonUtils.date.convert2FriendlyDate(resp.data);
           $scope.cases[caseIndex] = resp.data;
           $scope.newComment = {};

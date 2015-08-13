@@ -39,7 +39,6 @@ angular.module('ylbWxApp')
       $scope.patient.age = commonUtils.calculateAge(patient.birthday);
       $scope.patient.displaySex = resources.sex[patient.sex];
       $scope.patient.displayLevel = resources.patientLevel[patient.level];
-      $rootScope.checkAvatar(patient);
     };
 
     var loadFriendRelationship = function () {

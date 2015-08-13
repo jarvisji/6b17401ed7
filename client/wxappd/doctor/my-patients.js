@@ -25,9 +25,6 @@ angular.module('ylbWxApp')
               suizhen.push(data.patient);
             }
           }
-          $rootScope.checkAvatar(putong);
-          $rootScope.checkAvatar(jiwang);
-          $rootScope.checkAvatar(suizhen);
           $scope.patients = suizhen;
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);

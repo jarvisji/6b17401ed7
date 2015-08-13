@@ -62,7 +62,6 @@ angular.module('ylbWxApp')
       $scope.doctor.age = commonUtils.calculateAge(doctor.birthday);
       $scope.doctor.displaySex = resources.sex[doctor.sex];
       $scope.doctor.displayLevel = resources.doctorLevel[doctor.level];
-      $rootScope.checkAvatar(doctor);
 
       // get current user follow this doctor or not.
       if (currentUser.isPatient) {

@@ -25,9 +25,6 @@ angular.module('ylbWxApp')
               suizhen.push(data.doctor);
             }
           }
-          $rootScope.checkAvatar(putong);
-          $rootScope.checkAvatar(jiwang);
-          $rootScope.checkAvatar(suizhen);
           commonUtils.checkDoctorVIcon(putong);
           commonUtils.checkDoctorVIcon(jiwang);
           commonUtils.checkDoctorVIcon(suizhen);

@@ -359,7 +359,6 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
         if (patient.sickness) {
           patient.displaySickness = patient.sickness.join('<br>');
         }
-        $rootScope.checkAvatar(patient);
       }
       return patient;
     };
@@ -382,7 +381,6 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
         if (doctor.level != undefined) {
           doctor.displayLevel = resources.patientLevel[doctor.level];
         }
-        $rootScope.checkAvatar(doctor);
       }
       return doctor;
     };
@@ -406,28 +404,28 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       }
       return ret;
     };
-    /**
-     * If doctor/patient doesn't have avatar set in wechat, use default.
-     * @param user
-     */
-    $rootScope.checkAvatar = function (user) {
-      if (!user) {
-        return;
-      }
-      if (user instanceof Array) {
-        for (var i = 0; i < user.length; i++) {
-          $rootScope.checkAvatar(user[i]);
-        }
-      } else {
-        if (user.wechat && user.wechat.headimgurl) {
-          user.displayAvatar = user.wechat.headimgurl;
-        } else if (user.avatar) {
-          user.displayAvatar = user.avatar;
-        } else {
-          user.displayAvatar = resources.defaultAvatar;
-        }
-      }
-    };
+    ///**
+    // * If doctor/patient doesn't have avatar set in wechat, use default.
+    // * @param user
+    // */
+    //$rootScope.checkAvatar = function (user) {
+    //  if (!user) {
+    //    return;
+    //  }
+    //  if (user instanceof Array) {
+    //    for (var i = 0; i < user.length; i++) {
+    //      $rootScope.checkAvatar(user[i]);
+    //    }
+    //  } else {
+    //    if (user.wechat && user.wechat.headimgurl) {
+    //      user.displayAvatar = user.wechat.headimgurl;
+    //    } else if (user.avatar) {
+    //      user.displayAvatar = user.avatar;
+    //    } else {
+    //      user.displayAvatar = resources.defaultAvatar;
+    //    }
+    //  }
+    //};
 
     $rootScope.checkCommentAvatar = function (comment) {
       if (comment instanceof Array) {

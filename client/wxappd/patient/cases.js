@@ -38,7 +38,6 @@ angular.module('ylbWxApp')
               curCase.canDelete = true;
             }
             $rootScope.checkCommentDeletable(curCase.comments, currentUser);
-            $rootScope.checkAvatar(curCase.creator);
           }
           commonUtils.date.convert2FriendlyDate(cases);
           $scope.cases = cases;
@@ -81,7 +80,6 @@ angular.module('ylbWxApp')
             var createdCase = resp.data;
             createdCase.canDelete = true;
             commonUtils.date.convert2FriendlyDate(createdCase);
-            $rootScope.checkAvatar(createdCase.creator);
             $scope.cases.unshift(createdCase);
           }).error(function (resp, status) {
             $rootScope.alertError(null, resp, status);
@@ -143,7 +141,6 @@ angular.module('ylbWxApp')
         .success(function (resp) {
           // return data is the updated case.
           $rootScope.checkCommentDeletable(resp.data.comments, currentUser);
-          $rootScope.checkAvatar(resp.data.creator);
           commonUtils.date.convert2FriendlyDate(resp.data);
           $scope.cases[caseIndex] = resp.data;
           $scope.newComment = {};
@@ -364,7 +361,7 @@ angular.module('ylbWxApp')
       console.log('onLinkItemSelected(), ', item);
 
       var target;
-      var newLink = {linkType: linkType, avatar: item.displayAvatar, title: item.name};
+      var newLink = {linkType: linkType, avatar: item.avatar, title: item.name};
 
       if (linkType == resources.linkTypes.patient.value) {
         target = {targetType: 'state', name: 'profile-patient', params: {openid: item.id}};
@@ -492,7 +489,7 @@ angular.module('ylbWxApp')
       }
       if (linkType == resources.linkTypes.medicalImaging.value) {
         modalData.title = '输入影像链接';
-        modalData.data = {name: '', url: '', displayAvatar: resources.defaultIcon.medicalImaging};
+        modalData.data = {name: '', url: '', avatar: resources.defaultIcon.medicalImaging};
         $scope.modalData = modalData;
         showAddLinkModal();
       }
