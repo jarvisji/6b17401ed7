@@ -111,10 +111,10 @@ module.exports = {
    * @param callback
    */
   downloadWechatMedia: function (mediaId, userId, api, callback) {
-    debug('createCase(), downloading image from wechat server, mediaId: %s', mediaId);
+    _debug('createCase(), downloading image from wechat server, mediaId: %s', mediaId);
     api.getMedia(mediaId, function (err, result, header) {
       if (err) {
-        debug('downloadWechatMedia(), get media from wechat server error: %o', err);
+        _debug('downloadWechatMedia(), get media from wechat server error: %o', err);
         //TODO: if do not throw this error to user, need consider retry or error handler.
         callback(err);
       }
@@ -138,10 +138,10 @@ module.exports = {
 
         var filePath = path + fileName;
         fileLink += fileName;
-        debug('downloadWechatMedia(), writing download file to %s', filePath);
+        _debug('downloadWechatMedia(), writing download file to %s', filePath);
         fs.writeFile(filePath, result, function (err) {
           if (err) {
-            debug('createCase(), save media file error: %o', err);
+            _debug('createCase(), save media file error: %o', err);
             //TODO: error handler
             callback(err);
           }

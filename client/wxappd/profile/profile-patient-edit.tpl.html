@@ -8,6 +8,14 @@
     <h1>设置基本信息</h1>
   </div>
 
+  <div class="row">
+    <div class="col-xs-6">
+      <a href="#" class="thumbnail" ng-click="changeAvatar()">
+        <img ng-src="{{patient.avatar}}" id="avatar" class="img-rounded" style="width:100%">
+      </a>
+    </div>
+  </div>
+
   <form id="form" name="baseForm" role="form" novalidate>
     <div class="form-group" ng-class="{'has-error':baseForm.name.$dirty && baseForm.name.$invalid}">
       <label class="control-label" for="name">姓名</label>

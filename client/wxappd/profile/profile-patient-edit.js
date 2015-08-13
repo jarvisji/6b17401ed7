@@ -181,6 +181,45 @@ angular.module('ylbWxApp')
           }, 1000);
         });
     };
-  }
-  ])
-;
+
+    var uploadAvatar = function (localId) {
+      wx.uploadImage({
+        localId: localId, //$scope.patient.avatar, // 需要上传的图片的本地ID，由chooseImage接口获得
+        isShowProgressTips: 1, // 默认为1，显示进度提示
+        success: function (res) {
+          $scope.res = res;
+          var serverId = res.serverId; // 返回图片的服务器端ID
+          $timeout(function () {
+            // use target to save serverId, in our server side, will download and replace it.
+            $scope.patient.avatarMediaId = serverId;
+          }, 100);
+        },
+        fail: function (res) {
+          $scope.fail = arguments;
+          $rootScope.alertError('', res.errMsg);
+        }
+      });
+    };
+
+    $scope.changeAvatar = function () {
+      // refer to: http://mp.weixin.qq.com/wiki/7/aaa137b55fb2e0456bf8dd9148dd613f.html#.E9.A2.84.E8.A7.88.E5.9B.BE.E7.89.87.E6.8E.A5.E5.8F.A3
+      wx.chooseImage({
+        count: 1, // 默认9
+        sizeType: ['compressed'], // 可以指定是原图还是压缩图，默认二者都有
+        sourceType: ['album', 'camera'], // 可以指定来源是相册还是相机，默认二者都有
+        success: function (res) {
+          $scope.res = res;
+          var localId = res.localIds[0]; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+          $timeout(function () {
+            // for some reason of wechat api, we need delay 100ms to update variable.
+            $scope.patient.avatar = localId;
+            uploadAvatar(localId);
+          }, 100);
+        },
+        fail: function (res) {
+          $scope.fail = arguments;
+          $rootScope.alertError('', res.errMsg);
+        }
+      });
+    };
+  }]);

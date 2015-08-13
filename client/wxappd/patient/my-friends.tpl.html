@@ -15,7 +15,7 @@
       <div class="item" ng-repeat="request in requests">
         <div class="item-head">
           <div class="item-details" ng-click="showRequestProfile($index)">
-            <img class="item-pic" ng-src="{{request.fromAvatar}}">
+            <img class="item-pic avatar-md" ng-src="{{request.fromAvatar}}">
             <span class="item-name">{{request.fromName}}</span>
             <span class="item-label">{{request.message}}</span>
           </div>
@@ -35,7 +35,7 @@
       <div class="item" ng-repeat="patient in friends" ng-click="showDetails($index)">
         <div class="item-head">
           <div class="item-details">
-            <img class="item-pic" ng-src="{{patient.avatar}}">
+            <img class="item-pic avatar-md" ng-src="{{patient.avatar}}">
             <span class="item-name">{{patient.name}}</span>
             <span class="item-label"></span>
           </div>

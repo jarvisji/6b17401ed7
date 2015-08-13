@@ -116,6 +116,22 @@ module.exports = function (app, api) {
       patient = removeNoOutputData(patient);
       res.json(utils.jsonResult(patient));
     });
+
+    // download avatar from wechat server, then update patient data.
+    if (patient.avatarMediaId) {
+      debug('savePatient(), avatar changed, downloading from wechat server, mediaId: %s', patient.avatarMediaId);
+      utils.downloadWechatMedia(patient.avatarMediaId, id, api, function (err, avatarFileLink) {
+        if (err) {
+          return debug('savePatient(), download avatar from wechat server error: %o', err);
+        }
+        Patient.findByIdAndUpdate(id, {avatar: avatarFileLink}, function (err) {
+          if (err) {
+            return debug('savePatient(), save avatar error: %o', err);
+          }
+          debug('savePatient(), saved new avatar: %s', avatarFileLink);
+        });
+      });
+    }
   };
 
   /**
