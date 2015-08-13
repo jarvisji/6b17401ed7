@@ -137,7 +137,10 @@ module.exports = function () {
       income: {type: Number, default: 0}
     },
     comments: [commentSchema],
-    rank: Number,
+    rank: {
+      stars: Number,
+      memo: String
+    },
     created: {type: Date, default: Date.now},
     lastModified: {type: Date, default: Date.now}
   });

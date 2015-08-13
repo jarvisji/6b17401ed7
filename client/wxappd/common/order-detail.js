@@ -16,6 +16,14 @@ angular.module('ylbWxApp')
           commonUtils.date.convert2FriendlyDate(order.comments);
           $rootScope.handleDisplayBookingTime(order);
           handleUIFlags(order);
+
+          if (!order.rank || !order.rank.stars) {
+            order.rank = {};
+            checkRankStars(0);
+          } else {
+            checkRankStars(order.rank.stars);
+          }
+
           $scope.order = order;
           getPatientInfo();
         }).error(function (resp, status) {
@@ -39,6 +47,24 @@ angular.module('ylbWxApp')
           }).error(function (resp, status) {
             $rootScope.alertError(null, resp, status);
           });
+      }
+    };
+
+    var checkRankStars = function (stars) {
+      if (!stars) {
+        $scope.rankStars = [];
+        $scope.rankStarsO = [1, 2, 3, 4, 5];
+      } else {
+        var rankStars = [];
+        for (var i = 1; i <= stars; i++) {
+          rankStars.push(i);
+        }
+        var rankStarsO = [];
+        for (var i = 5; i > stars; i--) {
+          rankStarsO.unshift(i);
+        }
+        $scope.rankStars = rankStars;
+        $scope.rankStarsO = rankStarsO;
       }
     };
 
@@ -143,6 +169,24 @@ angular.module('ylbWxApp')
         });
     };
 
+    $scope.setRank = function (val) {
+      checkRankStars(val);
+      $scope.order.rank.stars = val;
+    };
+
+    $scope.saveRank = function () {
+      if (!$scope.order.rank.stars) {
+        $rootScope.alertWarn('', '请选择星级', '', 1);
+        return;
+      }
+      $http.put('/api/orders/' + orderId, {rank: $scope.order.rank})
+        .success(function (resp) {
+          handleUIFlags($scope.order);
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
+
     var checkCommentCanBeDelete = function (comments) {
       for (var idx in comments) {
         if (comments[idx].creator.id == currentUser.id) {
@@ -187,6 +231,14 @@ angular.module('ylbWxApp')
             }
             // if any doctor confirmed,the booking time cannot be changed again.
             flags.isShowBookingButtons = flags.isShowBookingButtons && !checkAnyDoctorConfirmed;
+          }
+        }
+        if (order.status == resources.orderStatus.finished.value) {
+          flags.isShowCommentInput = false;
+          if (!order.rank || !order.rank.stars) {
+            flags.isShowRankInput = true;
+          } else {
+            flags.isShowRankResult = true;
           }
         }
       }

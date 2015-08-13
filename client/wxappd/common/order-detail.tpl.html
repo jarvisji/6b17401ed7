@@ -120,6 +120,47 @@
 </section>
 <hr>
 
+<section ng-if="uiFlags.isShowRankInput">
+  <div class="row">
+    <div class="col-xs-12">
+      <div>订单已完成，请评价：</div>
+      <div>
+        <span class="text-danger" style="font-size: 2em" ng-repeat="val in rankStars">
+          <i class="fa fa-star" ng-click="setRank(val)"></i>
+        </span>
+        <span class="text-danger" style="font-size: 2em" ng-repeat="val in rankStarsO">
+          <i class="fa fa-star-o" ng-click="setRank(val)"></i>
+        </span>
+      </div>
+      <div class="input-group">
+        <input type="text" class="form-control" placeholder="说点什么吧..." ng-model="order.rank.memo">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button" ng-click="saveRank()">发布</button>
+          </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section ng-if="uiFlags.isShowRankResult">
+  <div class="row">
+    <div class="col-xs-12">
+      <div>订单已完成，患者评价：</div>
+      <div>
+        <span class="text-danger" style="font-size: 2em" ng-repeat="val in rankStars">
+          <i class="fa fa-star"></i>
+        </span>
+        <span class="text-danger" style="font-size: 2em" ng-repeat="val in rankStarsO">
+          <i class="fa fa-star-o"></i>
+        </span>
+      </div>
+      <div>
+        <span>{{order.rank.memo}}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="comments" ng-show="order">
   <div class="row" ng-repeat="comment in order.comments | orderBy:'created'">
     <div class="col-xs-12 media">
