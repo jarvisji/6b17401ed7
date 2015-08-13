@@ -285,7 +285,7 @@ module.exports = function (app) {
         }).then(function (doctor) {
           var doctorName = doctor.name;
           var doctorOpenid = doctor.wechat.openid;
-          var doctorAvatar = doctor.wechat.headimgurl;
+          var doctorAvatar = doctor.avatar;
           debug('createFriendsRequests(), found doctor name: "%s", openid: %s, of fromId: %s', doctorName, doctorOpenid, fromDoctorId);
           return DoctorFriend.create({
             from: fromDoctorId,

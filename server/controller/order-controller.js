@@ -98,7 +98,7 @@ module.exports = function (app) {
         if (!patient) {
           throw new Error('patient not found');
         }
-        newOrder.patient = {id: patient.id, name: patient.name, avatar: patient.wechat.headimgurl};
+        newOrder.patient = {id: patient.id, name: patient.name, avatar: patient.avatar};
 
         if (newOrder.serviceType == app.consts.doctorServices.jiahao.type) {
           createJiahao();
@@ -747,7 +747,7 @@ module.exports = function (app) {
     });
 
     var createComment = function (order, opUser) {
-      newComment.creator = {id: opUser.id, name: opUser.name, avatar: opUser.wechat.headimgurl, role: role};
+      newComment.creator = {id: opUser.id, name: opUser.name, avatar: opUser.avatar, role: role};
       order.comments.push(newComment);
       order.save(function (err) {
         if (err) return utils.handleError(err, 'createOrderComment()', debug, res);

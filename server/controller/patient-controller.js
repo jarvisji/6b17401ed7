@@ -188,7 +188,7 @@ module.exports = function (app, api) {
           debug('generateNewRelationObject(), doctor does not exist: %s', doctorId);
           throw new Error('doctor not exist');
         }
-        newDpr.doctor = {id: doctor.id, name: doctor.name, avatar: doctor.wechat.headimgurl, hospital: doctor.hospital};
+        newDpr.doctor = {id: doctor.id, name: doctor.name, avatar: doctor.avatar, hospital: doctor.hospital};
         debug('generateNewRelationObject(), getting patient info: %s', patientId);
         return Patient.findById(patientId).exec();
       }).then(function (patient) {
@@ -196,7 +196,7 @@ module.exports = function (app, api) {
           debug('generateNewRelationObject(), patient does not exist: %s', patientId);
           throw new Error('patient not exist');
         }
-        newDpr.patient = {id: patient.id, name: patient.name, avatar: patient.wechat.headimgurl};
+        newDpr.patient = {id: patient.id, name: patient.name, avatar: patient.avatar};
         debug('generateNewRelationObject(), generated new relation: %o', newDpr);
         callback(null, newDpr);
       }).then(null, function (err) {
@@ -652,7 +652,7 @@ module.exports = function (app, api) {
     });
 
     var createCase = function (creatorUser) {
-      newCase.creator = {id: creatorUser.id, name: creatorUser.name, avatar: creatorUser.wechat.headimgurl, role: role};
+      newCase.creator = {id: creatorUser.id, name: creatorUser.name, avatar: creatorUser.avatar, role: role};
       newCase.patientId = patientId;
       var createdCaseId;
       CaseHistory.create(newCase, function (err, created) {
@@ -996,7 +996,7 @@ module.exports = function (app, api) {
           return res.status(404).json(utils.jsonResult(new Error('not found')));
         }
 
-        newComment.creator = {id: opUser.id, name: opUser.name, avatar: opUser.wechat.headimgurl, role: role};
+        newComment.creator = {id: opUser.id, name: opUser.name, avatar: opUser.avatar, role: role};
         theCase.comments.push(newComment);
         theCase.save(function (err) {
           if (err) return handleError(err, 'createCaseComment', res);
