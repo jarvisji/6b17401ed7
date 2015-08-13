@@ -80,7 +80,7 @@ section {
 /* the 'v' icon for real name user */
 .profile-avatar-container .profile-avatar-v-icon {
   position: absolute;
-  right: 10px;
+  right: 15px;
   bottom: 0;
   font-size: 4em;
   color: indianred;
