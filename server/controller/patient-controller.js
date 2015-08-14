@@ -657,7 +657,7 @@ module.exports = function (app, api) {
 
     checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasRelation, creatorUser) {
       if (err) {
-        res.status(500).json(utils.jsonResult(err));
+        utils.handleError(err, 'createCase()', debug, res);
       } else {
         if (isSelf || hasRelation) {
           createCase(creatorUser);
@@ -715,7 +715,7 @@ module.exports = function (app, api) {
     var patientId = req.params.id;
     checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasRelation, opUser) {
       if (err) {
-        res.status(500).json(utils.jsonResult(err));
+        utils.handleError(err, 'getCasesPostPrivilege()', debug, res);
       } else {
         if (isSelf || hasRelation) {
           res.json('ok');
@@ -739,7 +739,7 @@ module.exports = function (app, api) {
     var patientId = req.params.id;
     checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasRelation, opUser) {
       if (err) {
-        res.status(500).json(utils.jsonResult(err));
+        utils.handleError(err, 'getCasesViewPrivilege()', debug, res);
       } else {
         if (isSelf || isFriend || hasRelation) {
           res.json('ok');
@@ -829,7 +829,7 @@ module.exports = function (app, api) {
 
     checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasRelation, opUser) {
       if (err) {
-        res.status(500).json(utils.jsonResult(err));
+        utils.handleError(err, 'deleteCaseComment()', debug, res);
       } else {
         if (isSelf || isFriend || hasRelation) {
           getCasesData();
@@ -961,7 +961,7 @@ module.exports = function (app, api) {
 
     checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasRelation, opUser) {
       if (err) {
-        res.status(500).json(utils.jsonResult(err));
+        utils.handleError(err, 'deleteCaseComment()', debug, res);
       } else {
         if (isSelf || isFriend || hasRelation) {
           createComment(opUser);
@@ -1004,7 +1004,7 @@ module.exports = function (app, api) {
 
     checkRelationshipWithPatient(patientId, openid, role, function (err, isSelf, isFriend, hasRelation, opUser) {
       if (err) {
-        res.status(500).json(utils.jsonResult(err));
+        utils.handleError(err, 'deleteCaseComment()', debug, res);
       } else {
         deleteComment(opUser);
       }
@@ -1020,6 +1020,9 @@ module.exports = function (app, api) {
         }
 
         var comment = theCase.comments.id(commentId);
+        if (!comment) {
+          return res.json('no such comment');
+        }
         if (comment.creator.id != opUser.id) {
           debug('deleteCaseComment(), cannot delete comment created by others. comment creator: %s, opUser: %s', comment.creator.id, opUser.id);
           return res.status(403).json(utils.jsonResult(new Error('no privilege')));
@@ -1093,7 +1096,7 @@ module.exports = function (app, api) {
               debug('checkRelationship(), patient and patient has friend relationship.');
               isFriend = true;
             } else {
-              debug('checkRelationship(), patient: %s, openid: %s has no orders with patient: %s.', operationUser.id, operatorOpenId, patientId);
+              debug('checkRelationship(), patient: %s, openid: %s has no friend relation with patient: %s.', operationUser.id, operatorOpenId, patientId);
               error = new Error('No privilege');
             }
           }

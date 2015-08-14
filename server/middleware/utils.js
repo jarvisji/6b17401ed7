@@ -26,7 +26,7 @@ module.exports = {
 
     if (res) {
       var statusCode = 500;
-      if (err.message == 'no privilege')
+      if (err.message.toLowerCase() == 'no privilege')
         statusCode = 403;
       if (status)
         statusCode = status;

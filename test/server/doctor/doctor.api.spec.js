@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var should = require('should');
 var util = require('../testUtils');
 
-describe.only('Test doctor APIs.', function () {
+describe('Test doctor APIs.', function () {
   var ts, testData, doctorId, doctorId2, serviceId, openid, mockDoctor, mockDoctor2, friendRequestId;
 
   before(function () {

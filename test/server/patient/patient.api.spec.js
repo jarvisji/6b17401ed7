@@ -66,6 +66,11 @@ describe('Test patient APIs.', function () {
       });
   });
 
+  it('Test get cases failed since no friend relation between patients.', function (done) {
+    util.req.json('get', '/api/patients/' + patientId2 + '/cases', mockOpenid, 'patient')
+      .expect(403, done);
+  });
+
   // create a request from patient to patients.
   it('Test create patient friend request', function (done) {
     // two patient ids were retrieved by upon cases;
@@ -152,6 +157,12 @@ describe('Test patient APIs.', function () {
         should(friends[0]._id).equal(patientId);
         done();
       })
+  });
+
+  it('Test create cases failed even has friend relation between patients.', function (done) {
+    util.req.json('post', '/api/patients/' + patientId2 + '/cases', mockOpenid, 'patient')
+      .send({content:'test case'})
+      .expect(403, done);
   });
 
   it('Test delete friends', function (done) {

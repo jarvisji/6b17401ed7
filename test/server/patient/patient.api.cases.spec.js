@@ -5,112 +5,100 @@ var mongoose = require('mongoose');
 var should = require('should');
 var util = require('../testUtils');
 
-describe('Tests for APIs of patient cases.', function () {
-  var testPatient = util.conf.testData.patients[0];
-  var testPatient2 = util.conf.testData.patients[1]; // friend with testPatient
-  var testPatient3 = util.conf.testData.patients[2]; // not friend with testPatient
-  var testDoctor = util.conf.testData.doctors[0]; // has order with testPatient
-  var testDoctor2 = util.conf.testData.doctors[1];// has no order with testPatient
+describe.only('Tests for APIs of patient cases.', function () {
+  var testData, testPatient, testPatient2, testPatient3, testDoctor, testDoctor2;
+  var patientId, patientId2, patientId3, doctorId, doctorId2;
+  var caseIdBySelf, caseIdBySelf2, caseIdByDoctor, friendId, relationId, commendIdBySelf, commendIdByPatient, commendIdByDoctor;
   var Doctor = util.app.models.Doctor;
   var Patient = util.app.models.Patient;
   var ServiceOrder = util.app.models.ServiceOrder;
   var PatientFriend = util.app.models.PatientFriend;
-  var patientId, patientId2, patientId3, doctorId, doctorId2, caseIdBySelf, caseIdByDoctor, commendIdBySelf, commendIdByPatient, commendIdByDoctor;
+  var DPRelation = util.app.models.DoctorPatientRelation;
+  var CaseHistory = util.app.models.CaseHistory;
 
   before(function (done) {
-    Patient.findOne({'wechat.openid': testPatient.wechat.openid}).exec()
-      .then(function (patient) {
-        patientId = patient.id;
-        return Patient.findOne({'wechat.openid': testPatient2.wechat.openid}).exec();
-      }).then(function (patient) {
-        patientId2 = patient.id;
-        return Patient.findOne({'wechat.openid': testPatient3.wechat.openid}).exec();
-      }).then(function (patient) {
-        patientId3 = patient.id;
-        return Doctor.findOne({'wechat.openid': testDoctor.wechat.openid}).exec();
-      }).then(function (doctor) {
-        doctorId = doctor.id;
-        return Doctor.findOne({'wechat.openid': testDoctor.wechat.openid}).exec();
-      }).then(function (doctor) {
-        doctorId2 = doctor.id;
-        return PatientFriend.find({
-          "$or": [{
-            from: patientId,
-            to: patientId2,
-            status: util.app.consts.friendStatus.accepted
-          }, {
-            from: patientId2,
-            to: patientId,
-            status: util.app.consts.friendStatus.accepted
-          }]
-        }).exec();
-      }).then(function (friends) {
-        // make sure patient and patient2 are friends.
-        if (friends.length == 0) {
-          PatientFriend.create({
-            from: patientId,
-            to: patientId2,
-            status: util.app.consts.friendStatus.accepted
-          }, function (err) {
+    testPatient = util.conf.testData.unitPatients[0];
+    testPatient2 = util.conf.testData.unitPatients[1]; // friend with testPatient
+    testPatient3 = util.conf.testData.unitPatients[2]; // not friend with testPatient
+    testDoctor = util.conf.testData.unitDoctors[0]; // has order with testPatient
+    testDoctor2 = util.conf.testData.unitDoctors[1];// has no order with testPatient
+    testData = JSON.parse(process.env.testData);
+    patientId = testData.patient1.id;
+    patientId2 = testData.patient2.id;
+    patientId3 = testData.patient3.id;
+    doctorId = testData.doctor1.id;
+    doctorId2 = testData.doctor2.id;
+
+
+    PatientFriend.create({
+      from: patientId,
+      to: patientId2,
+      status: util.app.consts.friendStatus.accepted
+    }).then(function (created) {
+      friendId = created.id;
+      return PatientFriend.find({
+        "$or": [{
+          from: patientId,
+          to: patientId3,
+          status: util.app.consts.friendStatus.accepted
+        }, {
+          from: patientId3,
+          to: patientId,
+          status: util.app.consts.friendStatus.accepted
+        }]
+      }).exec();
+    }).then(function (friends) {
+      // make sure patient and patient3 are NOT friends.
+      if (friends.length > 0) {
+        for (var i = 0; i < friends.length; i++) {
+          PatientFriend.remove({_id: friends[i].id}, function (err, ret) {
             if (err) return done(err);
           })
         }
-        return PatientFriend.find({
-          "$or": [{
-            from: patientId,
-            to: patientId3,
-            status: util.app.consts.friendStatus.accepted
-          }, {
-            from: patientId3,
-            to: patientId,
-            status: util.app.consts.friendStatus.accepted
-          }]
-        }).exec();
-      }).then(function (friends) {
-        // make sure patient and patient3 are NOT friends.
-        if (friends.length > 0) {
-          for (var i = 0; i < friends.length; i++) {
-            PatientFriend.remove({_id: friends[i].id}, function (err, ret) {
-              if (err) return done(err);
-            })
-          }
-        }
-        return ServiceOrder.find({doctorId: doctorId2, patientId: patientId}).exec();
-      }).then(function (orders) {
-        // make sure doctor2 and patient has NO orders
-        if (orders.length > 0) {
-          for (var i = 0; i < orders.length; i++) {
-            ServiceOrder.remove({_id: orders[i].id}, function (err, ret) {
-              if (err) return done(err);
-            })
-          }
-        }
-        return ServiceOrder.find({doctorId: doctorId, patientId: patientId}).exec();
-      }).then(function (orders) {
-        // make sure doctor and patient has orders
-        if (orders.length == 0) {
-          ServiceOrder.create({
-            serviceId: 'mock',
-            doctorId: doctorId,
-            patientId: patientId,
-            price: 10,
-            quantity: 1
-          }, function (err) {
+      }
+      return ServiceOrder.find({doctorId: doctorId2, patientId: patientId}).exec();
+    }).then(function (orders) {
+      // make sure doctor2 and patient has NO orders
+      if (orders.length > 0) {
+        for (var i = 0; i < orders.length; i++) {
+          ServiceOrder.remove({_id: orders[i].id}, function (err, ret) {
             if (err) return done(err);
-            done();
-          });
-        } else {
-          done();
+          })
         }
-      }).then(null, function (err) {
-        done(err);
-      });
+      }
+      return DPRelation.find({'doctor.id': doctorId, 'patient.id': patientId}).exec();
+    }).then(function (orders) {
+      // make sure doctor and patient has orders
+      if (orders.length == 0) {
+        DPRelation.create({
+          doctor: {id: doctorId},
+          patient: {id: patientId},
+          status: util.app.consts.relationStatus.putong.value
+        }, function (err, created) {
+          if (err) return done(err);
+          relationId = created.id;
+          done();
+        });
+      } else {
+        done();
+      }
+    }).then(null, function (err) {
+      done(err);
+    });
+  });
+
+  after(function (done) {
+    DPRelation.remove({_id: relationId}).exec()
+      .then(function () {
+        return PatientFriend.remove({_id: friendId}).exec();
+      }).then(function () {
+        done();
+      })
   });
 
   /* --- create cases ----------------------------------------------------------------------------*/
   it('Create case will success because created by patient self.', function (done) {
-    util.req.json('post', '/api/patients/' + patientId + '/cases')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('post', '/api/patients/' + patientId + '/cases', testPatient.wechat.openid, util.app.consts.role.patient)
       .send({content: 'test case'})
       .expect(200)
       .end(function (err, res) {
@@ -126,8 +114,7 @@ describe('Tests for APIs of patient cases.', function () {
   });
 
   it('Create case will success because doctor has order relationship.', function (done) {
-    util.req.json('post', '/api/patients/' + patientId + '/cases')
-      .set('Authorization', 'wechatOAuth openid="' + testDoctor.wechat.openid + '" role="' + util.app.consts.role.doctor + '"')
+    util.req.json('post', '/api/patients/' + patientId + '/cases', testDoctor.wechat.openid, util.app.consts.role.doctor)
       .send({content: 'test case'})
       .expect(200)
       .end(function (err, res) {
@@ -143,37 +130,44 @@ describe('Tests for APIs of patient cases.', function () {
   });
 
   it('Create case will fail because wrong link type.', function (done) {
-    util.req.json('post', '/api/patients/' + patientId + '/cases')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('post', '/api/patients/' + patientId + '/cases', testPatient.wechat.openid, util.app.consts.role.patient)
       .send({content: 'test case', link: {linkType: 'wrongType'}})
       .expect(400, done);
   });
 
   it('Create case will fail because blank content.', function (done) {
-    util.req.json('post', '/api/patients/' + patientId + '/cases')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
-      .send({link: {type: 'image'}})
+    util.req.json('post', '/api/patients/' + patientId + '/cases', testPatient.wechat.openid, util.app.consts.role.patient)
+      .send({})
       .expect(400, done);
   });
 
+  it('Create case will success because blank content but has link added.', function (done) {
+    util.req.json('post', '/api/patients/' + patientId + '/cases', testPatient.wechat.openid, util.app.consts.role.patient)
+      .send({link: {type: 'image'}})
+      .expect(200)
+      .end(function(err, res) {
+        if (err) return done(err);
+        var createdCase = res.body.data;
+        caseIdBySelf2 = createdCase._id;
+        done();
+      });
+  });
+
   it('Create case will fail because other patient has no privilege.', function (done) {
-    util.req.json('post', '/api/patients/' + patientId + '/cases')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient2.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('post', '/api/patients/' + patientId + '/cases', testPatient2.wechat.openid, util.app.consts.role.patient)
       .send({content: 'test case'})
       .expect(403, done);
   });
 
   it('Create case will fail because doctor has no privilege without order relationship.', function (done) {
-    util.req.json('post', '/api/patients/' + patientId + '/cases')
-      .set('Authorization', 'wechatOAuth openid="' + testDoctor2.wechat.openid + '" role="' + util.app.consts.role.doctor + '"')
+    util.req.json('post', '/api/patients/' + patientId + '/cases', testDoctor2.wechat.openid, util.app.consts.role.doctor)
       .send({content: 'test case'})
       .expect(403, done);
   });
 
   /* --- get cases ----------------------------------------------------------------------------*/
   it('Get cases will success because by patient self.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases', testPatient.wechat.openid, util.app.consts.role.patient)
       .expect(200)
       .end(function (err, res) {
         if (err) return done(err);
@@ -184,8 +178,7 @@ describe('Tests for APIs of patient cases.', function () {
   });
 
   it('Get cases will success because by doctor which have order relationship.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases')
-      .set('Authorization', 'wechatOAuth openid="' + testDoctor.wechat.openid + '" role="' + util.app.consts.role.doctor + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases', testDoctor.wechat.openid, util.app.consts.role.doctor)
       .expect(200)
       .end(function (err, res) {
         if (err) return done(err);
@@ -196,8 +189,7 @@ describe('Tests for APIs of patient cases.', function () {
   });
 
   it('Get cases will success because by patient which have friend relationship.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient2.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases', testPatient2.wechat.openid, util.app.consts.role.patient)
       .expect(200)
       .end(function (err, res) {
         if (err) return done(err);
@@ -208,21 +200,18 @@ describe('Tests for APIs of patient cases.', function () {
   });
 
   it('Get cases will fail because by patient which have NO friend relationship.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient3.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases', testPatient3.wechat.openid, util.app.consts.role.patient)
       .expect(403, done);
   });
 
   it('Get cases will fail because by doctor which have NO order relationship.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases')
-      .set('Authorization', 'wechatOAuth openid="' + testDoctor2.wechat.openid + '" role="' + util.app.consts.role.doctor + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases', testDoctor2.wechat.openid, util.app.consts.role.doctor)
       .expect(403, done);
   });
 
   /* --- create case comment ----------------------------------------------------------------------------*/
   it('Create case comment will success because by patient self.', function (done) {
-    util.req.json('post', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('post', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments', testPatient.wechat.openid, util.app.consts.role.patient)
       .expect(200)
       .send({comment: 'test comment'})
       .end(function (err, res) {
@@ -237,8 +226,7 @@ describe('Tests for APIs of patient cases.', function () {
   });
 
   it('Create case comment will success because by doctor which have order relationship.', function (done) {
-    util.req.json('post', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments')
-      .set('Authorization', 'wechatOAuth openid="' + testDoctor.wechat.openid + '" role="' + util.app.consts.role.doctor + '"')
+    util.req.json('post', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments', testDoctor.wechat.openid, util.app.consts.role.doctor)
       .expect(200)
       .send({comment: 'test comment1'})
       .end(function (err, res) {
@@ -253,8 +241,7 @@ describe('Tests for APIs of patient cases.', function () {
   });
 
   it('Create case comment will success because by patient which have friend relationship.', function (done) {
-    util.req.json('post', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient2.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('post', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments', testPatient2.wechat.openid, util.app.consts.role.patient)
       .expect(200)
       .send({comment: 'test comment2'})
       .end(function (err, res) {
@@ -269,33 +256,28 @@ describe('Tests for APIs of patient cases.', function () {
   });
 
   it('Create case comment will fail because by patient which have NO friend relationship.', function (done) {
-    util.req.json('post', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient3.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('post', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments', testPatient3.wechat.openid, util.app.consts.role.patient)
       .expect(403, done);
   });
 
   it('Create case comment will fail because by doctor which have NO order relationship.', function (done) {
-    util.req.json('post', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments')
-      .set('Authorization', 'wechatOAuth openid="' + testDoctor2.wechat.openid + '" role="' + util.app.consts.role.doctor + '"')
+    util.req.json('post', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments', testDoctor2.wechat.openid, util.app.consts.role.doctor)
       .expect(403, done);
   });
 
   /* --- delete case comment ----------------------------------------------------------------------------*/
   it('Delete case comment will fail because comment created by others.', function (done) {
-    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments/' + commendIdByDoctor)
-      .set('Authorization', 'wechatOAuth openid="' + testPatient.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments/' + commendIdByDoctor, testPatient.wechat.openid, util.app.consts.role.patient)
       .expect(403, done);
   });
 
   it('Delete case comment will fail because comment created by others.', function (done) {
-    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments/' + commendIdByPatient)
-      .set('Authorization', 'wechatOAuth openid="' + testPatient.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments/' + commendIdByPatient, testPatient.wechat.openid, util.app.consts.role.patient)
       .expect(403, done);
   });
 
   it('Delete case comment will success because it was created by patient self.', function (done) {
-    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments/' + commendIdBySelf)
-      .set('Authorization', 'wechatOAuth openid="' + testPatient.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments/' + commendIdBySelf, testPatient.wechat.openid, util.app.consts.role.patient)
       .expect(200)
       .end(function (err, res) {
         if (err) return done(err);
@@ -306,8 +288,7 @@ describe('Tests for APIs of patient cases.', function () {
   });
 
   it('Delete case comment will success because it was created by doctor self.', function (done) {
-    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments/' + commendIdByDoctor)
-      .set('Authorization', 'wechatOAuth openid="' + testDoctor.wechat.openid + '" role="' + util.app.consts.role.doctor + '"')
+    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments/' + commendIdByDoctor, testDoctor.wechat.openid, util.app.consts.role.doctor)
       .expect(200)
       .end(function (err, res) {
         if (err) return done(err);
@@ -318,8 +299,7 @@ describe('Tests for APIs of patient cases.', function () {
   });
 
   it('Delete case comment will success because it was created by another patient self.', function (done) {
-    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments/' + commendIdByPatient)
-      .set('Authorization', 'wechatOAuth openid="' + testPatient2.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf + '/comments/' + commendIdByPatient, testPatient2.wechat.openid, util.app.consts.role.patient)
       .expect(200)
       .end(function (err, res) {
         if (err) return done(err);
@@ -331,79 +311,71 @@ describe('Tests for APIs of patient cases.', function () {
 
   /* --- delete case ----------------------------------------------------------------------------*/
   it('Delete case will fail because comment created by others.', function (done) {
-    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdByDoctor)
-      .set('Authorization', 'wechatOAuth openid="' + testPatient2.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdByDoctor, testPatient2.wechat.openid, util.app.consts.role.patient)
       .expect(403, done);
   });
 
   it('Delete case will fail because comment created by others.', function (done) {
-    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf)
-      .set('Authorization', 'wechatOAuth openid="' + testDoctor.wechat.openid + '" role="' + util.app.consts.role.doctor + '"')
+    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf, testDoctor.wechat.openid, util.app.consts.role.doctor)
       .expect(403, done);
   });
 
   it('Delete case will success because it was created by patient self.', function (done) {
-    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf)
-      .set('Authorization', 'wechatOAuth openid="' + testPatient.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf, testPatient.wechat.openid, util.app.consts.role.patient)
+      .expect(200, done);
+  });
+
+  it('Delete case2 will success because it was created by patient self.', function (done) {
+    // this case is to avoid leave test data in db.
+    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdBySelf2, testPatient.wechat.openid, util.app.consts.role.patient)
       .expect(200, done);
   });
 
   it('Delete case will success because it was created by doctor self.', function (done) {
-    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdByDoctor)
-      .set('Authorization', 'wechatOAuth openid="' + testDoctor.wechat.openid + '" role="' + util.app.consts.role.doctor + '"')
+    util.req.json('delete', '/api/patients/' + patientId + '/cases/' + caseIdByDoctor, testDoctor.wechat.openid, util.app.consts.role.doctor)
       .expect(200, done);
   });
 
   /* --- check post case privilege ----------------------------------------------------------------*/
   it('Check case post privilege will success because is patient self.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege', testPatient.wechat.openid, util.app.consts.role.patient)
       .expect(200, done);
   });
   it('Check case post privilege will success because doctor has orders.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege')
-      .set('Authorization', 'wechatOAuth openid="' + testDoctor.wechat.openid + '" role="' + util.app.consts.role.doctor + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege', testDoctor.wechat.openid, util.app.consts.role.doctor)
       .expect(200, done);
   });
   it('Check case post privilege will fail because patient is friend.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient2.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege', testPatient2.wechat.openid, util.app.consts.role.patient)
       .expect(403, done);
   });
   it('Check case post privilege will fail because patient is not friend.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient3.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege', testPatient3.wechat.openid, util.app.consts.role.patient)
       .expect(403, done);
   });
   it('Check case post privilege will fail because doctor has no orders.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege')
-      .set('Authorization', 'wechatOAuth openid="' + testDoctor2.wechat.openid + '" role="' + util.app.consts.role.doctor + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases/postPrivilege', testDoctor2.wechat.openid, util.app.consts.role.doctor)
       .expect(403, done);
   });
   /* --- check view case privilege ----------------------------------------------------------------*/
   it('Check case view privilege will success because is patient self.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege', testPatient.wechat.openid, util.app.consts.role.patient)
       .expect(200, done);
   });
   it('Check case view privilege will success because doctor has orders.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege')
-      .set('Authorization', 'wechatOAuth openid="' + testDoctor.wechat.openid + '" role="' + util.app.consts.role.doctor + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege', testDoctor.wechat.openid, util.app.consts.role.doctor)
       .expect(200, done);
   });
   it('Check case view privilege will success because patient is friend.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient2.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege', testPatient2.wechat.openid, util.app.consts.role.patient)
       .expect(200, done);
   });
   it('Check case view privilege will fail because patient is not friend.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege')
-      .set('Authorization', 'wechatOAuth openid="' + testPatient3.wechat.openid + '" role="' + util.app.consts.role.patient + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege', testPatient3.wechat.openid, util.app.consts.role.patient)
       .expect(403, done);
   });
   it('Check case view privilege will fail because doctor has no orders.', function (done) {
-    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege')
-      .set('Authorization', 'wechatOAuth openid="' + testDoctor2.wechat.openid + '" role="' + util.app.consts.role.doctor + '"')
+    util.req.json('get', '/api/patients/' + patientId + '/cases/viewPrivilege', testDoctor2.wechat.openid, util.app.consts.role.doctor)
       .expect(403, done);
   });
 });
