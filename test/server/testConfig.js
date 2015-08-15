@@ -22,10 +22,12 @@ module.exports = {
       }
     }, {
       "type": "huizhen",
-      "price": 500
+      "price": 500,
+      "billingPrice": 550
     }, {
       "type": "suizhen",
-      "price": 200
+      "price": 200,
+      "billingPrice": 220
     }],
     // doctors, patient for manual test, unitDoctors, unitPatients for unit test cases use.
     doctors: [{

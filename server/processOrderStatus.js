@@ -17,6 +17,9 @@ var consts = require('./utils/consts');
 var ServiceOrder = models.ServiceOrder;
 var Doctor = models.Doctor;
 var Patient = models.Patient;
+
+debug('running order status processor from node command: %s', require.main === module);
+
 if (require.main === module) {
   // An array containing the command line arguments.
   // The first element will be 'node', the second element will be the name of the JavaScript file.
@@ -48,9 +51,11 @@ var expiredOrdersToProcess = 0;
 var finishedOrdersToProcess = 0;
 var doctorsToProcess = 0;
 var patientsToProcess = 0;
+var ret = {finishedOrdersCount: 0, expiredOrdersCount: 0};
 var doProcess = function (isTestMode, callback) {
   var status = [consts.orderStatus.init, consts.orderStatus.confirmed];
   var now = new Date();
+
   debug('finding orders with status in: %o, current time: %s', status, now.toISOString());
   ServiceOrder.find({status: {'$in': status}}).exec()
     .then(function (orders) {
@@ -61,9 +66,17 @@ var doProcess = function (isTestMode, callback) {
         if (order.status == consts.orderStatus.init) {
           // --------------------------------------------
           // find expired orders
-          if (now.getTime() - order.created.getTime() > 86400000) {
-            expiredOrdersToProcess++;
+          if (isTestMode) {
+            debug('Test Mode. Update all "init" orders to "expired", order: %s', order.id);
             order.status = consts.orderStatus.expired;
+          } else {
+            if (now.getTime() - order.created.getTime() > 86400000) {
+              order.status = consts.orderStatus.expired;
+            }
+          }
+          if (order.isModified()) {
+            expiredOrdersToProcess++;
+            ret.expiredOrdersCount++;
             order.save(function (err, order) {
               expiredOrdersToProcess--;
               if (err) {
@@ -77,7 +90,7 @@ var doProcess = function (isTestMode, callback) {
           // find finished orders
           if (isTestMode) {
             order.status = consts.orderStatus.finished;
-            debug('Test Mode. Update all confirmed order to finished, order: %s', order.id);
+            debug('Test Mode. Update all "confirmed" order to "finished", order: %s', order.id);
           } else {
             if (order.serviceType == consts.doctorServices.jiahao.type || order.serviceType == consts.doctorServices.huizhen.type) {
               if ((now.getDate() > order.bookingTime.getDate()) || (now.getMonth() > order.bookingTime.getMonth())) {
@@ -93,6 +106,7 @@ var doProcess = function (isTestMode, callback) {
           }
           if (order.isModified()) {
             finishedOrdersToProcess++;
+            ret.finishedOrdersCount++;
             order.save(function (err, order) {
               finishedOrdersToProcess--;
               if (err) {
@@ -155,18 +169,19 @@ var doProcess = function (isTestMode, callback) {
       }
 
       // waiting all saves finished.
-      setInterval(function () {
+      var intervalObj = setInterval(function () {
         if (finishedOrdersToProcess > 0 || expiredOrdersToProcess > 0 || doctorsToProcess > 0 || patientsToProcess > 0) {
           debug('Waiting for saving finished. remain finishedOrdersToProcess: %d, expiredOrdersToProcess: %d, doctorsToProcess: %d, patientsToProcess: %d ', finishedOrdersToProcess, expiredOrdersToProcess, doctorsToProcess, patientsToProcess);
         } else {
           debug('All processes finished.');
+          clearInterval(intervalObj);
           if (require.main === module) {
             process.exit();
           } else {
-            if (callback) callback(null);
+            if (callback) callback(null, ret);
           }
         }
-      }, 1000);
+      }, 500);
     }).then(null, function (err) {
       debug('Error: %o', err);
       if (require.main === module) {
