@@ -90,7 +90,7 @@ var registerRoutes = function () {
   app.get('/api/doctors/:id/serviceStock', doctorCtrl.getServiceStock);
   /**
    * Get the patients those have relations with the given doctor.
-   * Response: List of patients.
+   * Response: List of DPRelation.
    */
   app.get('/api/doctors/:id/patientRelations', doctorCtrl.getPatientRelations);
   /**

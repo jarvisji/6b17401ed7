@@ -31,7 +31,7 @@ module.exports = {
     doctors: [{
       "name": "测试医生1",
       "mobile": "13810000001",
-      "level": "1",
+      "level": "3",
       "province": "北京",
       "city": "朝阳区",
       "password": "NotInUseNowJustForTest",
@@ -44,7 +44,7 @@ module.exports = {
     }, {
       "name": "测试医生2",
       "mobile": "13810000002",
-      "level": "2",
+      "level": "3",
       "province": "北京",
       "city": "朝阳区",
       "password": "NotInUseNowJustForTest",
@@ -57,7 +57,7 @@ module.exports = {
     }, {
       "name": "测试医生3",
       "mobile": "13810000003",
-      "level": "3",
+      "level": "2",
       "province": "北京",
       "city": "朝阳区",
       "password": "NotInUseNowJustForTest",
@@ -70,7 +70,7 @@ module.exports = {
     }, {
       "name": "测试医生4",
       "mobile": "13810000004",
-      "level": "3",
+      "level": "1",
       "province": "北京",
       "city": "朝阳区",
       "password": "NotInUseNowJustForTest",
@@ -84,7 +84,7 @@ module.exports = {
     patients: [{
       "name": "测试患者1",
       "mobile": "13820000001",
-      "level": "1",
+      "level": "2",
       "province": "北京",
       "city": "朝阳区",
       "password": "NotInUseNowJustForTest",
@@ -123,7 +123,7 @@ module.exports = {
     }, {
       "name": "测试患者4",
       "mobile": "13820000004",
-      "level": "2",
+      "level": "1",
       "province": "北京",
       "city": "朝阳区",
       "password": "NotInUseNowJustForTest",

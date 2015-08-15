@@ -406,12 +406,31 @@ module.exports = function (app) {
       var orderDoctorIds = _getOrderDoctorIds(order);
       DPRelation.find({'doctor.id': {'$in': orderDoctorIds}, 'patient.id': order.patient.id}).exec()
         .then(function (relations) {
-          if (relations.length == 0) {
-            debug('handlePaymentSuccess(), no relations exist, create new.');
+          // find out the doctors has no relations to the patient.
+          var doctorsOfNewRelations = [];
+          var doctorIdsOfNewRelations = [];
+          if (relations.length != orderDoctorIds.length) {
+            for (var i = 0; i < orderDoctorIds.length; i++) {
+              var exist = false;
+              for (var j = 0; j < relations.length; j++) {
+                if (relations[j].doctor.id == orderDoctorIds[i]) {
+                  exist = true;
+                  break;
+                }
+              }
+              if (!exist) {
+                doctorIdsOfNewRelations.push(orderDoctorIds[i]);
+                doctorsOfNewRelations.push(order.doctors[i]);
+              }
+            }
+          }
+
+          if (doctorsOfNewRelations.length > 0) {
+            debug('handlePaymentSuccess(), some doctors has no relations exist, create new: %o', doctorIdsOfNewRelations);
             var newDpr = [];
-            for (var i = 0; i < order.doctors.length; i++) {
+            for (var i = 0; i < doctorsOfNewRelations.length; i++) {
               newDpr.push({
-                doctor: order.doctors[i].toObject(),
+                doctor: doctorsOfNewRelations[i].toObject(),
                 patient: order.patient.toObject(),
                 status: app.consts.relationStatus.jiwang.value
               });
@@ -425,22 +444,22 @@ module.exports = function (app) {
                 if (callback) callback(null);
               }
             });
-          } else {
-            for (var i = 0; i < relations.length; i++) {
-              var relation = relations[i];
-              debug('handlePaymentSuccess(), updating relation: %s status to 2', relation.id);
-              if (relation.status == app.consts.relationStatus.putong.value) {
-                relation.status = app.consts.relationStatus.jiwang.value;
-                relation.save(function (err) {
-                  if (err) {
-                    debug('handlePaymentSuccess(), update relation status error: %o', err);
-                    if (callback) callback(err);
-                  } else {
-                    debug('handlePaymentSuccess(), update relation status success');
-                    if (callback) callback(null);
-                  }
-                });
-              }
+          }
+
+          for (var i = 0; i < relations.length; i++) {
+            var relation = relations[i];
+            debug('handlePaymentSuccess(), updating relation: %s status to 2', relation.id);
+            if (relation.status == app.consts.relationStatus.putong.value) {
+              relation.status = app.consts.relationStatus.jiwang.value;
+              relation.save(function (err) {
+                if (err) {
+                  debug('handlePaymentSuccess(), update relation status error: %o', err);
+                  if (callback) callback(err);
+                } else {
+                  debug('handlePaymentSuccess(), update relation status success');
+                  if (callback) callback(null);
+                }
+              });
             }
           }
         }).then(null, function (err) {
