@@ -91,7 +91,7 @@ before(function (done) {
       // only create mock patients which not in db.
       if (patients.length != mockPatients.length) {
         removeExistsFromMock(mockPatients, patients);
-        getModelMaxNumber(Doctor, function (err, maxNumber) {
+        getModelMaxNumber(Patient, function (err, maxNumber) {
           if (err) return done(err);
           for (var i = 0; i < mockPatients.length; i++) {
             mockPatients[i].number = maxNumber + i + 1;
