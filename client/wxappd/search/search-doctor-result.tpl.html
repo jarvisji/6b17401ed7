@@ -1,22 +1,28 @@
-<section id="searchDoctorResult">
-  <div class="general-item-list">
-    <div class="item" ng-repeat="doctor in searchDoctorResult" ng-click="showDetails($index)">
-      <div class="item-head">
-        <div class="item-details">
-          <div class="item-pic-container">
-            <img class="item-pic avatar-md" ng-src="{{doctor.avatar}}">
-            <span class="item-pic-v-icon" ng-show="doctor.isShowVIcon"><i class="fa fa-vimeo-square"></i></span>
-          </div>
-          <span class="item-name">{{doctor.name}}</span>
-          <span class="item-label"></span>
-        </div>
-        <span class="item-status">{{doctor.hospital}}</span>
-      </div>
+<div class="portlet light">
+  <div class="portlet-title">
+    <div class="caption">
+      <span class="caption-subject font-blue-madison bold uppercase">找到医生</span>
     </div>
   </div>
-</section>
-<section>
-  <button type="button" class="btn btn-success btn-block btn-lg" ng-click="showMore()"
-          ng-hide="noMoreRecords">显示更多
-  </button>
-</section>
+  <div class="portlet-body">
+    <div class="general-item-list">
+      <div class="item" ng-repeat="doctor in searchDoctorResult" ng-click="showDetails($index)">
+        <div class="item-head">
+          <div class="item-details">
+            <div class="item-pic-container">
+              <img class="item-pic" ng-src="{{doctor.avatar}}">
+              <span class="item-pic-v-icon" ng-show="doctor.isShowVIcon"><i class="fa fa-vimeo-square"></i></span>
+            </div>
+            <span class="item-name primary-link">{{doctor.name}}</span>
+            <span class="item-label"></span>
+          </div>
+          <span class="item-status">{{doctor.hospital}}</span>
+        </div>
+      </div>
+    </div>
+    <div class="space-10"></div>
+    <button type="button" class="btn btn-success btn-block btn-lg" ng-click="showMore()"
+            ng-hide="noMoreRecords">显示更多
+    </button>
+  </div>
+</div>

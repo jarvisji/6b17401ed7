@@ -1,6 +1,12 @@
-<section id="patientProfile" ng-show="patient">
+<div class="portlet light" ng-show="patient">
+  <div class="portlet-title">
+    <div class="caption">
+      <span class="caption-subject font-blue-madison bold uppercase">订单详情</span>
+    </div>
+  </div>
+
   <div class="text-center">
-    <h4>{{order.displayBookingTime}}&nbsp;&nbsp;&nbsp;&nbsp;
+    <h4 class="font-green-sharp"><b>{{order.displayBookingTime}}</b>&nbsp;&nbsp;&nbsp;&nbsp;
       <span class="label label-primary" ng-show="uiFlags.isShowBookingButtons && !isEditingBookingTime"
             ng-click="toggleSetBookingTime()">
         <i class="fa fa-pencil-square-o"></i> 设置
@@ -40,41 +46,12 @@
     <p>&nbsp;</p>
   </div>
 
-  <div class="space-10"></div>
-  <!-- huizhen doctors -->
-  <div class="panel panel-default" ng-if="uiFlags.isShowHuizhenDoctors">
-    <div class="panel-heading">会诊医生</div>
-    <div class="panel-body">
-      <div class="row">
-        <div class="col-xs-6" ng-repeat="doctor in order.doctors">
-          <div class="thumbnail">
-            <img ng-src="{{doctor.avatar}}" style="width:100%">
-
-            <div class="caption">
-              <h3>{{doctor.name}}</h3> {{doctor.title}}
-              <p>
-                {{doctor.department}}<br>
-                {{doctor.hospital}}
-              </p>
-
-              <p>
-                <span class="label label-default" ng-show="doctor.isConfirmed==undefined">未确认</span>
-                <span class="label label-danger" ng-show="doctor.isConfirmed==false">已拒绝</span>
-                <span class="label label-success" ng-show="doctor.isConfirmed">已确认</span>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="general-item-list">
     <div class="item">
       <div class="item-head">
         <div class="item-details">
           <img class="item-pic avatar-md" ng-src="{{patient.avatar}}">
-          <span class="item-name">{{patient.name}}</span>
+          <span class="profile-usertitle-name">{{patient.name}}</span>
           <span class="item-label"></span>
         </div>
         <span class="item-status"></span>
@@ -82,10 +59,14 @@
       <div class="item-body">
         <div class="row">
           <div class="col-xs-8">
-            <span>年龄：{{patient.age}}</span><br>
-            <span>性别：{{patient.displaySex}}</span><br>
-            <span>地区：{{patient.province}}  {{patient.city}}</span><br>
-            <span>疾病：{{patient.displaySickness}}</span>
+            <span class="profile-desc-title">年龄：</span>
+            <span class="profile-desc-text">{{patient.age}}</span><br>
+            <span class="profile-desc-title">性别：</span>
+            <span class="profile-desc-text">{{patient.displaySex}}</span><br>
+            <span class="profile-desc-title">地区：</span>
+            <span class="profile-desc-text">{{patient.province}}  {{patient.city}}</span><br>
+            <span class="profile-desc-title">疾病：</span>
+            <span class="profile-desc-text">{{patient.displaySickness}}</span>
           </div>
           <div class="col-xs-4">
             <button type="button" class="btn btn-primary btn-block" ng-click="showCases()">病历</button>
@@ -117,8 +98,42 @@
       </button>
     </div>
   </div>
-</section>
-<hr>
+</div>
+
+<!-- huizhen doctors -->
+<div class="portlet light" ng-if="uiFlags.isShowHuizhenDoctors">
+  <div class="portlet-title">
+    <div class="caption">
+      <span class="caption-subject font-blue-madison bold uppercase">会诊医生</span>
+    </div>
+  </div>
+  <div class="portlet-body">
+    <div class="row">
+      <div class="col-xs-6" ng-repeat="doctor in order.doctors">
+        <div class="thumbnail">
+          <img ng-src="{{doctor.avatar}}" style="width:100%">
+
+          <div class="caption">
+            <h3 class="profile-usertitle-name">{{doctor.name}}</h3>
+            <span class="profile-desc-title">{{doctor.title}}</span>
+
+            <p>
+              <span class="profile-desc-text">{{doctor.department}}</span><br>
+              <span class="profile-desc-text">{{doctor.hospital}}</span>
+            </p>
+
+            <p>
+              <span class="label label-default" ng-show="doctor.isConfirmed==undefined">未确认</span>
+              <span class="label label-danger" ng-show="doctor.isConfirmed==false">已拒绝</span>
+              <span class="label label-success" ng-show="doctor.isConfirmed">已确认</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <section ng-if="uiFlags.isShowRankInput">
   <div class="row">
@@ -161,39 +176,73 @@
   </div>
 </section>
 
-<section id="comments" ng-show="order">
-  <div class="row" ng-repeat="comment in order.comments | orderBy:'created'">
-    <div class="col-xs-12 media">
-      <div class="media-left">
-        <a href="#">
-          <img class="media-object avatar-md" ng-src="{{comment.creator.avatar}}">
-        </a>
-      </div>
-      <div class="media-body">
-        <h4 class="media-heading">{{comment.creator.name}}</h4>
-        {{comment.comment}}
-        <div>
-          <small>{{comment.displayCreated}}</small>
-          <span class="pull-right">
-            <span ng-show="comment.canDelete">
-              <a href="" ng-click="deleteComment($index)">删除</a>
+
+<div class="portlet light" ng-show="order">
+  <div class="portlet-title">
+    <div class="caption">
+      <span class="caption-subject font-blue-madison bold uppercase">订单评论</span>
+    </div>
+  </div>
+
+  <div class="portlet-body">
+    <div ng-if="!order.comments || order.comments.length==0">
+      暂无评论
+    </div>
+
+    <div class="general-item-list">
+      <div class="item" ng-repeat="comment in order.comments | orderBy:'created'">
+        <div class="item-head">
+          <div class="item-details">
+            <img class="item-pic" ng-src="{{comment.creator.avatar}}">
+            <span class="item-name primary-link">{{comment.creator.name}}</span>
+            <span class="item-label">{{comment.displayCreated}}</span>
+          </div>
+            <span class="item-status">
+              <span ng-show="comment.canDelete">
+                <a href="" class="btn btn-sm red-stripe" ng-click="deleteComment($index)">删除</a>
+              </span>
             </span>
-          </span>
+        </div>
+        <div class="item-body">
+          {{comment.comment}}
         </div>
       </div>
     </div>
-    <p>&nbsp;</p>
   </div>
 
+  <!--<div class="row" ng-repeat="comment in order.comments | orderBy:'created'">-->
+  <!--<div class="col-xs-12 media">-->
+  <!--<div class="media-left">-->
+  <!--<a href="#">-->
+  <!--<img class="media-object avatar-md" ng-src="{{comment.creator.avatar}}">-->
+  <!--</a>-->
+  <!--</div>-->
+  <!--<div class="media-body">-->
+  <!--<h4 class="media-heading">{{comment.creator.name}}</h4>-->
+  <!--{{comment.comment}}-->
+  <!--<div>-->
+  <!--<small>{{comment.displayCreated}}</small>-->
+  <!--<span class="pull-right">-->
+  <!--<span ng-show="comment.canDelete">-->
+  <!--<a href="" ng-click="deleteComment($index)">删除</a>-->
+  <!--</span>-->
+  <!--</span>-->
+  <!--</div>-->
+  <!--</div>-->
+  <!--</div>-->
+  <!--<p>&nbsp;</p>-->
+  <!--</div>-->
 
+
+  <hr>
   <div class="row" ng-if="uiFlags.isShowCommentInput">
     <div class="col-xs-12">
       <div class="input-group">
-        <input type="text" class="form-control" placeholder="评论..." ng-model="newComment.comment">
+        <input type="text" class="form-control" placeholder="新增评论..." ng-model="newComment.comment">
           <span class="input-group-btn">
-            <button class="btn btn-default" type="button" ng-click="createComment()">发布</button>
+            <button class="btn btn-success" type="button" ng-click="createComment()">发布</button>
           </span>
       </div>
     </div>
   </div>
-</section>
+</div>

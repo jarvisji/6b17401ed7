@@ -55,7 +55,7 @@
         </a>
       </div>
     </div>
-    <div>
+    <div class="portlet-body">
       <!--<h4 class="profile-desc-title">医生简介</h4>-->
       <span class="profile-desc-text">{{doctor.introduction}}</span>
 
@@ -121,13 +121,13 @@
     <div ng-if="editingService">
       <form role="form">
         <div class="input-group">
-											<span class="input-group-btn">
-											<button class="btn green" type="button">加号</button>
-											</span>
+          <span class="input-group-btn">
+            <button class="btn green" type="button">加号</button>
+					</span>
           <input type="number" class="form-control text-right" placeholder="0" ng-model="jiahao.price">
-											<span class="input-group-btn">
-											<button class="btn" type="button">元/次</button>
-											</span>
+          <span class="input-group-btn">
+					  <button class="btn" type="button">元/次</button>
+					</span>
         </div>
         <p></p>
 
@@ -135,39 +135,38 @@
           <div class="panel-heading">设置每日加号数量</div>
           <div class="panel-body">
             <div class="input-group" ng-repeat-start="(day, number) in jiahao.weekQuantity">
-											<span class="input-group-btn">
-											<button class="btn green-haze" type="button">{{days[day]}}</button>
-											</span>
+						  <span class="input-group-btn">
+							  <button class="btn green-haze" type="button">{{days[day]}}</button>
+							</span>
               <input type="number" class="form-control text-right" placeholder="0" ng-model="jiahao.weekQuantity[day]">
-											<span class="input-group-btn">
-											<button class="btn" type="button">个</button>
-											</span>
+							<span class="input-group-btn">
+							  <button class="btn" type="button">个</button>
+							</span>
             </div>
             <p ng-repeat-end></p>
           </div>
         </div>
 
         <div class="input-group">
-											<span class="input-group-btn">
-											<button class="btn green" type="button">随诊</button>
-											</span>
+					<span class="input-group-btn">
+					  <button class="btn green" type="button">随诊</button>
+					</span>
           <input type="number" class="form-control text-right" placeholder="0" ng-model="suizhen.price">
-											<span class="input-group-btn">
-											<button class="btn" type="button">元/月</button>
-											</span>
+					<span class="input-group-btn">
+					  <button class="btn" type="button">元/月</button>
+					</span>
         </div>
         <p></p>
 
         <div class="input-group">
-											<span class="input-group-btn">
-											<button class="btn green" type="button">会诊</button>
-											</span>
+          <span class="input-group-btn">
+					  <button class="btn green" type="button">会诊</button>
+					</span>
           <input type="number" class="form-control text-right" placeholder="0" placeholder="0" ng-model="huizhen.price">
-											<span class="input-group-btn">
-											<button class="btn" type="button">元/次</button>
-											</span>
+					<span class="input-group-btn">
+					  <button class="btn" type="button">元/次</button>
+					</span>
         </div>
-
         <p></p>
 
         <div class="row">
@@ -194,8 +193,7 @@
         </div>
         <a href="" class="icon-btn pull-right" ng-click="showAddJiahaoModal()"
            ng-disabled="!jiahao.price">
-          <i class="fa fa-map-marker"></i>
-
+          <i class="fa fa-check-square-o"></i>
           <div>购买</div>
         </a>
       </div>
@@ -221,8 +219,7 @@
         </div>
         <a href="" class="icon-btn pull-right" ng-click="showAddSuizhenModal()"
            ng-disabled="!suizhen.price">
-          <i class="fa fa-map-marker"></i>
-
+          <i class="fa fa-check-square-o"></i>
           <div>购买</div>
         </a>
       </div>
@@ -247,8 +244,7 @@
         </div>
         <a href="" class="icon-btn pull-right" ng-click="showAddHuizhenModal()"
            ng-disabled="!huizhen.price">
-          <i class="fa fa-map-marker"></i>
-
+          <i class="fa fa-check-square-o"></i>
           <div>购买</div>
         </a>
       </div>
