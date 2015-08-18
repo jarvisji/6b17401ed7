@@ -121,48 +121,62 @@ angular.module('ylbWxApp')
       commonUtils.checkDoctorVIcon($scope.doctor);
     };
 
+    $scope.editService = function () {
+      if ($scope.editingService) {
+        // save
+        if (!angular.equals(snapshot.jiahao, $scope.jiahao)
+          || !angular.equals(snapshot.suizhen, $scope.suizhen)
+          || !angular.equals(snapshot.huizhen, $scope.huizhen)) {
+          updateService();
+        }
+      } else {
+        // edit
+      }
+      $scope.editingService = !$scope.editingService;
+    };
+
     /**
      * Toggle edit status of JiaHao.
      */
-    $scope.editJiahao = function () {
-      if ($scope.editingJiahao) {
-        // save
-        if (!angular.equals(snapshot.jiahao, $scope.jiahao)) {
-          updateService();
-        }
-      } else {
-        // edit
-      }
-      $scope.editingJiahao = !$scope.editingJiahao;
-    };
-    /**
-     * Toggle edit status of SuiZhen.
-     */
-    $scope.editSuizhen = function () {
-      if ($scope.editingSuizhen) {
-        // save
-        if (!angular.equals(snapshot.suizhen, $scope.suizhen)) {
-          updateService();
-        }
-      } else {
-        // edit
-      }
-      $scope.editingSuizhen = !$scope.editingSuizhen;
-    };
-    /**
-     * Toggle edit status of HuiZhen.
-     */
-    $scope.editHuizhen = function () {
-      if ($scope.editingHuizhen) {
-        // save
-        if (!angular.equals(snapshot.huizhen, $scope.huizhen)) {
-          updateService();
-        }
-      } else {
-        // edit
-      }
-      $scope.editingHuizhen = !$scope.editingHuizhen;
-    };
+    //$scope.editJiahao = function () {
+    //  if ($scope.editingJiahao) {
+    //    // save
+    //    if (!angular.equals(snapshot.jiahao, $scope.jiahao)) {
+    //      updateService();
+    //    }
+    //  } else {
+    //    // edit
+    //  }
+    //  $scope.editingJiahao = !$scope.editingJiahao;
+    //};
+    ///**
+    // * Toggle edit status of SuiZhen.
+    // */
+    //$scope.editSuizhen = function () {
+    //  if ($scope.editingSuizhen) {
+    //    // save
+    //    if (!angular.equals(snapshot.suizhen, $scope.suizhen)) {
+    //      updateService();
+    //    }
+    //  } else {
+    //    // edit
+    //  }
+    //  $scope.editingSuizhen = !$scope.editingSuizhen;
+    //};
+    ///**
+    // * Toggle edit status of HuiZhen.
+    // */
+    //$scope.editHuizhen = function () {
+    //  if ($scope.editingHuizhen) {
+    //    // save
+    //    if (!angular.equals(snapshot.huizhen, $scope.huizhen)) {
+    //      updateService();
+    //    }
+    //  } else {
+    //    // edit
+    //  }
+    //  $scope.editingHuizhen = !$scope.editingHuizhen;
+    //};
 
     /**
      * PUT '/api/doctors/:id' will overwrite services, so need put data for all services even only changed one.
