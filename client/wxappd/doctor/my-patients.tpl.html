@@ -4,18 +4,18 @@
       <span class="caption-subject font-blue-madison bold uppercase">全部患者</span>
     </div>
     <ul class="nav nav-tabs">
-      <li class="active">
-        <a href="" data-toggle="tab" aria-expanded="true" ng-click="switchPatients('suizhen')">
+      <li ng-class="{active: uiFlags.type=='suizhen'}">
+        <a href=""  ng-click="switchPatients('suizhen')">
           随诊患者
         </a>
       </li>
-      <li>
-        <a href="" data-toggle="tab" aria-expanded="true" ng-click="switchPatients('jiwang')">
+      <li ng-class="{active: uiFlags.type=='jiwang'}">
+        <a href=""  ng-click="switchPatients('jiwang')">
           既往患者
         </a>
       </li>
-      <li>
-        <a href="" data-toggle="tab" aria-expanded="true" ng-click="switchPatients('putong')">
+      <li ng-class="{active: uiFlags.type=='putong'}">
+        <a href=""  ng-click="switchPatients('putong')">
           普通患者
         </a>
       </li>
