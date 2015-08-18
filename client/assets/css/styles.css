@@ -2,16 +2,10 @@
 /*background-color: #ffffff;*/
 /*}*/
 html, body {
-  height: 100%
-}
-
-.container-fluid {
   background-color: #e9ecf3;
-  height: 100%;
 }
 
 .page-content {
-  background-color: #e9ecf3;
   position: relative;
   margin-top: 20px;
   margin-bottom: 55px;
