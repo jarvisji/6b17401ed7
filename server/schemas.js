@@ -272,6 +272,33 @@ module.exports = function () {
   });
   wechatOAuthSchema.index({openid: 1, access_token: 1});
 
+  var adminUserSchema = new Schema({
+    username: String,
+    password: String,
+    salt: String,
+    created: {type: Date, default: Date.now},
+    lastModified: {type: Date, default: Date.now}
+  });
+  adminUserSchema.pre('update', function () {
+    this.update({}, {$set: {lastModified: new Date()}});
+  });
+
+  var shopSchema = new Schema({
+    name: String,
+    //category_id: String,
+    //brief: String,
+    pic_url: String,
+    detail: String,
+    //detail_enabled: Boolean,
+    price: Number,
+    //original_price: Number,
+    //inventory: Number,
+    //is_in_sale: Boolean,
+    //status: String,
+    //spec: String
+    created: {type: Date, default: Date.now},
+    lastModified: {type: Date, default: Date.now}
+  });
 
   return {
     doctorSchema: doctorSchema,
@@ -284,7 +311,9 @@ module.exports = function () {
     patientFriendSchema: patientFriendSchema,
     caseHistorySchema: caseHistorySchema,
     doctorPatientRelationSchema: doctorPatientRelationSchema,
-    wechatOAuthSchema: wechatOAuthSchema
+    wechatOAuthSchema: wechatOAuthSchema,
+    adminUserSchema: adminUserSchema,
+    shopSchema: shopSchema
   };
 }
 ;

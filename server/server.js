@@ -49,6 +49,9 @@ var registerRoutes = function () {
   var patientCtrl = require('./controller/patient-controller')(app, api);
   var orderCtrl = require('./controller/order-controller')(app);
   var wechatCtrl = require('./controller/wechat-controller')(app, api);
+  var adminCtrl = require('./controller/admin-controller')(app);
+
+  app.use('/admin/login', adminCtrl.login);
 
   // TODO: add authentication for following APIs.
   app.use('/wxproxy', wxproxyDoctor); // TODO: delete this.

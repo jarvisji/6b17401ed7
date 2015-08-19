@@ -10,9 +10,9 @@
 
 var mongoose = require('mongoose');
 var debug = require('debug')('ylb.job');
-var conf = require('./conf');
-var models = require('./models');
-var consts = require('./utils/consts');
+var conf = require('./../conf');
+var models = require('./../models');
+var consts = require('./../utils/consts');
 
 var ServiceOrder = models.ServiceOrder;
 var Doctor = models.Doctor;
