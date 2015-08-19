@@ -1,0 +1,2 @@
+DEBUG=ylb.*
+0 0 */1 * * root DEBUG_FD=3 node /data/utime.info/ylb-git/server/processOrderStatus.js 3>> /data/utime.info/ylb-git/server/log/cron.log

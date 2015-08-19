@@ -18,6 +18,8 @@ var ServiceOrder = models.ServiceOrder;
 var Doctor = models.Doctor;
 var Patient = models.Patient;
 
+debug('');
+debug('=========================================================');
 debug('running order status processor from node command: %s', require.main === module);
 
 if (require.main === module) {
