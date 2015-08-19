@@ -1,66 +1,137 @@
-<div class="page-header">
-  <h3>我的病友</h3>
-</div>
-
-
-<div class="row" ng-if="requests && requests.length>0 && !isShowRequests">
-  <div class="col-xs-12">
-    <div class="alert alert-info" role="alert" ng-click="showRequests()">你有 {{requests.length}} 条好友请求未处理。</div>
+<div class="portlet light" ng-if="requests && requests.length>0">
+  <div class="portlet-title">
+    <div class="caption">
+      <span class="caption-subject font-blue-madison bold uppercase">好友请求</span>
+      <!--<span class="badge badge-danger">{{requests.length}}</span>-->
+    </div>
+  </div>
+  <div class="portlet-body">
+    <!--<div ng-show="!isShowRequests">-->
+      <!--<div class="alert alert-info" role="alert" ng-click="showRequests()">你有 {{requests.length}} 条好友请求未处理。</div>-->
+    <!--</div>-->
+    <!--<div ng-if="isShowRequests">-->
+      <div class="general-item-list">
+        <div class="item" ng-repeat="request in requests">
+          <div class="item-head">
+            <div class="item-details" ng-click="showRequestProfile($index)">
+              <img class="item-pic" ng-src="{{request.fromAvatar}}">
+              <span class="item-name">{{request.fromName}}</span>
+              <span class="item-label">{{request.message}}</span>
+            </div>
+            <span class="item-status">
+              <button type="button" class="btn btn-danger btn-sm" ng-click="reject($index)">拒绝</button>
+              <button type="button" class="btn btn-success btn-sm" ng-click="accept($index)">同意</button>
+            </span>
+          </div>
+        </div>
+      </div>
+    <!--</div>-->
   </div>
 </div>
 
-<div class="row" ng-if="isShowRequests">
-  <div class="col-xs-12">
-    <div class="general-item-list">
-      <div class="item" ng-repeat="request in requests">
-        <div class="item-head">
-          <div class="item-details" ng-click="showRequestProfile($index)">
-            <img class="item-pic avatar-md" ng-src="{{request.fromAvatar}}">
-            <span class="item-name">{{request.fromName}}</span>
-            <span class="item-label">{{request.message}}</span>
+<div class="portlet light">
+  <div class="portlet-title">
+    <div class="caption">
+      <span class="caption-subject font-blue-madison bold uppercase">我的病友</span>
+    </div>
+  </div>
+  <div class="portlet-body">
+    <div ng-if="friends.length>0">
+      <div class="general-item-list">
+        <div class="item" ng-repeat="patient in friends" ng-click="showDetails($index)">
+          <div class="item-head">
+            <div class="item-details">
+              <img class="item-pic" ng-src="{{patient.avatar}}">
+              <span class="item-name primary-link">{{patient.name}}</span>
+              <span class="item-label"></span>
+            </div>
+            <span class="item-status"></span>
           </div>
-          <span class="item-status">
-            <button type="button" class="btn btn-danger" ng-click="reject($index)">拒绝</button>
-            <button type="button" class="btn btn-success" ng-click="accept($index)">同意</button>
-          </span>
+
+          <div class="item-body" ng-if="$index == showDetailIndex">
+            <div class="row">
+              <div class="col-xs-8">
+                <span class="profile-desc-title">年龄：</span>
+                <span class="profile-desc-text">{{patient.age}}</span><br>
+                <span class="profile-desc-title">性别：</span>
+                <span class="profile-desc-text">{{patient.displaySex}}</span><br>
+                <span class="profile-desc-title">地区：</span>
+                <span class="profile-desc-text">{{patient.province}}  {{patientDetail.city}}</span><br>
+                <span class="profile-desc-title">疾病：</span>
+                <span class="profile-desc-text">{{patient.displaySickness}}</span>
+              </div>
+              <div class="col-xs-4">
+                <button type="button" class="btn btn-primary btn-block" ng-click="showCases(patient._id)">病历</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
+    <div ng-if="friends.length == 0">
+      <h4 class="text-center">目前没有好友</h4>
     </div>
   </div>
 </div>
 
-<div class="row" ng-if="friends.length>0 && !isShowRequests">
-  <div class="col-xs-12">
-    <div class="general-item-list">
-      <div class="item" ng-repeat="patient in friends" ng-click="showDetails($index)">
-        <div class="item-head">
-          <div class="item-details">
-            <img class="item-pic avatar-md" ng-src="{{patient.avatar}}">
-            <span class="item-name">{{patient.name}}</span>
-            <span class="item-label"></span>
-          </div>
-          <span class="item-status"></span>
-        </div>
+<!--<div class="row" ng-if="requests && requests.length>0 && !isShowRequests">-->
+  <!--<div class="col-xs-12">-->
+    <!--<div class="alert alert-info" role="alert" ng-click="showRequests()">你有 {{requests.length}} 条好友请求未处理。</div>-->
+  <!--</div>-->
+<!--</div>-->
 
-        <div class="item-body" ng-if="$index == showDetailIndex">
-          <div class="row">
-            <div class="col-xs-8">
-              <span>年龄：{{patient.age}}</span><br>
-              <span>性别：{{patient.displaySex}}</span><br>
-              <span>地区：{{patient.province}}  {{patient.city}}</span><br>
-              <span>疾病：{{patient.displaySickness}}</span>
-            </div>
-            <div class="col-xs-4">
-              <button type="button" class="btn btn-primary btn-block" ng-click="showCases(patient._id)">病历</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="row" ng-if="(!friends || friends.length == 0) && !isShowRequests">
-  <div class="col-xs-12">
-    <h4 class="text-center">目前没有好友</h4>
-  </div>
-</div>
+<!--<div class="row" ng-if="isShowRequests">-->
+  <!--<div class="col-xs-12">-->
+    <!--<div class="general-item-list">-->
+      <!--<div class="item" ng-repeat="request in requests">-->
+        <!--<div class="item-head">-->
+          <!--<div class="item-details" ng-click="showRequestProfile($index)">-->
+            <!--<img class="item-pic avatar-md" ng-src="{{request.fromAvatar}}">-->
+            <!--<span class="item-name">{{request.fromName}}</span>-->
+            <!--<span class="item-label">{{request.message}}</span>-->
+          <!--</div>-->
+          <!--<span class="item-status">-->
+            <!--<button type="button" class="btn btn-danger" ng-click="reject($index)">拒绝</button>-->
+            <!--<button type="button" class="btn btn-success" ng-click="accept($index)">同意</button>-->
+          <!--</span>-->
+        <!--</div>-->
+      <!--</div>-->
+    <!--</div>-->
+  <!--</div>-->
+<!--</div>-->
+
+<!--<div class="row" ng-if="friends.length>0 && !isShowRequests">-->
+  <!--<div class="col-xs-12">-->
+    <!--<div class="general-item-list">-->
+      <!--<div class="item" ng-repeat="patient in friends" ng-click="showDetails($index)">-->
+        <!--<div class="item-head">-->
+          <!--<div class="item-details">-->
+            <!--<img class="item-pic avatar-md" ng-src="{{patient.avatar}}">-->
+            <!--<span class="item-name">{{patient.name}}</span>-->
+            <!--<span class="item-label"></span>-->
+          <!--</div>-->
+          <!--<span class="item-status"></span>-->
+        <!--</div>-->
+
+        <!--<div class="item-body" ng-if="$index == showDetailIndex">-->
+          <!--<div class="row">-->
+            <!--<div class="col-xs-8">-->
+              <!--<span>年龄：{{patient.age}}</span><br>-->
+              <!--<span>性别：{{patient.displaySex}}</span><br>-->
+              <!--<span>地区：{{patient.province}}  {{patient.city}}</span><br>-->
+              <!--<span>疾病：{{patient.displaySickness}}</span>-->
+            <!--</div>-->
+            <!--<div class="col-xs-4">-->
+              <!--<button type="button" class="btn btn-primary btn-block" ng-click="showCases(patient._id)">病历</button>-->
+            <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
+      <!--</div>-->
+    <!--</div>-->
+  <!--</div>-->
+<!--</div>-->
+<!--<div class="row" ng-if="(!friends || friends.length == 0) && !isShowRequests">-->
+  <!--<div class="col-xs-12">-->
+    <!--<h4 class="text-center">目前没有好友</h4>-->
+  <!--</div>-->
+<!--</div>-->
