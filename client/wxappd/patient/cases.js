@@ -141,8 +141,8 @@ angular.module('ylbWxApp')
         .success(function (resp) {
           // return data is the updated case.
           $rootScope.checkCommentDeletable(resp.data.comments, currentUser);
-          commonUtils.date.convert2FriendlyDate(resp.data);
-          $scope.cases[caseIndex] = resp.data;
+          //commonUtils.date.convert2FriendlyDate(resp.data);
+          $scope.cases[caseIndex].comments = resp.data.comments;
           $scope.newComment = {};
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);

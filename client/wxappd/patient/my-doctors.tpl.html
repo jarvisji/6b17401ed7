@@ -1,45 +1,71 @@
-<div class="page-header">
-  <h3>我的医生</h3>
-</div>
-
-<section>
-  <div class="btn-group btn-group-justified" role="group" aria-label="">
-    <div class="btn-group" role="group">
-      <button type="button" class="btn btn-default" ng-class="{active: uiFlags.type=='suizhen'}"
-              ng-click="displayDoctors('suizhen')"> 随诊医生
-      </button>
+<div class="portlet light">
+  <div class="portlet-title tabbable-line">
+    <div class="caption">
+      <span class="caption-subject font-blue-madison bold uppercase">我的医生</span>
     </div>
-    <div class="btn-group" role="group">
-      <button type="button" class="btn btn-default" ng-class="{active: uiFlags.type=='jiwang'}"
-              ng-click="displayDoctors('jiwang')"> 既往医生
-      </button>
-    </div>
-    <div class="btn-group" role="group">
-      <button type="button" class="btn btn-default" ng-class="{active: uiFlags.type=='putong'}"
-              ng-click="displayDoctors('putong')"> 普通医生
-      </button>
-    </div>
+    <ul class="nav nav-tabs">
+      <li ng-class="{active: uiFlags.type=='suizhen'}">
+        <a href="" ng-click="displayDoctors('suizhen')">
+          随诊医生
+        </a>
+      </li>
+      <li ng-class="{active: uiFlags.type=='jiwang'}">
+        <a href="" ng-click="displayDoctors('jiwang')">
+          既往医生
+        </a>
+      </li>
+      <li ng-class="{active: uiFlags.type=='putong'}">
+        <a href="" ng-click="displayDoctors('putong')">
+          普通医生
+        </a>
+      </li>
+    </ul>
   </div>
-</section>
+  <div class="portlet-body">
+    <span ng-show="doctors.length == 0">没有数据</span>
 
-<section id="myDoctors" ng-if="doctors">
-  <span ng-show="doctors.length == 0">没有数据</span>
-
-  <div class="general-item-list">
-    <div class="item" ng-repeat="doctor in doctors" ng-swipe-left="onSwipeLeft($index)">
-      <div class="item-head">
-        <div class="item-details" ng-click="showDetails(doctor.id)">
-          <div class="item-pic-container">
-            <img class="item-pic" ng-src="{{doctor.avatar}}">
-            <span class="item-pic-v-icon" ng-show="doctor.isShowVIcon"><i class="fa fa-vimeo-square"></i></span>
+    <div class="general-item-list" ng-if="doctors.length>0">
+      <div class="item" ng-repeat="doctor in doctors" ng-swipe-left="onSwipeLeft($index)">
+        <div class="item-head">
+          <div class="item-details" ng-click="showDetails(doctor.id)">
+            <div class="item-pic-container">
+              <img class="item-pic" ng-src="{{doctor.avatar}}">
+              <span class="item-pic-v-icon" ng-show="doctor.isShowVIcon"><i class="fa fa-vimeo-square"></i></span>
+            </div>
+            <span class="item-name primary-link">{{doctor.name}}</span>
+            <span class="item-label"></span>
           </div>
-          <span class="item-name">{{doctor.name}}</span>
-          <span class="item-label"></span>
+          <button type="button" class="btn btn-danger pull-right" ng-show="doctor.isShowDeleteButton"
+                  ng-click="deleteRelation($index)">删除
+          </button>
+          <span class="item-status">{{doctor.hospital}}</span>
         </div>
-        <span class="item-status">{{doctor.hospital}}&nbsp;&nbsp;
-          <button type="button" class="btn btn-danger" ng-show="doctor.isShowDeleteButton" ng-click="deleteRelation($index)">删除</button>
-        </span>
       </div>
     </div>
   </div>
-</section>
+</div>
+
+<!--<div class="page-header">-->
+<!--<h3>我的医生</h3>-->
+<!--</div>-->
+
+<!--<section>-->
+<!--<div class="btn-group btn-group-justified" role="group" aria-label="">-->
+<!--<div class="btn-group" role="group">-->
+<!--<button type="button" class="btn btn-default" ng-class="{active: uiFlags.type=='suizhen'}"-->
+<!--ng-click="displayDoctors('suizhen')"> 随诊医生-->
+<!--</button>-->
+<!--</div>-->
+<!--<div class="btn-group" role="group">-->
+<!--<button type="button" class="btn btn-default" ng-class="{active: uiFlags.type=='jiwang'}"-->
+<!--ng-click="displayDoctors('jiwang')"> 既往医生-->
+<!--</button>-->
+<!--</div>-->
+<!--<div class="btn-group" role="group">-->
+<!--<button type="button" class="btn btn-default" ng-class="{active: uiFlags.type=='putong'}"-->
+<!--ng-click="displayDoctors('putong')"> 普通医生-->
+<!--</button>-->
+<!--</div>-->
+<!--</div>-->
+<!--</section>-->
+

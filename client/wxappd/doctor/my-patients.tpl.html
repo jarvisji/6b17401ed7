@@ -40,7 +40,7 @@
   <!--</div>-->
 
 
-  <section id="myPatients" ng-if="patients">
+  <div id="myPatients" ng-if="patients">
     <span ng-hide="patients.length > 0">没有数据</span>
 
     <div class="general-item-list">
@@ -49,7 +49,7 @@
           <div class="item-details">
             <div class="item-pic-container">
               <img class="item-pic" ng-src="{{patient.avatar}}">
-              <span class="item-pic-v-icon"><i class="fa fa-vimeo-square"></i></span>
+              <!--<span class="item-pic-v-icon"><i class="fa fa-vimeo-square"></i></span>-->
             </div>
             <span class="item-name primary-link">{{patient.name}}</span>
             <span class="item-label"><span ng-show="patient.relationMemo">留言：{{patient.relationMemo}}</span></span>
@@ -81,6 +81,6 @@
         </div>
       </div>
     </div>
-  </section>
+  </div>
 
 </div>

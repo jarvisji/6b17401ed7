@@ -75,7 +75,7 @@
             <div ng-show="uiFlags.isShowPaymentButtons" style="margin-top: 5px">
               <button type="button" class="btn btn-success btn-block" ng-show="order.status=='init'"
                       ng-click="payment()">支付
-              </button>
+              </button><span></span>
               <button type="button" class="btn btn-default btn-block" ng-show="order.status=='paid'"
                       disabled>已支付
               </button>
