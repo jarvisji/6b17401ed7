@@ -1,32 +1,46 @@
-<div class="row" ng-if="requests && requests.length>0 && !isShowRequests">
-  <div class="col-xs-12">
-    <div class="alert alert-info" role="alert" ng-click="showRequests()">你有 {{requests.length}} 条好友请求未处理。</div>
+<div class="portlet light" ng-if="requests && requests.length>0">
+  <div class="portlet-title">
+    <div class="caption">
+      <span class="caption-subject font-blue-madison bold uppercase">好友请求</span>
+      <!--<span class="badge badge-danger">{{requests.length}}</span>-->
+    </div>
   </div>
-</div>
-
-<div class="row" ng-if="isShowRequests">
-  <div class="col-xs-12">
+  <div class="portlet-body">
+    <!--<div ng-show="!isShowRequests">-->
+    <!--<div class="alert alert-info" role="alert" ng-click="showRequests()">你有 {{requests.length}} 条好友请求未处理。</div>-->
+    <!--</div>-->
+    <!--<div ng-if="isShowRequests">-->
     <div class="general-item-list">
       <div class="item" ng-repeat="request in requests">
         <div class="item-head">
           <div class="item-details" ng-click="showRequestDoctorProfile($index)">
-            <img class="item-pic avatar-md" ng-src="{{request.fromAvatar}}">
+            <img class="item-pic" ng-src="{{request.fromAvatar}}">
             <span class="item-name">{{request.fromName}}</span>
             <span class="item-label">{{request.message}}</span>
           </div>
-          <span class="item-status">
-            <button type="button" class="btn btn-danger" ng-click="reject($index)">拒绝</button>
-            <button type="button" class="btn btn-success" ng-click="accept($index)">同意</button>
-          </span>
+            <span class="item-status">
+              <button type="button" class="btn btn-danger btn-sm" ng-click="reject($index)">拒绝</button>
+              <button type="button" class="btn btn-success btn-sm" ng-click="accept($index)">同意</button>
+            </span>
         </div>
       </div>
     </div>
+    <!--</div>-->
   </div>
 </div>
 
-<div class="row" ng-if="friends">
-  <div class="col-xs-12">
-    <div class="general-item-list">
+
+<div class="portlet light">
+  <div class="portlet-title">
+    <div class="caption">
+      <span class="caption-subject font-blue-madison bold uppercase">我的医友</span>
+    </div>
+  </div>
+  <div class="portlet-body">
+    <div  ng-if="friends.length==0">
+      目前没有好友
+    </div>
+    <div class="general-item-list" ng-if="friends.length>0">
       <div class="item" ng-repeat="doctor in friends" ng-click="showDetails($index)">
         <div class="item-head">
           <div class="item-details">
@@ -43,3 +57,50 @@
     </div>
   </div>
 </div>
+
+
+<!--<div class="row" ng-if="requests && requests.length>0 && !isShowRequests">-->
+<!--<div class="col-xs-12">-->
+<!--<div class="alert alert-info" role="alert" ng-click="showRequests()">你有 {{requests.length}} 条好友请求未处理。</div>-->
+<!--</div>-->
+<!--</div>-->
+
+<!--<div class="row" ng-if="isShowRequests">-->
+<!--<div class="col-xs-12">-->
+<!--<div class="general-item-list">-->
+<!--<div class="item" ng-repeat="request in requests">-->
+<!--<div class="item-head">-->
+<!--<div class="item-details" ng-click="showRequestDoctorProfile($index)">-->
+<!--<img class="item-pic avatar-md" ng-src="{{request.fromAvatar}}">-->
+<!--<span class="item-name">{{request.fromName}}</span>-->
+<!--<span class="item-label">{{request.message}}</span>-->
+<!--</div>-->
+<!--<span class="item-status">-->
+<!--<button type="button" class="btn btn-danger" ng-click="reject($index)">拒绝</button>-->
+<!--<button type="button" class="btn btn-success" ng-click="accept($index)">同意</button>-->
+<!--</span>-->
+<!--</div>-->
+<!--</div>-->
+<!--</div>-->
+<!--</div>-->
+<!--</div>-->
+
+<!--<div class="row" ng-if="friends">-->
+  <!--<div class="col-xs-12">-->
+    <!--<div class="general-item-list">-->
+      <!--<div class="item" ng-repeat="doctor in friends" ng-click="showDetails($index)">-->
+        <!--<div class="item-head">-->
+          <!--<div class="item-details">-->
+            <!--<div class="item-pic-container">-->
+              <!--<img class="item-pic avatar-md" ng-src="{{doctor.avatar}}">-->
+              <!--<span class="item-pic-v-icon"><i class="fa fa-vimeo-square"></i></span>-->
+            <!--</div>-->
+            <!--<span class="item-name">{{doctor.name}}</span>-->
+            <!--<span class="item-label"></span>-->
+          <!--</div>-->
+          <!--<span class="item-status">{{doctor.hospital}}</span>-->
+        <!--</div>-->
+      <!--</div>-->
+    <!--</div>-->
+  <!--</div>-->
+<!--</div>-->

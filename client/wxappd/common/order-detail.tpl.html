@@ -75,7 +75,8 @@
             <div ng-show="uiFlags.isShowPaymentButtons" style="margin-top: 5px">
               <button type="button" class="btn btn-success btn-block" ng-show="order.status=='init'"
                       ng-click="payment()">支付
-              </button><span></span>
+              </button>
+              <span></span>
               <button type="button" class="btn btn-default btn-block" ng-show="order.status=='paid'"
                       disabled>已支付
               </button>
@@ -199,7 +200,9 @@
           </div>
             <span class="item-status">
               <span ng-show="comment.canDelete">
-                <a href="" class="btn btn-sm red-stripe" ng-click="deleteComment($index)">删除</a>
+                <a href="" ng-click="deleteComment($index)">
+                  <small>删除</small>
+                </a>
               </span>
             </span>
         </div>

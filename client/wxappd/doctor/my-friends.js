@@ -45,6 +45,7 @@ angular.module('ylbWxApp')
       $http.put('/api/doctors/friends/requests/' + reqId + '/acceptance')
         .success(function (resp) {
           $scope.requests.splice(idx, 1);
+          getMyFriends();
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });
