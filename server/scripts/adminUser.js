@@ -47,7 +47,7 @@ var doUpdateAdmin = function () {
 
   var adminUser = {username: username, password: password};
   adminUser.salt = Math.round((new Date().valueOf() * Math.random()));
-  adminUser.password = sha512(adminUser.salt + adminUser.password);
+  adminUser.password = sha512(adminUser.salt + adminUser.password).toString();
   AdminUser.update({username: username}, adminUser, {upsert: true}, function (err, raw) {
     if (err) {
       console.log('error: %o', err);
