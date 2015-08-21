@@ -124,6 +124,16 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       templateUrl: 'wxappd/common/order-detail.tpl.html',
       controller: 'wxOrderDetailCtrl'
     });
+    $stateProvider.state('shop', {
+      url: '/shop',
+      templateUrl: 'wxappd/common/shop.tpl.html',
+      controller: 'wxShopCtrl'
+    });
+    $stateProvider.state('goods-detail', {
+      url: '/shop/goods/:id',
+      templateUrl: 'wxappd/common/goods-detail.tpl.html',
+      controller: 'wxGoodsCtrl'
+    });
     $stateProvider.state('error-not-from-wechat', {
       template: '<div class="alert alert-danger" role="alert">请从微信访问此页面。</div>'
     });
@@ -598,7 +608,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       sub3: [
         {
           "text": "商城",
-          "href": "wxindex.html#/doctor/index"
+          "href": "wxindex.html#/shop"
         }, {
           "text": "交易记录",
           "href": "wxindex.html#/doctor/orders/history"
@@ -636,7 +646,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       sub3: [
         {
           "text": "商城",
-          "href": "wxindex.html#"
+          "href": "wxindex.html#/shop"
         }, {
           "text": "交易记录",
           "href": "wxindex.html#/patient/orders/history"

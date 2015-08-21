@@ -52,10 +52,11 @@ var registerRoutes = function () {
   var adminCtrl = require('./controller/admin-controller')(app);
 
   app.post('/admin/login', adminCtrl.login);
-  app.post('/admin/goods', adminCtrl.createGood);
+  app.post('/admin/goods', adminCtrl.createGoods);
   app.get('/admin/goods', adminCtrl.getGoods);
-  app.put('/admin/goods/:id', adminCtrl.updateGood);
-  app.delete('/admin/goods/:id', adminCtrl.deleteGood);
+  app.put('/admin/goods/:id', adminCtrl.updateGoods);
+  app.delete('/admin/goods/:id', adminCtrl.deleteGoods);
+  app.get('/admin/goods/:id', adminCtrl.getGoodsDetail);
   app.post('/admin/upload', adminCtrl.upload);
 
   // TODO: add authentication for following APIs.

@@ -15,7 +15,7 @@ module.exports = function (app) {
   var DPRelation = app.models.DoctorPatientRelation;
 
   var orderStatus = app.consts.orderStatus;
-  var serviceType = app.consts.doctorServices;
+  var orderTypes = app.consts.orderTypes;
   var finalStatus = [orderStatus.rejected, orderStatus.finished, orderStatus.expired, orderStatus.cancelled];
   /**
    * POST '/api/orders'
@@ -31,7 +31,7 @@ module.exports = function (app) {
       return res.status(400).json(utils.jsonResult(new Error('invalid data')));
     }
 
-    var validServiceTypes = [app.consts.doctorServices.jiahao.type, app.consts.doctorServices.suizhen.type, app.consts.doctorServices.huizhen.type];
+    var validServiceTypes = Object.keys(orderTypes);
     if (validServiceTypes.indexOf(newOrder.serviceType) == -1) {
       debug('createOrder(), invalid service type.');
       return res.status(400).json(utils.jsonResult(new Error('invalid data')));
@@ -242,13 +242,13 @@ module.exports = function (app) {
               return res.status(400).json(utils.jsonResult(new Error('order status is final')));
             }
             //TODO: this should be invoke when wechat server callback.
-            if (newStatus == orderStatus.paid && order.serviceType == serviceType.jiahao.type) {
+            if (newStatus == orderStatus.paid && order.serviceType == orderTypes.jiahao.type) {
               newStatus = orderStatus.confirmed;
             }
           }
 
           // for 'huizhen' orders, one doctor 'confirmed' will not update order status.
-          if (order.serviceType == serviceType.huizhen.type) {
+          if (order.serviceType == orderTypes.huizhen.type) {
             debug('updateOrderStatus(), update status of "huizhen" order.');
             if (newStatus == orderStatus.confirmed) {
               // Only when all doctors 'confirmed', order status become 'confirmed'.
@@ -301,7 +301,7 @@ module.exports = function (app) {
               handleRelations4PaymentSuccess(order);
             } else if (newStatus == orderStatus.finished) {
 
-            } else if (newStatus == orderStatus.confirmed && order.serviceType == serviceType.suizhen.type) {
+            } else if (newStatus == orderStatus.confirmed && order.serviceType == orderTypes.suizhen.type) {
               handleRelations4SuizhenConfirmed(order);
               //TODO:
               // 1. send wechat message to doctor and patient.

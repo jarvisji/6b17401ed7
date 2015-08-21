@@ -51,6 +51,11 @@ section {
   height: 128px !important;
 }
 
+/*for goods detail page*/
+.profile-desc-text img {
+  max-width: 100%;
+}
+
 .profile-section {
   position: relative;
 }

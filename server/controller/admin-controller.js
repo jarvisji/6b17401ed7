@@ -53,7 +53,7 @@ module.exports = function (app) {
    * @param req
    * @param res
    */
-  var createGood = function (req, res) {
+  var createGoods = function (req, res) {
     if (!verifyToken(req, res)) {
       return;
     }
@@ -70,7 +70,7 @@ module.exports = function (app) {
    * @param req
    * @param res
    */
-  var updateGood = function (req, res) {
+  var updateGoods = function (req, res) {
     if (!verifyToken(req, res)) {
       return;
     }
@@ -103,7 +103,7 @@ module.exports = function (app) {
    * @param req
    * @param res
    */
-  var deleteGood = function (req, res) {
+  var deleteGoods = function (req, res) {
     if (!verifyToken(req, res)) {
       return;
     }
@@ -112,6 +112,20 @@ module.exports = function (app) {
       if (err) return utils.handleError(err, 'deleteGood()', debug, res);
       debug('deleteGood(), success');
       res.json('success');
+    });
+  };
+
+  /**
+   * GET '/admin/goods/:id'
+   * @param req
+   * @param res
+   */
+  var getGoodsDetail = function (req, res) {
+    var id = req.params.id;
+    ShopItem.findById(id, function (err, item) {
+      if (err) return utils.handleError(err, 'getGoodsDetail()', debug, res);
+      debug('getGoodsDetail(), success, id: %s', id);
+      res.json(utils.jsonResult(item));
     });
   };
 
@@ -175,10 +189,11 @@ module.exports = function (app) {
 
   return {
     login: login,
-    createGood: createGood,
-    updateGood: updateGood,
-    deleteGood: deleteGood,
+    createGoods: createGoods,
+    updateGoods: updateGoods,
+    deleteGoods: deleteGoods,
     getGoods: getGoods,
+    getGoodsDetail: getGoodsDetail,
     upload: upload
   };
 };
