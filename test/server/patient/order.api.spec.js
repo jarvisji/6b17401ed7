@@ -46,7 +46,7 @@
 var should = require('should');
 var test = require('../testUtils');
 var dateUtil = require('../../../server/utils/date-utils');
-var orderStatusProcessor = require('../../../server/processOrderStatus');
+var orderStatusProcessor = require('../../../server/scripts/processOrderStatus');
 describe('Test order APIs. ', function () {
   var testData, testPatient, testPatient2, testDoctor, testDoctor2;
   var patientId, patientId2, doctorId, doctorId2, patientOpenid, patientOpenid2, doctorOpenid, doctorOpenid2;
