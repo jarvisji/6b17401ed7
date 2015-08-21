@@ -38,6 +38,19 @@ angular.module('ylbWxApp')
           }
         });
     };
+    var getNonServiceOrders = function () {
+      $http.get('/api/orders/non-service')
+        .success(function (resp) {
+          for (var i = 0; i < resp.data.length; i++) {
+            var order = resp.data[i];
+            order.displayStatus = resources.orderStatus[order.status].label;
+            $rootScope.applyStatusLabelStyle(order, false, true);
+          }
+          $scope.nonServiceOrders = resp.data;
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
     var getSummary = function () {
       $http.get('/api/doctors/' + currentUser.id + '/orders/summary')
         .success(function (resp) {
@@ -54,11 +67,32 @@ angular.module('ylbWxApp')
     };
     if (currentUser.isDoctor) {
       getHistoryOrders();
+      getNonServiceOrders();
       getSummary();
     }
 
     $scope.showOrderDetail = function (index) {
       var orderId = $scope.orders[index]._id;
       $state.go('order-detail', {id: orderId});
+    };
+
+    $scope.showGoodsDetail = function (index) {
+      var orderId = $scope.nonServiceOrders[index].orderItem.id;
+      $state.go('goods-detail', {id: orderId});
+    };
+
+    $scope.cancelNonServiceOrder = function (index) {
+      var orderId = $scope.nonServiceOrders[index]._id;
+      $http.delete('/api/orders/non-service/' + orderId)
+        .success(function (resp) {
+          $scope.nonServiceOrders.splice(index, 1);
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
+
+    $scope.payNonServiceOrder = function (index) {
+
+
     };
   }]);

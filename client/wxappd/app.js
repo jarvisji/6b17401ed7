@@ -124,6 +124,11 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       templateUrl: 'wxappd/common/order-detail.tpl.html',
       controller: 'wxOrderDetailCtrl'
     });
+    $stateProvider.state('order-non-service-detail', {
+      url: '/order/non-service/detail/:id',
+      templateUrl: 'wxappd/common/order-non-service-detail.tpl.html',
+      controller: 'wxOrderDetailCtrl'
+    });
     $stateProvider.state('shop', {
       url: '/shop',
       templateUrl: 'wxappd/common/shop.tpl.html',

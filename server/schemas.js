@@ -165,12 +165,6 @@ module.exports = function () {
     quantity: {type: Number, required: true},
     orderPrice: {type: Number, required: true},
     status: {type: String, default: 'init'}, // check consts.orderStatus
-    referee: {
-      id: String,
-      name: String,
-      effectDate: Date,
-      income: {type: Number, default: 0}
-    },
     comments: [commentSchema],
     rank: {
       stars: Number,

@@ -4,6 +4,7 @@
 angular.module('ylbWxApp')
   .controller('wxOrderDetailCtrl', ['$scope', '$rootScope', '$http', '$state', '$stateParams', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, $stateParams, resources, commonUtils) {
     var currentUser = $scope.currentUser = $rootScope.checkUserVerified();
+    var stateName = $state.current.name;
     var orderId = $stateParams.id;
     var sType = resources.doctorServices;
 
@@ -34,7 +35,26 @@ angular.module('ylbWxApp')
           }
         });
     };
-    getOrderInfo();
+
+    var getNonServiceOrderInfo = function () {
+      $http.get('/api/orders/non-service' + orderId)
+        .success(function (resp) {
+          var order = resp.data;
+          $scope.order = order;
+        }).error(function (resp, status) {
+          if (status == 403) {
+            $rootScope.alertError('', '不能查看他人的订单。');
+          } else {
+            $rootScope.alertError(null, resp, status);
+          }
+        });
+    };
+
+    if (stateName == 'order-non-service-detail') {
+      getNonServiceOrderInfo();
+    } else {
+      getOrderInfo();
+    }
 
     var getPatientInfo = function () {
       var patientId = $scope.order.patient.id;

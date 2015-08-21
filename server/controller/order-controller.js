@@ -616,6 +616,100 @@ module.exports = function (app) {
     });
   };
 
+  /**
+   * GET '/api/orders/non-service'
+   * @param req
+   * @param res
+   */
+  var getNonServiceOrders = function (req, res) {
+    var role = req.query.role; // operator
+    var openid = req.query.openid; // operator
+    debug('_getCommonOrderQuery(), find user by openid: %s, role: %s', openid, role);
+    var currentUserId;
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        if (!user) {
+          throw new Error('user not found');
+        }
+        currentUserId = user.id;
+        debug('getNonServiceOrders(), finding orders of user: %s', currentUserId);
+        return Order.find({'buyer.id': currentUserId}).sort({created: -1}).exec();
+      }).then(function (orders) {
+        debug('getNonServiceOrders(), found %d orders.', orders.length);
+        res.json(utils.jsonResult(orders));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getNonServiceOrders()', debug, res);
+      });
+  };
+
+  /**
+   * GET '/api/orders/non-service/:id'
+   * @param req
+   * @param res
+   */
+  var getNonServiceOrderDetail = function (req, res) {
+    var orderId = req.params.id;
+    var role = req.query.role; // operator
+    var openid = req.query.openid; // operator
+    debug('getNonServiceOrderDetail(), find user by openid: %s, role: %s', openid, role);
+    var currentUserId;
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        if (!user) {
+          throw new Error('user not found');
+        }
+        currentUserId = user.id;
+        debug('getNonServiceOrderDetail(), find non service order: %s', orderId);
+        return Order.findById(orderId).exec();
+      }).then(function (order) {
+        if (!order) {
+          throw new Error('order not found');
+        }
+
+        if (currentUserId != order.buyer.id) {
+          throw new Error('no privilege');
+        }
+        res.json(utils.jsonResult(order));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getNonServiceOrderDetail()', debug, res);
+      });
+  };
+
+  /**
+   * DELETE '/api/orders/non-service/:id'
+   * @param req
+   * @param res
+   */
+  var deleteNonServiceOrder = function (req, res) {
+    var orderId = req.params.id;
+    var role = req.query.role; // operator
+    var openid = req.query.openid; // operator
+    debug('deleteNonServiceOrder(), find user by openid: %s, role: %s', openid, role);
+    var currentUserId;
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        if (!user) {
+          throw new Error('user not found');
+        }
+        currentUserId = user.id;
+        debug('deleteNonServiceOrder(), find non service order: %s', orderId);
+        return Order.findById(orderId).exec();
+      }).then(function (order) {
+        if (!order) {
+          throw new Error('order not found');
+        }
+
+        if (currentUserId != order.buyer.id) {
+          throw new Error('no privilege');
+        }
+        return order.remove();
+      }).then(function (ret) {
+        res.json(utils.jsonResult('success'));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getNonServiceOrderDetail()', debug, res);
+      });
+  };
+
   //var getHistoryOrders = function (req, res) {
   //  var role = req.query.role; // operator
   //  _getCommonQueryOfOrder(req, function (err, query) {
@@ -873,7 +967,9 @@ module.exports = function (app) {
     getAllOrders: getAllOrders,
     getOrderDetail: getOrderDetail,
     createComment: createOrderComment,
-    deleteComment: deleteOrderComment
+    deleteComment: deleteOrderComment,
+    getNonServiceOrders: getNonServiceOrders,
+    getNonServiceOrderDetail: getNonServiceOrderDetail,
+    deleteNonServiceOrder: deleteNonServiceOrder
   }
-}
-;
+};
