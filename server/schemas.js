@@ -283,17 +283,17 @@ module.exports = function () {
     this.update({}, {$set: {lastModified: new Date()}});
   });
 
-  var shopSchema = new Schema({
-    name: String,
+  var shopItemSchema = new Schema({
+    name: {type: String, required: true},
     //category_id: String,
     //brief: String,
     pic_url: String,
     detail: String,
     //detail_enabled: Boolean,
-    price: Number,
+    price: {type: Number, required: true},
     //original_price: Number,
     //inventory: Number,
-    //is_in_sale: Boolean,
+    is_in_sale: {type:Boolean, default: true},
     //status: String,
     //spec: String
     created: {type: Date, default: Date.now},
@@ -313,7 +313,7 @@ module.exports = function () {
     doctorPatientRelationSchema: doctorPatientRelationSchema,
     wechatOAuthSchema: wechatOAuthSchema,
     adminUserSchema: adminUserSchema,
-    shopSchema: shopSchema
+    shopItemSchema: shopItemSchema
   };
 }
 ;

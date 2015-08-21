@@ -24,4 +24,5 @@ client/vendor
 
 .tmp
 dist
+upload
 jshint-report.txt

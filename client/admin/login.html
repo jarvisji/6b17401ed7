@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="ylbAdmin" ng-controller="rootCtrl">
+<html ng-app="ylbAdmin" ng-controller="loginCtrl">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,9 +9,9 @@
   <title>医联邦-控制台</title>
 
   <link href="http://cdn.bootcss.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
-  <link href="http://cdn.bootcss.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">
-  <link href="http://cdn.bootcss.com/angular-motion/0.4.2/angular-motion.min.css" rel="stylesheet">
-  <link href="../vendor/bootstrap-additions/dist/bootstrap-additions.min.css" rel="stylesheet">
+  <!--<link href="http://cdn.bootcss.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet">-->
+  <!--<link href="http://cdn.bootcss.com/angular-motion/0.4.2/angular-motion.min.css" rel="stylesheet">-->
+  <!--<link href="../vendor/bootstrap-additions/dist/bootstrap-additions.min.css" rel="stylesheet">-->
 
   <!-- build:css assets/css/app.min.css -->
   <link href="../assets/css/components-rounded.css" rel="stylesheet">
@@ -25,11 +25,12 @@
   <script src="http://cdn.bootcss.com/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
   <script src="http://cdn.bootcss.com/angular-strap/2.2.4/angular-strap.min.js"></script>
   <script src="http://cdn.bootcss.com/angular-strap/2.2.4/angular-strap.tpl.min.js"></script>
+  <script src="../vendor/angular-file-upload/dist/angular-file-upload.min.js"></script>
 
   <!-- build:js assets/js/3rd.min.js -->
   <script src="../vendor/angular-cookies/angular-cookies.js"></script>
   <script src="../vendor/angular-animate/angular-animate.js"></script>
-  <script src="../vendor/angular-sanitize/angular-sanitize.js"></script>
+  <!--<script src="../vendor/angular-sanitize/angular-sanitize.js"></script>-->
   <!-- endbuild -->
 
   <!-- build:js assets/js/app.min.js -->
@@ -61,7 +62,7 @@
       <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="密码" name="password" ng-model="password">
     </div>
     <div class="form-actions">
-      <button type="submit" class="btn btn-success btn-block" ng-click="login()">登录</button>
+      <button type="button" class="btn btn-success btn-block" ng-click="login()">登录</button>
       <!--<label class="rememberme check">-->
         <!--<div class="checker"><span><input type="checkbox" name="remember" value="1"></span></div>Remember </label>-->
       <!--<a href="javascript:;" id="forget-password" class="forget-password">Forgot Password?</a>-->

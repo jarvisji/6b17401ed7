@@ -1,32 +1,57 @@
-angular.module('ylbAdmin', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStrap'])
+angular.module('ylbAdmin', ['ui.router', 'ngCookies', 'ngAnimate', 'angularFileUpload', 'mgcrea.ngStrap'])
   .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', function ($stateProvider, $urlRouterProvider, $locationProvider) {
     //$locationProvider.html5Mode(true);
-    $stateProvider.state('dashboard', {
-      url: '/dashboard',
-      templateUrl: 'app/dashboard/dashboard.tpl.html',
-      controller: 'dashboardCtrl'
+    $stateProvider.state('shop', {
+      url: '/shop',
+      templateUrl: 'admin/shop/shop-goods.tpl.html',
+      controller: 'adminShopCtrl'
     });
-    //$urlRouterProvider.otherwise('dashboard');
+    $stateProvider.state('withdraw', {
+      url: '/withdraw',
+      templateUrl: 'admin/withdraw/withdraw.tpl.html',
+      controller: 'adminWithdrawCtrl'
+    });
+    $urlRouterProvider.otherwise('shop');
   }])
-  .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$http', '$alert', '$log', function ($scope, $rootScope, $state, $http, $alert, $log) {
-    $scope.login = function () {
-      $http.post('/admin/login', {username: $scope.username, password: $scope.password})
-        .success(function (resp) {
-          window.location.href = 'admin/dashboard.html';
-        }).error(function (resp, status) {
-          $rootScope.alertError(null, resp, status);
-        });
+  .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$http', '$alert', '$cookies', '$log', function ($scope, $rootScope, $state, $http, $alert, $cookies, $log) {
+    $log.log('init rootCtrl');
+
+    $rootScope.checkUserLogin = function () {
+      var verifiedData = $cookies.getObject('adminUser');
+      if (!verifiedData) {
+        window.location.href = '/admin/login.html';
+      } else {
+        $rootScope.currentUser = verifiedData;
+        console.log('vd:', verifiedData);
+        $http.defaults.headers.common.token = verifiedData.token;
+        return verifiedData;
+      }
     };
+
+    $rootScope.currentUser = $rootScope.checkUserLogin();
 
     // init menu
     $scope.menu = [
-      {label: '最新通知', location: '/curriculum'},
-      {label: '今日作业', location: '/curriculum'},
-      {label: '成绩查询', location: '/curriculum'},
-      {label: '课程表', location: '/curriculum'},
-      {label: '通讯录', location: '/curriculum'},
-      {label: '账号绑定', location: '/curriculum'}];
+      {label: '商品管理', location: 'shop'},
+      {label: '退款管理', location: 'withdraw'}];
 
+    $scope.logout = function() {
+      $cookies.remove('adminUser');
+      window.location.href = '/admin/login.html';
+    };
+
+    $rootScope.validateForm = function (form) {
+      var formValid = form.$valid;
+      angular.forEach(form, function (ele) {
+        if (ele && ele.$invalid) {
+          ele.$dirty = true;
+          formValid = false;
+          $log.debug("invalid element:", ele);
+        }
+      });
+//        $log.debug("validated form:", formValid, form);
+      return formValid;
+    };
 
     var generateAlertTitle = function (title, _title, status) {
       if (_title !== undefined && _title !== null)
@@ -81,6 +106,39 @@ angular.module('ylbAdmin', ['ui.router', 'ngCookies', 'ngAnimate', 'mgcrea.ngStr
       }
       $alert(opt);
     };
+    $rootScope.alertWarn = function (_title, content, status, duration) {
+      var title = generateAlertTitle('警告 ', _title, status);
+      $alert({
+        title: title,
+        content: parseContent(content),
+        placement: 'top',
+        type: 'warning',
+        duration: duration != undefined ? duration : 3,
+        animation: 'am-fade-and-slide-top'
+      });
+    };
+
+    $rootScope.alertSuccess = function (_title, content, status, duration) {
+      var title = generateAlertTitle('成功', _title, status);
+      $alert({
+        title: title,
+        content: parseContent(content),
+        placement: 'top',
+        type: 'success',
+        duration: duration != undefined ? duration : 3,
+        animation: 'am-fade-and-slide-top'
+      });
+    };
   }
-  ])
-;
+  ]).controller('loginCtrl', ['$scope', '$rootScope', '$http', '$cookies', function ($scope, $rootScope, $http, $cookies) {
+    $scope.login = function () {
+      $http.post('/admin/login', {username: $scope.username, password: $scope.password})
+        .success(function (resp) {
+          $cookies.putObject('adminUser', resp.data);
+          $rootScope.currentUser = resp.data;
+          window.location.href = '/admin/dashboard.html';
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
+  }]);

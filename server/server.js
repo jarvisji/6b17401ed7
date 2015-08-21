@@ -51,7 +51,12 @@ var registerRoutes = function () {
   var wechatCtrl = require('./controller/wechat-controller')(app, api);
   var adminCtrl = require('./controller/admin-controller')(app);
 
-  app.use('/admin/login', adminCtrl.login);
+  app.post('/admin/login', adminCtrl.login);
+  app.post('/admin/goods', adminCtrl.createGood);
+  app.get('/admin/goods', adminCtrl.getGoods);
+  app.put('/admin/goods/:id', adminCtrl.updateGood);
+  app.delete('/admin/goods/:id', adminCtrl.deleteGood);
+  app.post('/admin/upload', adminCtrl.upload);
 
   // TODO: add authentication for following APIs.
   app.use('/wxproxy', wxproxyDoctor); // TODO: delete this.

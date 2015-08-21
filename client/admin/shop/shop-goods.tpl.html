@@ -1,0 +1,155 @@
+<div class="portlet light bordered">
+  <div class="portlet-title">
+    <div class="caption font-dark">
+      <span class="caption-subject bold uppercase">商品管理</span>
+      <span class="caption-helper"></span>
+    </div>
+    <div class="actions">
+      <a href="" class="btn btn-circle btn-default btn-sm" ng-click="createItem()"
+         ng-disabled="editingItemIndex != undefined">
+        <i class="fa fa-plus"></i> 添加商品 </a>
+    </div>
+  </div>
+  <div class="portlet-body">
+    <table class="table table-hover table-light">
+      <thead>
+      <tr role="row">
+        <!--<th class="center sorting_disabled" role="columnheader" rowspan="1" colspan="1"-->
+        <!--aria-label="" style="width: 49px;"><label>-->
+        <!--<input type="checkbox" class="ace" ng-model="isSelectedAllItems" ng-click="selectAllItems()">-->
+        <!--<span class="lbl"></span> </label>-->
+        <!--</th>-->
+        <th class="center">名称</th>
+        <th class="center">售价</th>
+        <!--<th class="center sorting_disabled" role="columnheader" rowspan="1" colspan="1"-->
+        <!--aria-label="" style="width: 80px;">状态-->
+        <!--</th>-->
+        <th class="center">上架</th>
+        <th class="center">操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat-start="item in items" ng-hide="$index == editingItemIndex">
+        <!--<td class="center">-->
+        <!--<label>-->
+        <!--<input type="checkbox" class="ace" ng-model="item.isSelected" ng-change="selectItem($index)">-->
+        <!--<span class="lbl"></span>-->
+        <!--</label>-->
+        <!--</td>-->
+        <td>{{item.name}}</td>
+        <td>{{item.price}}</td>
+        <!--<td>-->
+        <!--<span class="label label-xlg arrowed-in-right" ng-if="STATUS_DDMENU[item.status].class"-->
+        <!--ng-class="STATUS_DDMENU[item.status].class">{{STATUS_DDMENU[item.status].name}}-->
+        <!--</span>-->
+        <!--<span ng-if="!STATUS_DDMENU[item.status].class">{{STATUS_DDMENU[item.status].name}}</span>-->
+        <!--</td>-->
+        <td>
+          <div class="btn-group btn-group-circle">
+            <button type="button" class="btn btn-default btn-xs" ng-class="{active: item.is_in_sale}"
+                    ng-click="updateItemInSell($index, true)" style="margin-right: 0">是
+            </button>
+            <button type="button" class="btn btn-default btn-xs" ng-class="{active: !item.is_in_sale}"
+                    ng-click="updateItemInSell($index, false)">否
+            </button>
+          </div>
+          <!--<label>-->
+          <!--<input class="ace ace-switch ace-switch-4" name="isInSell" type="checkbox" ng-model="item.isInSell"-->
+          <!--ng-click="updateItemInSell($index)"/>-->
+          <!--<span class="lbl"></span>-->
+          <!--</label>-->
+        </td>
+        <td>
+          <a href="" class="blue" ng-click="editItem($index)">
+            <i class="icon-pencil bigger-130"></i>编辑
+          </a> &nbsp;
+          <a href="" class="red" ng-click="deleteItem($index)">
+            <i class="icon-trash bigger-130"></i>删除
+          </a>
+        </td>
+      </tr>
+      <!-- 编辑商品表单 -->
+      <tr ng-repeat-end ng-show="$index == editingItemIndex">
+        <td colspan="4">
+
+          <div class="portlet light bordered">
+            <div class="portlet-title">
+              <div class="caption font-dark">
+                <span class="caption-subject bold uppercase">编辑商品</span>
+                <span class="caption-helper"></span>
+              </div>
+            </div>
+            <div class="portlet-body">
+              <form class="form" name="formItem" role="form" novalidate>
+
+                <div class="form-group"
+                     ng-class="{'has-error':errMsg.pic}">
+                  <input type="file" nv-file-select="" name="file" uploader="uploader"/><br/>
+
+                  <div class="help-block" ng-show="errMsg.pic">
+                    <span>请选择商品图片</span>
+                  </div>
+
+                  <div ng-repeat="queueItem in uploader.queue">
+                    <div ng-show="uploader.isHTML5" ng-thumb="{ file: queueItem._file, height: 100 }"></div>
+                  </div>
+                  <div ng-hide="!item.pic_url || uploader.queue.length > 0">
+                    <img ng-src="{{item.pic_url}}" height="100">
+                  </div>
+
+                </div>
+
+                <div class="form-group"
+                     ng-class="{'has-error':formItem.name.$dirty && formItem.name.$invalid}">
+                  <span class="lbl control-label">名称：</span>
+                  <input name="name" type="text" class="form-control todo-taskbody-tasktitle"
+                         placeholder="" ng-model="item.name" maxlength="50" required>
+
+                  <div class="help-block" ng-show="formItem.name.$dirty && formItem.name.$invalid">
+                    <span ng-show="formItem.name.$error.required">请输入商品名称</span>
+                  </div>
+                </div>
+
+                <div class="form-group"
+                     ng-class="{'has-error':formItem.price.$dirty && formItem.price.$invalid}">
+                  <span class="lbl control-label">价格：</span>
+                  <input type="number" name="price" class="form-control todo-taskbody-tasktitle"
+                         ng-model="item.price" min="0" max="999999" required/>
+
+                  <div class="help-block">
+                    <span ng-show="formItem.price.$dirty && formItem.price.$invalid">请输入价格</span>
+                  </div>
+                </div>
+
+
+                <div class="form-group" ng-class="{'has-error': errMsg.detail}">
+                  <span class="lbl control-label no-padding-right">详情 ：</span>
+
+                  <div id="itemEditorPlaceholder_{{item._id}}"></div>
+                  <div class="help-block">
+                    <span ng-show="errMsg.detail">请输入商品介绍</span>
+                  </div>
+                </div>
+
+                <div class="form-actions center">
+                  <button type="submit" class="btn btn-primary btn-sm" ng-click="saveItem($index, formItem)">
+                    <i class="fa fa-save"></i> 保存
+                  </button>
+                  &nbsp;&nbsp;
+                  <button type="button" class="btn btn-sm" ng-click="cancelItem($index)">
+                    <i class="fa fa-remove"></i> 取消
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<script id="itemEditor" name="itemEditor" type="text/plain"></script>
+
