@@ -26,6 +26,10 @@ module.exports = {
     huizhen: {type: 'huizhen'},
     suizhen: {type: 'suizhen'}
   },
+  orderTypes: {
+    shop: {type: 'shop'},
+    withdraw: {type: 'withdraw'}
+  },
   orderStatus: {
     init: 'init',
     paid: 'paid',

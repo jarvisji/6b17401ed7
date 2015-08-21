@@ -108,9 +108,9 @@ module.exports = function () {
    * 4. For extracted order, orderPrice = extracted amount, servicePrice = undefined.
    */
   var serviceOrderSchema = new Schema({
-    serviceId: {type: String, index: true, required: true},
-    serviceType: String, //jiahao, huizhen, suizhen
-    doctors: [{
+    serviceId: {type: String, index: true, required: true}, // goods id when type is 'shop', userId when type is 'withdraw'
+    serviceType: String, //jiahao, huizhen, suizhen, shop, withdraw
+    doctors: [{  // reused by goods when type is 'shop'; doctor/patient self when type is 'withdraw'
       id: {type: String, required: true},
       name: String,
       avatar: String,
@@ -149,6 +149,36 @@ module.exports = function () {
   });
   serviceOrderSchema.index({'doctors.id': 1, 'patient.id': 1, 'referee.id': 1, lastModified: -1, status: 1});
 
+  // non-service order
+  var orderSchema = new Schema({
+    orderType: {type: String, index: true, required: true}, //shop, withdraw
+    orderItem: {  // reused by goods when type is 'shop'; doctor/patient self when type is 'withdraw'
+      id: String,
+      name: String,
+      avatar: String
+    },
+    buyer: {
+      id: {type: String, required: true},
+      name: String,
+      avatar: String
+    },
+    quantity: {type: Number, required: true},
+    orderPrice: {type: Number, required: true},
+    status: {type: String, default: 'init'}, // check consts.orderStatus
+    referee: {
+      id: String,
+      name: String,
+      effectDate: Date,
+      income: {type: Number, default: 0}
+    },
+    comments: [commentSchema],
+    rank: {
+      stars: Number,
+      memo: String
+    },
+    created: {type: Date, default: Date.now},
+    lastModified: {type: Date, default: Date.now}
+  });
 
   var patientSchema = new Schema({
     name: String,
@@ -293,7 +323,7 @@ module.exports = function () {
     price: {type: Number, required: true},
     //original_price: Number,
     //inventory: Number,
-    isInSale: {type:Boolean, default: true},
+    isInSale: {type: Boolean, default: true},
     //status: String,
     //spec: String
     created: {type: Date, default: Date.now},
@@ -306,6 +336,7 @@ module.exports = function () {
     serviceSchema: serviceSchema,
     serviceStockSchema: serviceStockSchema,
     serviceOrderSchema: serviceOrderSchema,
+    orderSchema: orderSchema,
     commentSchema: commentSchema,
     patientSchema: patientSchema,
     patientFriendSchema: patientFriendSchema,

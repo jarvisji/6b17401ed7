@@ -30,6 +30,10 @@ angular.module('ylbWxApp')
       huizhen: {type: 'huizhen', label: "会诊"},
       suizhen: {type: 'suizhen', label: "随诊"}
     },
+    orderTypes: {
+      shop: {type: 'shop', label: "商城"},
+      withdraw: {type: 'withdraw', label: "提取"}
+    },
     orderStatus: {
       init: {value: 'init', label: '未支付'},
       paid: {value: 'paid', label: '已支付'},

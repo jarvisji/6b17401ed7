@@ -13,8 +13,11 @@ module.exports = function (app) {
   var Patient = app.models.Patient;
   var Doctor = app.models.Doctor;
   var DPRelation = app.models.DoctorPatientRelation;
+  var ShopItem = app.models.ShopItem;
+  var Order = app.models.Order;
 
   var orderStatus = app.consts.orderStatus;
+  var serviceTypes = app.consts.doctorServices;
   var orderTypes = app.consts.orderTypes;
   var finalStatus = [orderStatus.rejected, orderStatus.finished, orderStatus.expired, orderStatus.cancelled];
   /**
@@ -25,20 +28,47 @@ module.exports = function (app) {
    */
   var createOrder = function (req, res) {
     var newOrder = req.body;
-    debug('createOrder(), receive new order data: %o', newOrder);
-    if (!newOrder || !newOrder.serviceId || !newOrder.doctorId || !newOrder.patientId || newOrder.price == undefined || newOrder.quantity == undefined || !newOrder.serviceType) {
-      debug('createOrder(), invalid data. serviceId: %s, serviceType: %s, doctorId: %s, patientId: %s, price: %s, quantity: %s.', !newOrder.serviceId, !newOrder.serviceType, !newOrder.doctorId, !newOrder.patientId, newOrder.price == undefined, newOrder.quantity == undefined);
+    if (newOrder.serviceType) {
+      createServiceOrder(newOrder, res);
+    } else {
+      createNonServiceOrder(newOrder, res);
+    }
+  };
+
+  var createNonServiceOrder = function (newOrder, res) {
+    debug('createNonServiceOrder(), receive new order data: %o', newOrder);
+    if (!newOrder || !newOrder.buyer || !newOrder.buyer.id || newOrder.orderPrice == undefined || newOrder.quantity == undefined || !newOrder.orderType) {
+      debug('createNonServiceOrder(), invalid data. buyer: %s, orderPrice: %s, quantity: %s, orderType: %s.', !newOrder.buyer || !newOrder.buyer.id, newOrder.orderPrice == undefined, newOrder.quantity == undefined, !newOrder.orderType);
       return res.status(400).json(utils.jsonResult(new Error('invalid data')));
     }
 
     var validServiceTypes = Object.keys(orderTypes);
+    if (validServiceTypes.indexOf(newOrder.orderType) == -1) {
+      debug('createNonServiceOrder(), invalid order type.');
+      return res.status(400).json(utils.jsonResult(new Error('invalid data')));
+    }
+
+    Order.create(newOrder, function (err, created) {
+      if (err) return utils.handleError(err, 'createNonServiceOrder()', debug, res);
+      res.json(utils.jsonResult(created));
+    });
+  };
+
+  var createServiceOrder = function (newOrder, res) {
+    debug('createServiceOrder(), receive new order data: %o', newOrder);
+    if (!newOrder || !newOrder.serviceId || !newOrder.doctorId || !newOrder.patientId || newOrder.price == undefined || newOrder.quantity == undefined || !newOrder.serviceType) {
+      debug('createServiceOrder(), invalid data. serviceId: %s, serviceType: %s, doctorId: %s, patientId: %s, price: %s, quantity: %s.', !newOrder.serviceId, !newOrder.serviceType, !newOrder.doctorId, !newOrder.patientId, newOrder.price == undefined, newOrder.quantity == undefined);
+      return res.status(400).json(utils.jsonResult(new Error('invalid data')));
+    }
+
+    var validServiceTypes = Object.keys(serviceTypes);
     if (validServiceTypes.indexOf(newOrder.serviceType) == -1) {
-      debug('createOrder(), invalid service type.');
+      debug('createServiceOrder(), invalid service type.');
       return res.status(400).json(utils.jsonResult(new Error('invalid data')));
     }
 
     if (newOrder.serviceType == app.consts.doctorServices.jiahao.type && !newOrder.bookingTime) {
-      debug('createOrder(), missed bookingTime for jiahao service.');
+      debug('createServiceOrder(), missed bookingTime for jiahao service.');
       return res.status(400).json(utils.jsonResult(new Error('invalid data')));
     }
 
@@ -53,7 +83,7 @@ module.exports = function (app) {
     }
 
 
-    debug('createOrder(), fill doctor information for ids: %o', newOrder.doctorId);
+    debug('createServiceOrder(), fill doctor information for ids: %o', newOrder.doctorId);
     Doctor.find({_id: {'$in': newOrder.doctorId}}).exec()
       .then(function (doctors) {
         if (doctors.length != newOrder.doctorId.length) {
@@ -92,7 +122,7 @@ module.exports = function (app) {
         // if orderPrice still 0, means the order is not one of 'jiahao', 'huizhen' and 'suizhen',
         // it should be 'extracted', use price in data to create order.
         newOrder.orderPrice = orderPrice ? (orderPrice * newOrder.quantity).toFixed(2) : newOrder.price;
-        debug('createOrder(), calculated orderPrice is %d', newOrder.orderPrice);
+        debug('createServiceOrder(), calculated orderPrice is %d', newOrder.orderPrice);
         return Patient.findById(newOrder.patientId).exec();
       }).then(function (patient) {
         if (!patient) {
@@ -104,18 +134,18 @@ module.exports = function (app) {
           createJiahao();
         } else {
           ServiceOrder.create(newOrder, function (err, createdOrder) {
-            if (err) return utils.handleError(err, 'createOrder()', debug, res);
+            if (err) return utils.handleError(err, 'createServiceOrder()', debug, res);
             res.json(utils.jsonResult(createdOrder));
           });
         }
       }).then(null, function (err) {
-        utils.handleError(err, 'createOrder()', debug, res);
+        utils.handleError(err, 'createServiceOrder()', debug, res);
       });
 
 
     var createJiahao = function () {
       var date = newOrder.bookingTime;
-      debug('createOrder(), createJiahao(), checking service stock, serviceId: %s, date: %s', newOrder.serviceId, date);
+      debug('createServiceOrder(), createJiahao(), checking service stock, serviceId: %s, date: %s', newOrder.serviceId, date);
       var serviceStockQuery = {serviceId: newOrder.serviceId, date: date};
       ServiceStock.find(serviceStockQuery).exec()
         .then(function (serviceStock) {
@@ -135,16 +165,16 @@ module.exports = function (app) {
           // update service stock.
           return ServiceStock.update(serviceStockQuery, {'$inc': {stock: -1}}).exec();
         }).then(null, function (err) {
-          if (err) return utils.handleError(err, 'createOrder()', debug, res);
+          if (err) return utils.handleError(err, 'createServiceOrder()', debug, res);
         });
     };
 
 
     //// get doctor, check what type of service is going to create.
     //Doctor.findById(newOrder.doctorId, function (err, doctor) {
-    //  if (err) return utils.handleError(err, 'createOrder()', debug, res);
+    //  if (err) return utils.handleError(err, 'createServiceOrder()', debug, res);
     //
-    //  if (!doctor) return utils.handleError(new Error('doctor not found'), 'createOrder()', debug, res, 404);
+    //  if (!doctor) return utils.handleError(new Error('doctor not found'), 'createServiceOrder()', debug, res, 404);
     //
     //  var services = doctor.services;
     //  var serviceType;
@@ -242,13 +272,13 @@ module.exports = function (app) {
               return res.status(400).json(utils.jsonResult(new Error('order status is final')));
             }
             //TODO: this should be invoke when wechat server callback.
-            if (newStatus == orderStatus.paid && order.serviceType == orderTypes.jiahao.type) {
+            if (newStatus == orderStatus.paid && order.serviceType == serviceTypes.jiahao.type) {
               newStatus = orderStatus.confirmed;
             }
           }
 
           // for 'huizhen' orders, one doctor 'confirmed' will not update order status.
-          if (order.serviceType == orderTypes.huizhen.type) {
+          if (order.serviceType == serviceTypes.huizhen.type) {
             debug('updateOrderStatus(), update status of "huizhen" order.');
             if (newStatus == orderStatus.confirmed) {
               // Only when all doctors 'confirmed', order status become 'confirmed'.
@@ -301,7 +331,7 @@ module.exports = function (app) {
               handleRelations4PaymentSuccess(order);
             } else if (newStatus == orderStatus.finished) {
 
-            } else if (newStatus == orderStatus.confirmed && order.serviceType == orderTypes.suizhen.type) {
+            } else if (newStatus == orderStatus.confirmed && order.serviceType == serviceTypes.suizhen.type) {
               handleRelations4SuizhenConfirmed(order);
               //TODO:
               // 1. send wechat message to doctor and patient.

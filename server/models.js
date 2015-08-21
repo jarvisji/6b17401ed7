@@ -10,6 +10,7 @@ module.exports = {
   Service: mongoose.model('Service', schemas.serviceSchema),
   ServiceStock: mongoose.model('ServiceStock', schemas.serviceStockSchema),
   ServiceOrder: mongoose.model('ServiceOrder', schemas.serviceOrderSchema),
+  Order: mongoose.model('Order', schemas.orderSchema),
   Comment: mongoose.model('Comment', schemas.commentSchema),
   Patient: mongoose.model('Patient', schemas.patientSchema),
   PatientFriend: mongoose.model('PatientFriend', schemas.patientFriendSchema),
