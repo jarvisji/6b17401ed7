@@ -370,6 +370,8 @@ angular.module('ylbWxApp')
         target = {targetType: 'state', name: 'profile', params: {openid: item.id}};
       }
       if (linkType == resources.linkTypes.shop.value) {
+        newLink.avatar = item.picUrl;
+        target = {targetType: 'state', name: 'goods-detail', params: {id: item._id}};
       }
       if (linkType == resources.linkTypes.medicalImaging.value) {
         if (!item.url) {
@@ -486,6 +488,20 @@ angular.module('ylbWxApp')
       }
       if (linkType == resources.linkTypes.shop.value) {
         modalData.title = '选择商品';
+        $http.get('/admin/goods')
+          .success(function (resp) {
+            var goods = [];
+            for (var i = 0; i < resp.data.length; i++) {
+              if (resp.data[i].isInSale) {
+                goods.push(resp.data[i]);
+              }
+            }
+            modalData.data = goods;
+            $scope.modalData = modalData;
+            showAddLinkModal();
+          }).error(function (resp, status) {
+            $rootScope.alertError(null, resp, status);
+          });
       }
       if (linkType == resources.linkTypes.medicalImaging.value) {
         modalData.title = '输入影像链接';

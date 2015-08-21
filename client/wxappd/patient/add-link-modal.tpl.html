@@ -31,7 +31,8 @@
           </form>
         </div>
         <!-- add doctor or patient -->
-        <div class="general-item-list" ng-if="modalData.type != 'medicalImaging' && modalData.type != 'image'">
+        <div class="general-item-list"
+             ng-if="modalData.type == 'patient' || modalData.type == 'doctor' || modalData.type=='serviceJiahao' || modalData.type=='serviceSuizhen'">
           <div class="item" ng-repeat="item in modalData.data"
                ng-click="onLinkItemSelected(modalData.type, item);$hide()">
             <div class="item-head">
@@ -41,6 +42,20 @@
                 <span class="item-label">{{item.displaySex}}  {{item.age}}</span>
               </div>
               <span class="item-status"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="general-item-list" ng-if="modalData.type == 'shop'">
+          <div class="item" ng-repeat="item in modalData.data"
+               ng-click="onLinkItemSelected(modalData.type, item);$hide()">
+            <div class="item-head">
+              <div class="item-details">
+                <img class="item-pic avatar-md" ng-src="{{item.picUrl}}">
+                <span class="item-name">{{item.name}}</span>
+                <span class="item-label"></span>
+              </div>
+              <span class="item-status">¥ {{item.price}}</span>
             </div>
           </div>
         </div>
