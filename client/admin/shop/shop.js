@@ -115,7 +115,7 @@ angular.module('ylbAdmin')
       }
 
       $scope.errMsg = {};
-      if (!savingItem.pic_url && uploader.queue.length == 0) {
+      if (!savingItem.picUrl && uploader.queue.length == 0) {
         $scope.errMsg.pic = true;
         return;
       } else if (!savingItem.detail) {
@@ -135,7 +135,7 @@ angular.module('ylbAdmin')
 
     function doSaveItem(fileUrl) {
       if (fileUrl) {
-        savingItem.pic_url = fileUrl;
+        savingItem.picUrl = fileUrl;
       }
       $log.debug('doSaveItem(), after file uploaded: ', savingItem);
       if (savingItem._id) {
@@ -194,7 +194,7 @@ angular.module('ylbAdmin')
 
     $scope.updateItemInSell = function (index, inSell) {
       var item = $scope.items[index];
-      item.is_in_sale = inSell;
+      item.isInSale = inSell;
       $http.put('/admin/goods/' + item._id, item)
         .success(function (resp) {
           $rootScope.alertSuccess('', '更新成功', null, 1);

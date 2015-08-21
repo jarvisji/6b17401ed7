@@ -46,10 +46,10 @@
         <!--</td>-->
         <td>
           <div class="btn-group btn-group-circle">
-            <button type="button" class="btn btn-default btn-xs" ng-class="{active: item.is_in_sale}"
+            <button type="button" class="btn btn-default btn-xs" ng-class="{active: item.isInSale}"
                     ng-click="updateItemInSell($index, true)" style="margin-right: 0">是
             </button>
-            <button type="button" class="btn btn-default btn-xs" ng-class="{active: !item.is_in_sale}"
+            <button type="button" class="btn btn-default btn-xs" ng-class="{active: !item.isInSale}"
                     ng-click="updateItemInSell($index, false)">否
             </button>
           </div>
@@ -93,8 +93,8 @@
                   <div ng-repeat="queueItem in uploader.queue">
                     <div ng-show="uploader.isHTML5" ng-thumb="{ file: queueItem._file, height: 100 }"></div>
                   </div>
-                  <div ng-hide="!item.pic_url || uploader.queue.length > 0">
-                    <img ng-src="{{item.pic_url}}" height="100">
+                  <div ng-hide="!item.picUrl || uploader.queue.length > 0">
+                    <img ng-src="{{item.picUrl}}" height="100">
                   </div>
 
                 </div>
