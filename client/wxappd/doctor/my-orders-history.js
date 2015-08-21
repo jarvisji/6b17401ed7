@@ -2,7 +2,7 @@
  * Created by Ting on 2015/8/10.
  */
 angular.module('ylbWxApp')
-  .controller('wxDoctorOrderHistoryCtrl', ['$scope', '$rootScope', '$http', '$state', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, resources, commonUtils) {
+  .controller('wxDoctorOrderHistoryCtrl', ['$scope', '$rootScope', '$http', '$state', '$modal', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, $modal, resources, commonUtils) {
     var currentUser = $scope.currentUser = $rootScope.checkUserVerified();
     $scope.uiFlags = {};
     var pageLimit = 20;
@@ -39,7 +39,7 @@ angular.module('ylbWxApp')
         });
     };
     var getNonServiceOrders = function () {
-      $http.get('/api/orders/non-service')
+      $http.get('/api/orders/shop')
         .success(function (resp) {
           for (var i = 0; i < resp.data.length; i++) {
             var order = resp.data[i];
@@ -55,7 +55,6 @@ angular.module('ylbWxApp')
       $http.get('/api/doctors/' + currentUser.id + '/orders/summary')
         .success(function (resp) {
           var summary = resp.data;
-          summary.available = summary.finished + summary.recommended - summary.extracted;
           $scope.summary = summary;
         }).error(function (resp, status) {
           if (status == 403) {
@@ -83,7 +82,7 @@ angular.module('ylbWxApp')
 
     $scope.cancelNonServiceOrder = function (index) {
       var orderId = $scope.nonServiceOrders[index]._id;
-      $http.delete('/api/orders/non-service/' + orderId)
+      $http.delete('/api/orders/shop/' + orderId)
         .success(function (resp) {
           $scope.nonServiceOrders.splice(index, 1);
         }).error(function (resp, status) {
@@ -93,6 +92,34 @@ angular.module('ylbWxApp')
 
     $scope.payNonServiceOrder = function (index) {
 
+    };
 
+    var withdrawModal = $modal({scope: $scope, template: 'wxappd/common/request-withdraw-modal.tpl.html', show: false});
+    var showWithdrawModal = function () {
+      withdrawModal.$promise.then(withdrawModal.show);
+    };
+    $scope.requestWithdraw = function () {
+      $scope.modalData = {totalPoints: $scope.summary.available};
+      showWithdrawModal();
+    };
+    $scope.createWithdraw = function () {
+      var buyer = currentUser.isPatient ? currentUser.patient : currentUser.doctor;
+      var newOrder = {
+        orderType: resources.orderTypes.withdraw.type,
+        buyer: {
+          id: buyer._id,
+          name: buyer.name,
+          avatar: buyer.avatar
+        },
+        quantity: 1,
+        orderPrice: $scope.modalData.requestPoints
+      };
+      $http.post('/api/orders', newOrder)
+        .success(function (resp) {
+          $rootScope.alertSuccess('', '提现申请已提交，我们会尽快审核并转账。');
+          withdrawModal.$promise.then(withdrawModal.hide);
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
     };
   }]);

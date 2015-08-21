@@ -2,7 +2,7 @@
  * Created by Ting on 2015/8/10.
  */
 angular.module('ylbWxApp')
-  .controller('wxPatientOrderHistoryCtrl', ['$scope', '$rootScope', '$http', '$state', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, resources, commonUtils) {
+  .controller('wxPatientOrderHistoryCtrl', ['$scope', '$rootScope', '$http', '$state', '$modal', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $state, $modal, resources, commonUtils) {
     var currentUser = $scope.currentUser = $rootScope.checkUserVerified();
     $scope.uiFlags = {};
     var pageLimit = 20;
@@ -31,7 +31,6 @@ angular.module('ylbWxApp')
       $http.get('/api/patients/' + currentUser.id + '/orders/summary')
         .success(function (resp) {
           var summary = resp.data;
-          summary.available = summary.rejected - summary.extracted;
           $scope.summary = summary;
         }).error(function (resp, status) {
           if (status == 403) {
@@ -49,5 +48,34 @@ angular.module('ylbWxApp')
     $scope.showOrderDetail = function (index) {
       var orderId = $scope.orders[index]._id;
       $state.go('order-detail', {id: orderId});
+    };
+
+    var withdrawModal = $modal({scope: $scope, template: 'wxappd/common/request-withdraw-modal.tpl.html', show: false});
+    var showWithdrawModal = function () {
+      withdrawModal.$promise.then(withdrawModal.show);
+    };
+    $scope.requestWithdraw = function () {
+      $scope.modalData = {totalPoints: $scope.summary.available};
+      showWithdrawModal();
+    };
+    $scope.createWithdraw = function () {
+      var buyer = currentUser.isPatient ? currentUser.patient : currentUser.doctor;
+      var newOrder = {
+        orderType: resources.orderTypes.withdraw.type,
+        buyer: {
+          id: buyer._id,
+          name: buyer.name,
+          avatar: buyer.avatar
+        },
+        quantity: 1,
+        orderPrice: $scope.modalData.requestPoints
+      };
+      $http.post('/api/orders', newOrder)
+        .success(function (resp) {
+          $rootScope.alertSuccess('', '提现申请已提交，我们会尽快审核并转账。');
+          withdrawModal.$promise.then(withdrawModal.hide);
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
     };
   }]);

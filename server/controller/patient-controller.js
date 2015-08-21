@@ -17,10 +17,11 @@ module.exports = function (app, api) {
   var ServiceOrder = app.models.ServiceOrder;
   var DPRelation = app.models.DoctorPatientRelation;
   var Comment = app.models.Comment;
+  var Order = app.models.Order;
   var doctorExcludeFields = app.models.doctorExcludeFields;
   var patientExcludeFields = app.models.patientExcludeFields;
   var orderStatus = app.consts.orderStatus;
-
+  var orderTypes = app.consts.orderTypes;
   /**
    * GET /api/patients
    * Accept JSON object as filter. Also deal with '*' as wildcard. For example:
@@ -791,6 +792,7 @@ module.exports = function (app, api) {
     var patientId = req.params.id;
 
     debug('getPatientOrdersSummary(), receive request to get orders summary of patient: %s', patientId);
+    var summary = {rejected: 0, extractRequested: 0, extracted: 0};
     utils.getUserByOpenid(openid, role)
       .then(function (user) {
         if (!user) {
@@ -805,11 +807,20 @@ module.exports = function (app, api) {
         return ServiceOrder.find({'patient.id': patientId, status: {'$in': status}}).exec();
       }).then(function (orders) {
         debug('getPatientOrdersSummary(), found %d orders.', orders.length);
-        var summary = {rejected: 0, extracted: 0};
         for (var i = 0; i < orders.length; i++) {
           var order = orders[i];
           summary[order.status] += order.orderPrice;
         }
+        return Order.find({'buyer.id': patientId, orderType: orderTypes.withdraw.type}).exec();
+      }).then(function (withdraws) {
+        for (var i = 0; i < withdraws.length; i++) {
+          if (withdraws[i].status == orderStatus.init) {
+            summary.extractRequested += withdraws[i].orderPrice;
+          } else if (withdraws[i].status == orderStatus.finished) {
+            summary.extracted += withdraws[i].orderPrice;
+          }
+        }
+        summary.available = summary.rejected - summary.extractRequested - summary.extracted;
         res.json(utils.jsonResult(summary));
       }).then(null, function (err) {
         utils.handleError(err, 'getPatientOrdersSummary()', debug, res);

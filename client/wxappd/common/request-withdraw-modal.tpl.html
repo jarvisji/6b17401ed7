@@ -1,0 +1,42 @@
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" ng-click="$hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h3 class="modal-title">申请提现</h3>
+      </div>
+      <div class="modal-body">
+        <h4>您可提现余额为： {{modalData.totalPoints}} </h4>
+
+        <div class="row">
+          <div class="col-xs-6">
+            <form class="form-inline" name="form">
+              <div class="form-group"
+                   ng-class="{'has-error': form.points.$dirty && (form.points.$error.required || form.points.$error.number || form.points.$error.min || form.points.$error.max)}">
+                <label for="points">申请提现：</label>
+
+                <input type="number" class="form-control" id="points" name="points"
+                       min="1" max="{{modalData.totalPoints}}"
+                       ng-model="modalData.requestPoints" required>
+
+                <div class="help-block"
+                     ng-show="form.points.$dirty && (form.points.$error.required || form.points.$error.number || form.points.$error.min || form.points.$error.max)">
+                  <span>提现最小为1， 最大为{{modalData.totalPoints}}</span>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" ng-click="$hide()">取消</button>
+          <button type="button" class="btn btn-success" ng-click="createWithdraw()"
+                  ng-disabled="!form.points.$dirty || (form.points.$error.required || form.points.$error.number || form.points.$error.min || form.points.$error.max)">
+            确定
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

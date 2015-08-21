@@ -164,6 +164,7 @@ section {
 
 .general-item-list > .item > .item-head > .item-details .item-pic {
   height: 35px;
+  width: 35px;
   margin-right: 10px;
 }
 

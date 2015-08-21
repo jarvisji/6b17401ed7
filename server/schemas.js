@@ -173,6 +173,8 @@ module.exports = function () {
     created: {type: Date, default: Date.now},
     lastModified: {type: Date, default: Date.now}
   });
+  orderSchema.index({'buyer.id': 1, 'orderType': 1, created: -1, status: 1});
+
 
   var patientSchema = new Schema({
     name: String,

@@ -617,14 +617,14 @@ module.exports = function (app) {
   };
 
   /**
-   * GET '/api/orders/non-service'
+   * GET '/api/orders/shop'
    * @param req
    * @param res
    */
-  var getNonServiceOrders = function (req, res) {
+  var getShopOrders = function (req, res) {
     var role = req.query.role; // operator
     var openid = req.query.openid; // operator
-    debug('_getCommonOrderQuery(), find user by openid: %s, role: %s', openid, role);
+    debug('getShopOrders(), find user by openid: %s, role: %s', openid, role);
     var currentUserId;
     utils.getUserByOpenid(openid, role)
       .then(function (user) {
@@ -632,13 +632,39 @@ module.exports = function (app) {
           throw new Error('user not found');
         }
         currentUserId = user.id;
-        debug('getNonServiceOrders(), finding orders of user: %s', currentUserId);
-        return Order.find({'buyer.id': currentUserId}).sort({created: -1}).exec();
+        debug('getShopOrders(), finding orders of user: %s', currentUserId);
+        return Order.find({'buyer.id': currentUserId, orderType: orderTypes.shop.type}).sort({created: -1}).exec();
       }).then(function (orders) {
-        debug('getNonServiceOrders(), found %d orders.', orders.length);
+        debug('getShopOrders(), found %d orders.', orders.length);
         res.json(utils.jsonResult(orders));
       }).then(null, function (err) {
-        utils.handleError(err, 'getNonServiceOrders()', debug, res);
+        utils.handleError(err, 'getShopOrders()', debug, res);
+      });
+  };
+
+  /**
+   * GET '/api/orders/withdraw'
+   * @param req
+   * @param res
+   */
+  var getWithdrawOrders = function (req, res) {
+    var role = req.query.role; // operator
+    var openid = req.query.openid; // operator
+    debug('getWithdrawOrders(), find user by openid: %s, role: %s', openid, role);
+    var currentUserId;
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        if (!user) {
+          throw new Error('user not found');
+        }
+        currentUserId = user.id;
+        debug('getWithdrawOrders(), finding orders of user: %s', currentUserId);
+        return Order.find({'buyer.id': currentUserId, orderType: orderTypes.withdraw.type}).sort({created: -1}).exec();
+      }).then(function (orders) {
+        debug('getWithdrawOrders(), found %d orders.', orders.length);
+        res.json(utils.jsonResult(orders));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getWithdrawOrders()', debug, res);
       });
   };
 
@@ -676,15 +702,15 @@ module.exports = function (app) {
   };
 
   /**
-   * DELETE '/api/orders/non-service/:id'
+   * DELETE '/api/orders/shop/:id'
    * @param req
    * @param res
    */
-  var deleteNonServiceOrder = function (req, res) {
+  var deleteShopOrder = function (req, res) {
     var orderId = req.params.id;
     var role = req.query.role; // operator
     var openid = req.query.openid; // operator
-    debug('deleteNonServiceOrder(), find user by openid: %s, role: %s', openid, role);
+    debug('deleteShopOrder(), find user by openid: %s, role: %s', openid, role);
     var currentUserId;
     utils.getUserByOpenid(openid, role)
       .then(function (user) {
@@ -692,7 +718,7 @@ module.exports = function (app) {
           throw new Error('user not found');
         }
         currentUserId = user.id;
-        debug('deleteNonServiceOrder(), find non service order: %s', orderId);
+        debug('deleteShopOrder(), find non service order: %s', orderId);
         return Order.findById(orderId).exec();
       }).then(function (order) {
         if (!order) {
@@ -706,7 +732,7 @@ module.exports = function (app) {
       }).then(function (ret) {
         res.json(utils.jsonResult('success'));
       }).then(null, function (err) {
-        utils.handleError(err, 'getNonServiceOrderDetail()', debug, res);
+        utils.handleError(err, 'deleteShopOrder()', debug, res);
       });
   };
 
@@ -968,8 +994,9 @@ module.exports = function (app) {
     getOrderDetail: getOrderDetail,
     createComment: createOrderComment,
     deleteComment: deleteOrderComment,
-    getNonServiceOrders: getNonServiceOrders,
-    getNonServiceOrderDetail: getNonServiceOrderDetail,
-    deleteNonServiceOrder: deleteNonServiceOrder
+    getShopOrders: getShopOrders,
+    getWithdrawOrders: getWithdrawOrders,
+    //getNonServiceOrderDetail: getNonServiceOrderDetail,
+    deleteShopOrder: deleteShopOrder
   }
 };

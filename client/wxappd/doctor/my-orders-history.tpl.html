@@ -43,14 +43,25 @@
       </div>
       <div class="col-xs-4">
         <div class="font-grey-mint font-sm">
+          已申请提取积分
+        </div>
+        <div class="uppercase font-hg font-red-flamingo">
+          {{summary.extractRequested}} <span class="font-lg font-grey-mint"></span>
+        </div>
+      </div>
+      <div class="col-xs-4">
+        <div class="font-grey-mint font-sm">
           已提取积分
         </div>
         <div class="uppercase font-hg font-red-flamingo">
           {{summary.extracted}} <span class="font-lg font-grey-mint"></span>
         </div>
       </div>
-      <div class="col-xs-4">
-        <button type="button" class="btn btn-success btn-block">提现</button>
+      <div class="space-10"></div>
+      <div class="col-xs-12">
+        <button type="button" class="btn btn-success btn-block" ng-click="requestWithdraw()"
+                ng-disabled="summary.available==0">提现
+        </button>
         <a href="#">积分提现说明</a>
       </div>
     </div>
@@ -126,7 +137,8 @@
               </div>
               <span class="item-status" ng-show="order.status=='init'" style="position: relative; top: 0;">
                 <button type="button" class="btn btn-success btn-sm" ng-click="payNonServiceOrder($index)">支付</button>
-                <button type="button" class="btn btn-default btn-sm" ng-click="cancelNonServiceOrder($index)">取消</button>
+                <button type="button" class="btn btn-default btn-sm" ng-click="cancelNonServiceOrder($index)">取消
+                </button>
               </span>
             </div>
           </div>

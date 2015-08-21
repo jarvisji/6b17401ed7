@@ -15,8 +15,10 @@ module.exports = function (app, api) {
   var DPRelation = app.models.DoctorPatientRelation;
   var CaseHistory = app.models.CaseHistory;
   var ServiceOrder = app.models.ServiceOrder;
+  var Order = app.models.Order;
   var excludeFields = app.models.doctorExcludeFields;
   var orderStatus = app.consts.orderStatus;
+  var orderTypes = app.consts.orderTypes;
 
   var login = function (req, res) {
     var loginUser = req.body;
@@ -719,6 +721,7 @@ module.exports = function (app, api) {
     var doctorId = req.params.id;
 
     debug('getDoctorOrdersSummary(), receive request to get orders summary of doctor: %s', doctorId);
+    var summary = {confirmed: 0, finished: 0, extractRequested: 0, extracted: 0, recommended: 0};
     utils.getUserByOpenid(openid, role)
       .then(function (user) {
         if (!user) {
@@ -736,7 +739,6 @@ module.exports = function (app, api) {
         }).exec();
       }).then(function (orders) {
         debug('getDoctorOrdersSummary(), found %d orders.', orders.length);
-        var summary = {confirmed: 0, finished: 0, extracted: 0, recommended: 0};
         for (var i = 0; i < orders.length; i++) {
           var order = orders[i];
           // income of doctor was calculated when order confirmed. Now only sum the numbers;
@@ -774,6 +776,16 @@ module.exports = function (app, api) {
           //  }
           //}
         }
+        return Order.find({'buyer.id': doctorId, orderType: orderTypes.withdraw.type}).exec();
+      }).then(function (withdraws) {
+        for (var i = 0; i < withdraws.length; i++) {
+          if (withdraws[i].status == orderStatus.init) {
+            summary.extractRequested += withdraws[i].orderPrice;
+          } else if (withdraws[i].status == orderStatus.finished) {
+            summary.extracted += withdraws[i].orderPrice;
+          }
+        }
+        summary.available = summary.finished + summary.recommended - summary.extractRequested - summary.extracted;
         res.json(utils.jsonResult(summary));
       }).then(null, function (err) {
         utils.handleError(err, 'getDoctorOrders()', debug, res);
