@@ -13,6 +13,13 @@ angular.module('ylbAdmin', ['ui.router', 'ngCookies', 'ngAnimate', 'angularFileU
     });
     $urlRouterProvider.otherwise('shop');
   }])
+  .filter('localeDate', function () {
+    return function (input) {
+      var date = new Date(input);
+      var year = 1900 + date.getYear();
+      return year + '-' + date.getMonth() + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+    }
+  })
   .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$http', '$alert', '$cookies', '$log', function ($scope, $rootScope, $state, $http, $alert, $cookies, $log) {
     $log.log('init rootCtrl');
 
@@ -35,7 +42,7 @@ angular.module('ylbAdmin', ['ui.router', 'ngCookies', 'ngAnimate', 'angularFileU
       {label: '商品管理', location: 'shop'},
       {label: '退款管理', location: 'withdraw'}];
 
-    $scope.logout = function() {
+    $scope.logout = function () {
       $cookies.remove('adminUser');
       window.location.href = '/admin/login.html';
     };
@@ -89,7 +96,7 @@ angular.module('ylbAdmin', ['ui.router', 'ngCookies', 'ngAnimate', 'angularFileU
       var title = generateAlertTitle('错误 ', _title, status);
       var content;
       if (status == 403) {
-        content = '没有权限';
+        content = '没有权限，请重新登录。';
       } else {
         content = parseContent(content);
       }

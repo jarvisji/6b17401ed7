@@ -58,6 +58,14 @@ var registerRoutes = function () {
   app.delete('/admin/goods/:id', adminCtrl.deleteGoods);
   app.get('/admin/goods/:id', adminCtrl.getGoodsDetail);
   app.post('/admin/upload', adminCtrl.upload);
+  /**
+   * Get all withdraws in admin console.
+   * status: all/init
+   */
+  app.get('/admin/orders/withdraw/:status', adminCtrl.getWithdrawOrders);
+  app.get('/admin/orders/shop/:status', adminCtrl.getShopOrders);
+  app.put('/admin/orders/:id/status/confirm', adminCtrl.setOrderConfirm);
+  app.put('/admin/orders/:id/status/reject', adminCtrl.setOrderDecline);
 
   // TODO: add authentication for following APIs.
   app.use('/wxproxy', wxproxyDoctor); // TODO: delete this.
@@ -184,7 +192,7 @@ var registerRoutes = function () {
   app.put('/api/orders/:id/status/:status', orderCtrl.updateOrderStatus);
   app.get('/api/orders/my', orderCtrl.getOrders); // all unfinished service orders.
   app.get('/api/orders/shop', orderCtrl.getShopOrders);
-  app.get('/api/orders/withdraw', orderCtrl.getWithdrawOrders);
+  app.get('/api/orders/withdraw', orderCtrl.getWithdrawOrders); // get withdraws of current user.
   //app.get('/api/orders/non-service/:id', orderCtrl.getNonServiceOrderDetail);
   app.delete('/api/orders/shop/:id', orderCtrl.deleteShopOrder);
   //app.get('/api/orders/my/history', orderCtrl.getHistoryOrders);

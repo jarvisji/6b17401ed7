@@ -16,7 +16,7 @@
       </div>
       <div class="col-xs-4">
         <div class="font-grey-mint font-sm">
-          已申请提现
+          待审核提现
         </div>
         <div class="uppercase font-hg font-red-flamingo">
           {{summary.extractRequested}} <span class="font-lg font-grey-mint"></span>
@@ -80,6 +80,42 @@
 </div>
 
 
+<div class="portlet light">
+  <div class="portlet-title">
+    <div class="caption">
+      <span class="caption-subject font-blue-madison bold uppercase">积分提取记录</span>
+    </div>
+  </div>
+  <div class="portlet-body">
+    <div class="row" ng-if="withdrawOrders.length == 0">
+      <div class="col-xs-12">
+        没有订单
+        <!--<div class="alert alert-info" role="alert">没有订单</div>-->
+      </div>
+    </div>
+
+    <div class="row" ng-if="withdrawOrders.length > 0">
+      <div class="col-xs-12">
+        <div class="general-item-list">
+          <div class="item" ng-repeat="order in withdrawOrders">
+            <div class="item-head">
+              <div class="item-details">
+                <!--<img class="item-pic">-->
+                <span class="item-name">{{order.created | localeDate}}</span>
+                <span class="item-label">
+                  <span>提取积分：{{order.orderPrice}}</span>
+                </span>
+              </div>
+              <span class="item-status" style="position: relative; top: 0;">
+                <span class="label" ng-class="order.statusClass">{{order.displayStatus}}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <!--<div class="panel panel-default">-->
 <!--<div class="panel-heading">我的积分</div>-->
 <!--<ul class="list-group">-->

@@ -144,6 +144,13 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
     });
     //$urlRouterProvider.otherwise('entry');
   }])
+  .filter('localeDate', function () {
+    return function (input) {
+      var date = new Date(input);
+      var year = 1900 + date.getYear();
+      return year + '-' + date.getMonth() + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+    }
+  })
   .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$location', '$cookies', '$log', '$timeout', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $state, $stateParams, $http, $location, $cookies, $log, $timeout, $alert, resources, commonUtils) {
     // some page will cache data to avoid retrieve new data when click 'back' of browser.
     $rootScope.dataCache = {};

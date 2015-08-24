@@ -13,6 +13,8 @@ var conf = require('../conf');
 module.exports = function (app) {
   var AdminUser = app.models.AdminUser;
   var ShopItem = app.models.ShopItem;
+  var Order = app.models.Order;
+  var orderTypes = app.consts.orderTypes;
 
   /**
    * POST '/admin/login'
@@ -148,6 +150,75 @@ module.exports = function (app) {
     return tokenStr;
   };
 
+  /**
+   * GET '/admin/orders/withdraw/:status'
+   * Get all withdraws in admin console. Need verify user token of admin.
+   * status: all/init
+   * @param req
+   * @param res
+   */
+  var getWithdrawOrders = function (req, res) {
+    if (!verifyToken(req, res)) {
+      return;
+    }
+    var status = req.params.status;
+    var filter = {orderType: orderTypes.withdraw.type};
+    if (status != undefined && status != 'all') {
+      filter.status = status;
+    }
+    debug('getWithdrawOrders(), find orders by: %o', filter);
+    Order.find(filter).sort({created: -1}).exec()
+      .then(function (orders) {
+        res.json(utils.jsonResult(orders));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getWithdrawOrders()', debug, res);
+      });
+  };
+
+  /**
+   * GET '/admin/orders/shop/:status'
+   * @param req
+   * @param res
+   */
+  var getShopOrders = function (req, res) {
+    if (!verifyToken(req, res)) {
+      return;
+    }
+
+  };
+
+  /**
+   * PUT '/admin/orders/:id/status/confirm'
+   * @param req
+   * @param res
+   */
+  var setOrderConfirm = function (req, res) {
+    if (!verifyToken(req, res)) {
+      return;
+    }
+    var id = req.params.id;
+    Order.findByIdAndUpdate(id, {status: app.consts.orderStatus.confirmed}, function (err, ret) {
+      if (err) return utils.handleError(err, 'setOrderConfirm()', debug, res);
+      res.json(utils.jsonResult({status: app.consts.orderStatus.confirmed}));
+    });
+  };
+
+  /**
+   * PUT '/admin/orders/:id/status/reject'
+   * @param req
+   * @param res
+   */
+  var setOrderDecline = function (req, res) {
+    if (!verifyToken(req, res)) {
+      return;
+    }
+    var id = req.params.id;
+    Order.findByIdAndUpdate(id, {status: app.consts.orderStatus.rejected}, function (err, ret) {
+      if (err) return utils.handleError(err, 'setOrderDecline()', debug, res);
+      res.json(utils.jsonResult({status: app.consts.orderStatus.rejected}));
+    });
+  };
+
   var verifyToken = function (req, res) {
     var tokenStr = req.get('token');
     debug('verify token: %s, app.tokens: %o', tokenStr, app.tokens);
@@ -194,6 +265,10 @@ module.exports = function (app) {
     deleteGoods: deleteGoods,
     getGoods: getGoods,
     getGoodsDetail: getGoodsDetail,
-    upload: upload
+    getWithdrawOrders: getWithdrawOrders,
+    upload: upload,
+    getShopOrders: getShopOrders,
+    setOrderConfirm: setOrderConfirm,
+    setOrderDecline: setOrderDecline
   };
 };

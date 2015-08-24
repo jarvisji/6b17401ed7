@@ -644,6 +644,7 @@ module.exports = function (app) {
 
   /**
    * GET '/api/orders/withdraw'
+   * Get withdraws of current user, need verify openid and token.
    * @param req
    * @param res
    */

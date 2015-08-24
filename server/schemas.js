@@ -160,7 +160,8 @@ module.exports = function () {
     buyer: {
       id: {type: String, required: true},
       name: String,
-      avatar: String
+      avatar: String,
+      role: String
     },
     quantity: {type: Number, required: true},
     orderPrice: {type: Number, required: true},

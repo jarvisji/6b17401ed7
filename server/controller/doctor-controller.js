@@ -781,7 +781,7 @@ module.exports = function (app, api) {
         for (var i = 0; i < withdraws.length; i++) {
           if (withdraws[i].status == orderStatus.init) {
             summary.extractRequested += withdraws[i].orderPrice;
-          } else if (withdraws[i].status == orderStatus.finished) {
+          } else if (withdraws[i].status == orderStatus.confirmed) {
             summary.extracted += withdraws[i].orderPrice;
           }
         }

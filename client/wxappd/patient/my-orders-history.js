@@ -27,6 +27,23 @@ angular.module('ylbWxApp')
           }
         });
     };
+    var getWithdrawOrders = function() {
+      $http.get('/api/orders/withdraw')
+        .success(function (resp) {
+          for (var i = 0; i < resp.data.length; i++) {
+            var order = resp.data[i];
+            $rootScope.applyStatusLabelStyle(order, false, true);
+            if (order.status == 'init') {
+              order.displayStatus = '已提交';
+            } else {
+              order.displayStatus = resources.orderStatus[order.status].label;
+            }
+          }
+          $scope.withdrawOrders = resp.data;
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
     var getSummary = function () {
       $http.get('/api/patients/' + currentUser.id + '/orders/summary')
         .success(function (resp) {
@@ -42,6 +59,7 @@ angular.module('ylbWxApp')
     };
     if (currentUser.isPatient) {
       getHistoryOrders();
+      getWithdrawOrders();
       getSummary();
     }
 
@@ -65,7 +83,8 @@ angular.module('ylbWxApp')
         buyer: {
           id: buyer._id,
           name: buyer.name,
-          avatar: buyer.avatar
+          avatar: buyer.avatar,
+          role: currentUser.isPatient ? resources.role.patient : resources.role.doctor
         },
         quantity: 1,
         orderPrice: $scope.modalData.requestPoints
@@ -73,6 +92,7 @@ angular.module('ylbWxApp')
       $http.post('/api/orders', newOrder)
         .success(function (resp) {
           $rootScope.alertSuccess('', '提现申请已提交，我们会尽快审核并转账。');
+          getSummary();
           withdrawModal.$promise.then(withdrawModal.hide);
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);

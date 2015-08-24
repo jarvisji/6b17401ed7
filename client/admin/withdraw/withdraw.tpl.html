@@ -1,10 +1,65 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+<div class="portlet light bordered">
+  <div class="portlet-title tabbable-line">
+    <div class="caption font-dark">
+      <span class="caption-subject bold uppercase">退款管理</span>
+      <span class="caption-helper"></span>
+    </div>
 
-</body>
-</html>
+    <ul class="nav nav-tabs">
+      <li ng-class="{active: uiFlags.status=='init'}">
+        <a href="" ng-click="switchOrders('init')">
+          未处理
+        </a>
+      </li>
+      <li ng-class="{active: uiFlags.status=='confirmed'}">
+        <a href="" ng-click="switchOrders('confirmed')">
+          已同意
+        </a>
+      </li>
+      <li ng-class="{active: uiFlags.status=='rejected'}">
+        <a href="" ng-click="switchOrders('rejected')">
+          已拒绝
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="portlet-body">
+    <table class="table table-hover table-light">
+      <thead>
+      <tr role="row">
+        <!--<th class="center sorting_disabled" role="columnheader" rowspan="1" colspan="1"-->
+        <!--aria-label="" style="width: 49px;"><label>-->
+        <!--<input type="checkbox" class="ace" ng-model="isSelectedAllItems" ng-click="selectAllItems()">-->
+        <!--<span class="lbl"></span> </label>-->
+        <!--</th>-->
+        <th class="center">申请时间</th>
+        <th class="center">姓名</th>
+        <th class="center">医患</th>
+        <th class="center">金额</th>
+        <!--<th class="center sorting_disabled" role="columnheader" rowspan="1" colspan="1"-->
+        <!--aria-label="" style="width: 80px;">状态-->
+        <!--</th>-->
+        <th class="center" ng-show="uiFlags.status=='init'">操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="item in orders">
+        <td>{{item.created |  localeDate}}</td>
+        <!--<td>{{item.created | localTimezone | date : 'yyyy-MM-dd hh:mm:ss'}}</td>-->
+        <td>{{item.buyer.name}}</td>
+        <td>{{item.buyer.displayRole}}</td>
+        <td>{{item.orderPrice}}</td>
+        <td ng-show="uiFlags.status=='init'">
+          <div>
+            <button type="button" class="btn btn-success" ng-click="agree($index)">同意</button>
+            <button type="button" class="btn btn-danger" ng-click="decline($index)">拒绝</button>
+          </div>
+        </td>
+      </tr>
+      <tr ng-if="orders.length == 0">
+        <td colspan="4">没有订单</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

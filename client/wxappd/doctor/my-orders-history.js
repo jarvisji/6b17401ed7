@@ -38,7 +38,7 @@ angular.module('ylbWxApp')
           }
         });
     };
-    var getNonServiceOrders = function () {
+    var getShopOrders = function () {
       $http.get('/api/orders/shop')
         .success(function (resp) {
           for (var i = 0; i < resp.data.length; i++) {
@@ -46,7 +46,24 @@ angular.module('ylbWxApp')
             order.displayStatus = resources.orderStatus[order.status].label;
             $rootScope.applyStatusLabelStyle(order, false, true);
           }
-          $scope.nonServiceOrders = resp.data;
+          $scope.shopOrders = resp.data;
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
+    var getWithdrawOrders = function() {
+      $http.get('/api/orders/withdraw')
+        .success(function (resp) {
+          for (var i = 0; i < resp.data.length; i++) {
+            var order = resp.data[i];
+            $rootScope.applyStatusLabelStyle(order, false, true);
+            if (order.status == 'init') {
+              order.displayStatus = '已提交';
+            } else {
+              order.displayStatus = resources.orderStatus[order.status].label;
+            }
+          }
+          $scope.withdrawOrders = resp.data;
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });
@@ -66,7 +83,8 @@ angular.module('ylbWxApp')
     };
     if (currentUser.isDoctor) {
       getHistoryOrders();
-      getNonServiceOrders();
+      getShopOrders();
+      getWithdrawOrders();
       getSummary();
     }
 
@@ -76,15 +94,15 @@ angular.module('ylbWxApp')
     };
 
     $scope.showGoodsDetail = function (index) {
-      var orderId = $scope.nonServiceOrders[index].orderItem.id;
+      var orderId = $scope.shopOrders[index].orderItem.id;
       $state.go('goods-detail', {id: orderId});
     };
 
     $scope.cancelNonServiceOrder = function (index) {
-      var orderId = $scope.nonServiceOrders[index]._id;
+      var orderId = $scope.shopOrders[index]._id;
       $http.delete('/api/orders/shop/' + orderId)
         .success(function (resp) {
-          $scope.nonServiceOrders.splice(index, 1);
+          $scope.shopOrders.splice(index, 1);
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });
@@ -109,7 +127,8 @@ angular.module('ylbWxApp')
         buyer: {
           id: buyer._id,
           name: buyer.name,
-          avatar: buyer.avatar
+          avatar: buyer.avatar,
+          role: currentUser.isPatient ? resources.role.patient : resources.role.doctor
         },
         quantity: 1,
         orderPrice: $scope.modalData.requestPoints
@@ -117,6 +136,7 @@ angular.module('ylbWxApp')
       $http.post('/api/orders', newOrder)
         .success(function (resp) {
           $rootScope.alertSuccess('', '提现申请已提交，我们会尽快审核并转账。');
+          getSummary();
           withdrawModal.$promise.then(withdrawModal.hide);
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
