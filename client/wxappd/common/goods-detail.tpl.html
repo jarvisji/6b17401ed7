@@ -24,10 +24,16 @@
   </div>
   <div class="portlet-body">
     <span class="profile-desc-text" ng-bind-html="item.detailHtml"></span>
+    <!-- display on pc -->
+    <button class="btn btn-block btn-danger visible-md-block visible-lg-block" ng-click="showBuyModal()">
+      立即购买
+    </button>
   </div>
 </div>
 
-<nav class="navbar navbar-default navbar-fixed-bottom wlshop-navigation-bgcolor" style="margin-bottom: 45px;">
+<!-- display on mobile -->
+<nav class="navbar navbar-default navbar-fixed-bottom wlshop-navigation-bgcolor hidden-md hidden-lg"
+     style="margin-bottom: 45px;">
   <div class="col-xs-12" style="padding-top:10px; margin-bottom:10px;">
     <button class="btn btn-block btn-danger" ng-click="showBuyModal()">
       立即购买

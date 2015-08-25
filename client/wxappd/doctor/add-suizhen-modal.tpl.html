@@ -11,12 +11,14 @@
         <h4>服务价格为每月 {{modalData.price}} 元</h4>
 
         <div class="row">
-          <div class="col-xs-6">
-            <form class="form-inline">
+          <div class="col-xs-9">
+            <form class="form-horizontal">
               <div class="form-group">
-                <label for="quantity">购买数量（月）：</label>
+                <label class="col-xs-4" for="quantity">购买数量（月）：</label>
 
-                <input type="number" class="form-control" id="quantity" name="quantity" ng-model="modalData.quantity">
+                <div class="col-xs-4">
+                  <input type="number" class="form-control" id="quantity" name="quantity" ng-model="modalData.quantity">
+                </div>
               </div>
             </form>
           </div>

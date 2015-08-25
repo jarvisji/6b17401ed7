@@ -16,6 +16,7 @@
   <!-- build:css assets/css/app.min.css -->
   <link href="assets/css/components-rounded.css" rel="stylesheet">
   <link href="assets/css/profile.css" rel="stylesheet">
+  <link href="assets/css/layout.css" rel="stylesheet">
   <link href="assets/css/styles.css" rel="stylesheet">
   <!-- endbuild -->
 
@@ -68,15 +69,67 @@
 </head>
 
 <body>
-<div class="container-fluid">
-  <div class="row">
+<div class="container-fluid" ng-if="currentUser.doctor">
+  <!-- display on pc -->
+  <div class="page-content page-content-popup visible-md-block visible-lg-block">
+    <div class="page-sidebar-wrapper ">
+      <div class="page-sidebar navbar-collapse collapse">
+        <ul class="page-sidebar-menu">
+          <li class="open">
+            <a href="javascript:;">
+              <span class="title">患者</span>
+              <span class="arrow open"></span>
+            </a>
+            <ul class="sub-menu" style="display: block;">
+              <li ng-repeat="item in doctorMenu.sub1">
+                <a ui-sref="{{item.location}}"><span class="title">{{item.text}}</span></a>
+              </li>
+            </ul>
+          </li>
+          <li class="open">
+            <a href="javascript:;">
+              <span class="title">医友</span>
+              <span class="arrow open"></span>
+            </a>
+            <ul class="sub-menu" style="display: block;">
+              <li ng-repeat="item in doctorMenu.sub2">
+                <a ui-sref="{{item.location}}"><span class="title">{{item.text}}</span></a>
+              </li>
+            </ul>
+          </li>
+          <li class="open">
+            <a href="javascript:;">
+              <span class="title">更多</span>
+              <span class="arrow open"></span>
+            </a>
+            <ul class="sub-menu" style="display: block;">
+              <li ng-repeat="item in doctorMenu.sub3">
+                <a ui-sref="{{item.location}}"><span class="title">{{item.text}}</span></a>
+              </li>
+            </ul>
+          </li>
+          <!--<li ng-repeat="item in menu"><a ui-sref="{{item.location}}"><span class="title">{{item.label}}</span></a></li>-->
+        </ul>
+      </div>
+    </div>
+
+    <div class="page-fixed-main-content">
+      <div class="row">
+        <div class="col-md-10 col-lg-8">
+          <div ui-view style="border: 1px solid #e1e1e1;border-radius: 4px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- display on mobile -->
+  <div class="row hidden-md hidden-lg">
     <div class="col-xs-12">
       <div ui-view class="page-content"></div>
     </div>
   </div>
 
-
-  <div class="row" id="doctorMenu" ng-if="currentUser.doctor">
+  <div class="row hidden-md hidden-lg" id="doctorMenu">
     <div class="btn-group btn-group-justified navbar-fixed-bottom" role="group">
       <div class="btn-group" role="group">
         <button type="button" class="btn btn-lg btn-default" style="padding:1px;border-radius: 0;">
@@ -100,8 +153,16 @@
       </div>
     </div>
   </div>
+</div>
 
-  <div class="row" id="patientMenu" ng-if="currentUser.patient">
+<div class="container-fluid" ng-if="currentUser.patient">
+  <div class="row">
+    <div class="col-xs-12">
+      <div ui-view class="page-content"></div>
+    </div>
+  </div>
+
+  <div class="row" id="patientMenu">
     <div class="btn-group btn-group-justified navbar-fixed-bottom" role="group">
       <div class="btn-group" role="group">
         <button type="button" class="btn btn-lg btn-default" style="padding:1px;border-radius: 0;">

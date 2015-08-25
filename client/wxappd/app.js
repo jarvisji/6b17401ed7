@@ -601,32 +601,40 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       sub1: [
         {
           "text": "全部患者",
-          "href": "wxindex.html#/doctor/patients"
+          "href": "wxindex.html#/doctor/patients",
+          "location": "doctor-my-patients"
         }, {
           "text": "随诊病历",
-          "href": "wxindex.html#/doctor/patients/cases"
+          "href": "wxindex.html#/doctor/patients/cases",
+          "location": "doctor-patients-cases"
         }, {
           "text": "我的预约",
-          "href": "wxindex.html#/doctor/orders"
+          "href": "wxindex.html#/doctor/orders",
+          "location": "doctor-orders"
         }],
       sub2: [
         {
           "text": "医生搜索",
-          "href": "wxindex.html#/search/doctor"
+          "href": "wxindex.html#/search/doctor",
+          "location": "search-doctor"
         }, {
           "text": "我的医友",
-          "href": "wxindex.html#/doctor/friends"
+          "href": "wxindex.html#/doctor/friends",
+          "location": "doctor-my-friends"
         }],
       sub3: [
         {
           "text": "商城",
-          "href": "wxindex.html#/shop"
+          "href": "wxindex.html#/shop",
+          "location": "shop"
         }, {
           "text": "交易记录",
-          "href": "wxindex.html#/doctor/orders/history"
+          "href": "wxindex.html#/doctor/orders/history",
+          "location": "doctor-orders-history"
         }, {
           "text": "个人设置",
-          "href": "wxindex.html#/profile/doctor/"
+          "href": "wxindex.html#/profile/doctor/",
+          "location": "profile"
         }]
     };
     $scope.patientMenu = {

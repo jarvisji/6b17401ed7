@@ -12,45 +12,45 @@
         <div>单价：{{item.price}}</div>
         <div class="space-10"></div>
 
-        <form class="form-inline" name="form">
-          <div class="row">
-            <div class="col-xs-6">
+        <form class="form-horizontal" name="form">
+          <div class="form-group"
+               ng-class="{'has-error': form.quantity.$dirty && (form.quantity.$error.required || form.quantity.$error.number || form.quantity.$error.min)}">
+            <label class="col-xs-2" for="quantity">数量：</label>
 
-              <div class="form-group"
-                   ng-class="{'has-error': form.quantity.$dirty && (form.quantity.$error.required || form.quantity.$error.number || form.quantity.$error.min)}">
-                <label for="quantity">购买数量：</label>
-                <input type="number" class="form-control" id="quantity" name="quantity" min="1"
-                       ng-model="modalData.quantity" required>
+            <div class="col-xs-4">
+              <input type="number" class="form-control" id="quantity" name="quantity" min="1"
+                     ng-model="modalData.quantity" required>
 
-                <div class="help-block"
-                     ng-show="form.quantity.$dirty && (form.quantity.$error.required || form.quantity.$error.number || form.quantity.$error.min)">
-                  <span>请输入购买数量</span>
-                </div>
-              </div>
-
-              <div class="form-group" ng-class="{'has-error':form.mobile.$dirty && form.mobile.$invalid}">
-                <label class="control-label" for="mobile">手机</label>
-                <input type="text" class="form-control" id="mobile" name="mobile" placeholder=""
-                       ng-model="modalData.mobile" maxlength="11" ng-pattern="/^1[3-8]\d{9}$/" required>
-
-                <div class="help-block" ng-show="form.mobile.$dirty && form.mobile.$invalid">
-                  <span>手机号应为11位数字，且以13-18开头。</span>
-                </div>
+              <div class="help-block"
+                   ng-show="form.quantity.$dirty && (form.quantity.$error.required || form.quantity.$error.number || form.quantity.$error.min)">
+                <span>请输入购买数量</span>
               </div>
             </div>
           </div>
-          <div class="row">
-            <div class="col-xs-12">
 
-              <div class="form-group"
-                   ng-class="{'has-error': form.address.$dirty && form.address.$error.required}">
-                <label for="quantity">收货地址：</label>
-                <input type="text" class="form-control" id="address" name="address" ng-model="modalData.address"
-                       required>
+          <div class="form-group" ng-class="{'has-error':form.mobile.$dirty && form.mobile.$invalid}">
+            <label class="col-xs-2" class="control-label" for="mobile">手机：</label>
 
-                <div class="help-block" ng-show="form.address.$dirty && form.address.$error.required">
-                  <span>请输入地址</span>
-                </div>
+            <div class="col-xs-6">
+              <input type="text" class="form-control" id="mobile" name="mobile" placeholder=""
+                     ng-model="modalData.mobile" maxlength="11" ng-pattern="/^1[3-8]\d{9}$/" required>
+
+              <div class="help-block" ng-show="form.mobile.$dirty && form.mobile.$invalid">
+                <span>手机号应为11位数字，且以13-18开头。</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group"
+               ng-class="{'has-error': form.address.$dirty && form.address.$error.required}">
+            <label class="col-xs-2" for="quantity">地址：</label>
+
+            <div class="col-xs-10">
+              <input type="text" class="form-control" id="address" name="address" ng-model="modalData.address"
+                     required>
+
+              <div class="help-block" ng-show="form.address.$dirty && form.address.$error.required">
+                <span>请输入地址</span>
               </div>
             </div>
           </div>
