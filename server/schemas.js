@@ -161,7 +161,9 @@ module.exports = function () {
       id: {type: String, required: true},
       name: String,
       avatar: String,
-      role: String
+      role: String,
+      mobile: String,
+      address: String
     },
     quantity: {type: Number, required: true},
     orderPrice: {type: Number, required: true},
