@@ -1,0 +1,65 @@
+<div class="portlet light bordered">
+  <div class="portlet-title tabbable-line">
+    <div class="caption font-dark">
+      <span class="caption-subject bold uppercase">订单管理</span>
+      <span class="caption-helper"></span>
+    </div>
+
+    <ul class="nav nav-tabs">
+      <li ng-class="{active: uiFlags.status=='init'}">
+        <a href="" ng-click="switchOrders('init')">
+          未处理
+        </a>
+      </li>
+      <li ng-class="{active: uiFlags.status=='confirmed'}">
+        <a href="" ng-click="switchOrders('confirmed')">
+          已处理
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="portlet-body">
+    <table class="table table-hover table-light">
+      <thead>
+      <tr role="row">
+        <!--<th class="center sorting_disabled" role="columnheader" rowspan="1" colspan="1"-->
+        <!--aria-label="" style="width: 49px;"><label>-->
+        <!--<input type="checkbox" class="ace" ng-model="isSelectedAllItems" ng-click="selectAllItems()">-->
+        <!--<span class="lbl"></span> </label>-->
+        <!--</th>-->
+        <th class="center">订单时间</th>
+        <th class="center">姓名</th>
+        <th class="center">电话</th>
+        <th class="center">地址</th>
+        <th class="center">商品</th>
+        <th class="center">数量</th>
+        <th class="center">金额</th>
+        <!--<th class="center sorting_disabled" role="columnheader" rowspan="1" colspan="1"-->
+        <!--aria-label="" style="width: 80px;">状态-->
+        <!--</th>-->
+        <th class="center" ng-show="uiFlags.status=='init'">操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr ng-repeat="item in orders">
+        <td>{{item.created |  localeDate}}</td>
+        <!--<td>{{item.created | localTimezone | date : 'yyyy-MM-dd hh:mm:ss'}}</td>-->
+        <td>{{item.buyer.name}}</td>
+        <td>{{item.buyer.mobile}}</td>
+        <td>{{item.buyer.address}}</td>
+        <td>{{item.orderItem.name}}</td>
+        <td>{{item.quantity}}</td>
+        <td>{{item.orderPrice}}</td>
+        <td ng-show="uiFlags.status=='init'">
+          <div>
+            <button type="button" class="btn btn-success btn-sm" ng-click="agree($index)">已发货</button>
+          </div>
+        </td>
+      </tr>
+      <tr ng-if="orders.length == 0">
+        <td colspan="4">没有订单</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -153,7 +153,7 @@ module.exports = function (app) {
   /**
    * GET '/admin/orders/withdraw/:status'
    * Get all withdraws in admin console. Need verify user token of admin.
-   * status: all/init
+   * status: all/init/confirmed/rejected
    * @param req
    * @param res
    */
@@ -177,6 +177,7 @@ module.exports = function (app) {
 
   /**
    * GET '/admin/orders/shop/:status'
+   * status: all/init/confirmed/rejected
    * @param req
    * @param res
    */
@@ -184,7 +185,18 @@ module.exports = function (app) {
     if (!verifyToken(req, res)) {
       return;
     }
-
+    var status = req.params.status;
+    var filter = {orderType: orderTypes.shop.type};
+    if (status != undefined && status != 'all') {
+      filter.status = status;
+    }
+    debug('getShopOrders(), find orders by: %o', filter);
+    Order.find(filter).sort({created: -1}).exec()
+      .then(function (orders) {
+        res.json(utils.jsonResult(orders));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getShopOrders()', debug, res);
+      });
   };
 
   /**

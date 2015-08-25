@@ -6,6 +6,11 @@ angular.module('ylbAdmin', ['ui.router', 'ngCookies', 'ngAnimate', 'angularFileU
       templateUrl: 'admin/shop/shop-goods.tpl.html',
       controller: 'adminShopCtrl'
     });
+    $stateProvider.state('order', {
+      url: '/order',
+      templateUrl: 'admin/shop/shop-order.tpl.html',
+      controller: 'adminOrderCtrl'
+    });
     $stateProvider.state('withdraw', {
       url: '/withdraw',
       templateUrl: 'admin/withdraw/withdraw.tpl.html',
@@ -40,6 +45,7 @@ angular.module('ylbAdmin', ['ui.router', 'ngCookies', 'ngAnimate', 'angularFileU
     // init menu
     $scope.menu = [
       {label: '商品管理', location: 'shop'},
+      {label: '订单管理', location: 'order'},
       {label: '退款管理', location: 'withdraw'}];
 
     $scope.logout = function () {
