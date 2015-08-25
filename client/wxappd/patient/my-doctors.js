@@ -29,8 +29,6 @@ angular.module('ylbWxApp')
           commonUtils.checkDoctorVIcon(jiwang);
           commonUtils.checkDoctorVIcon(suizhen);
           $scope.doctors = suizhen;
-
-          console.log(putong);
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });

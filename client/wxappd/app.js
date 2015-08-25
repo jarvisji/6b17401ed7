@@ -157,6 +157,13 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
 
     $rootScope.$on('$stateChangeSuccess',
       function (event, toState, toParams, fromState, fromParams) {
+        console.log('$stateChangeSuccess: from: %s, to: %s', fromState.name, toState.name);
+        // avoid wxindex.html create too many 'ui-view' when on entry page.
+        $rootScope.stateName = toState.name;
+        if (!fromState.name && toState.name != 'entry') {
+          // when press 'f5' to refresh page, fromState.name will not be defined.
+          onPageRefresh();
+        }
       });
 
 
@@ -220,6 +227,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
 
     /** -- load page ---------------------------------------------------------------*/
     var onPageRefresh = function () {
+      console.log('onPageRefresh');
       var sessionUser = $cookies.getObject('currentUser');
       if (sessionUser) {
         $log.debug('read user from session');
@@ -231,8 +239,6 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
         $rootScope.initWxJsSdk();
       }
     };
-    onPageRefresh();
-
 
     // Common method for each controller.
     $rootScope.validateForm = function (form) {
@@ -695,7 +701,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
      * }
      */
     var verifyAndGetUserInfo = function () {
-      $log.info('entryCtrl:verifyAndGetUserInfo()');
+      $log.info('entryCtrl:verifyAndGetUserInfo()', $rootScope.stateName);
       //$cookies.remove('currentUser');
       var openid = $stateParams.openid;
       var access_token = $stateParams.token;

@@ -69,7 +69,7 @@
 </head>
 
 <body>
-<div class="container-fluid" ng-if="currentUser.doctor">
+<div class="container-fluid" ng-if="stateName!='entry' && currentUser.doctor">
   <!-- display on pc -->
   <div class="page-content page-content-popup visible-md-block visible-lg-block">
     <div class="page-sidebar-wrapper ">
@@ -155,7 +155,7 @@
   </div>
 </div>
 
-<div class="container-fluid" ng-if="currentUser.patient">
+<div class="container-fluid" ng-if="stateName!='entry' && currentUser.patient">
   <div class="row">
     <div class="col-xs-12">
       <div ui-view class="page-content"></div>
@@ -187,6 +187,8 @@
     </div>
   </div>
 </div>
+
+<div ui-view class="page-content" ng-if="!currentUser"></div>
 
 </body>
 </html>
