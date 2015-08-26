@@ -4,67 +4,72 @@
     开始使用前，请先完善个人资料。
   </div>
 
-  <div class="page-header">
-    <h1>设置基本信息</h1>
-  </div>
+  <div class="portlet light">
+    <div class="portlet-title">
+      <div class="caption">
+        <span class="caption-subject font-blue-madison bold uppercase">设置基本信息</span>
+      </div>
+    </div>
 
-  <div class="row">
-    <div class="col-xs-6">
-      <a href="#" class="thumbnail" ng-click="changeAvatar()">
-        <img ng-src="{{patient.avatar}}" id="avatar" class="img-rounded" style="width:100%">
-      </a>
+    <div class="row">
+      <div class="col-xs-6">
+        <a href="#" class="thumbnail" ng-click="changeAvatar()">
+          <img ng-src="{{patient.avatar}}" id="avatar" class="img-rounded" style="width:100%">
+        </a>
+      </div>
     </div>
-  </div>
 
-  <form id="form" name="baseForm" role="form" novalidate>
-    <div class="form-group" ng-class="{'has-error':baseForm.name.$dirty && baseForm.name.$invalid}">
-      <label class="control-label" for="name">姓名</label>
-      <input type="text" class="form-control" id="name" name="name" placeholder="" ng-model="patient.name" required>
-    </div>
-    <div class="form-group">
-      <label for="number">编号：</label>
-      <span id="number">{{patient.number}}</span>
-    </div>
-    <div class="form-group" ng-class="{'has-error':baseForm.mobile.$dirty && baseForm.mobile.$invalid}">
-      <label class="control-label" for="mobile">手机（11位数字）</label>
-      <input type="text" class="form-control" id="mobile" name="mobile" placeholder="" ng-model="patient.mobile"
-             maxlength="11" ng-pattern="/^1[3-8]\d{9}$/">
-    </div>
-    <div class="form-group" ng-class="{'has-error':sexInvalid}">
-      <label for="sex">性别</label>
-      <button type="button" class="btn btn-default btn-block" id="sex" name="sex" bs-dropdown="ddSex">
-        {{patient.displaySex}} <span class="caret"></span></button>
-    </div>
-    <div class="form-group" ng-class="{'has-error':birthdayInvalid}">
-      <label class="control-label" for="year">出生日期</label><br>
-      <button type="button" class="btn btn-default" id="year" bs-dropdown="ddYear">
-        {{patient.birthdayYear?patient.birthdayYear:'年'}} <span class="caret"></span></button>
-      <button type="button" class="btn btn-default" bs-dropdown="ddMonth">
-        {{patient.birthdayMonth?patient.birthdayMonth:'月'}} <span class="caret"></span></button>
-      <!--<button type="button" class="btn btn-default" bs-dropdown="ddDay">-->
+
+    <form id="form" name="baseForm" role="form" novalidate>
+      <div class="form-group" ng-class="{'has-error':baseForm.name.$dirty && baseForm.name.$invalid}">
+        <label class="control-label" for="name">姓名</label>
+        <input type="text" class="form-control" id="name" name="name" placeholder="" ng-model="patient.name" required>
+      </div>
+      <div class="form-group">
+        <label for="number">编号：</label>
+        <span id="number">{{patient.number}}</span>
+      </div>
+      <div class="form-group" ng-class="{'has-error':baseForm.mobile.$dirty && baseForm.mobile.$invalid}">
+        <label class="control-label" for="mobile">手机（11位数字）</label>
+        <input type="text" class="form-control" id="mobile" name="mobile" placeholder="" ng-model="patient.mobile"
+               maxlength="11" ng-pattern="/^1[3-8]\d{9}$/">
+      </div>
+      <div class="form-group" ng-class="{'has-error':sexInvalid}">
+        <label for="sex">性别</label>
+        <button type="button" class="btn btn-default btn-block" id="sex" name="sex" bs-dropdown="ddSex">
+          {{patient.displaySex}} <span class="caret"></span></button>
+      </div>
+      <div class="form-group" ng-class="{'has-error':birthdayInvalid}">
+        <label class="control-label" for="year">出生日期</label><br>
+        <button type="button" class="btn btn-default" id="year" bs-dropdown="ddYear">
+          {{patient.birthdayYear?patient.birthdayYear:'年'}} <span class="caret"></span></button>
+        <button type="button" class="btn btn-default" bs-dropdown="ddMonth">
+          {{patient.birthdayMonth?patient.birthdayMonth:'月'}} <span class="caret"></span></button>
+        <!--<button type="button" class="btn btn-default" bs-dropdown="ddDay">-->
         <!--{{patient.birthdayDay?patient.birthdayDay:'日'}} <span class="caret"></span></button>-->
-    </div>
-    <div class="form-group" ng-class="{'has-error':provinceInvalid}">
-      <label class="control-label" for="province">省份</label>
-      <button type="button" class="btn btn-default btn-block" id="province" name="province" bs-dropdown="ddProvince">
-        {{patient.province?patient.province:'请选择'}} <span class="caret"></span></button>
-    </div>
-    <div class="form-group" ng-class="{'has-error':cityInvalid}">
-      <label class="control-label" for="city">城市</label>
-      <button type="button" class="btn btn-default btn-block" id="city" name="city" bs-dropdown="ddCity">
-        {{patient.city?patient.city:'请选择'}} <span class="caret"></span>
-      </button>
-    </div>
+      </div>
+      <div class="form-group" ng-class="{'has-error':provinceInvalid}">
+        <label class="control-label" for="province">省份</label>
+        <button type="button" class="btn btn-default btn-block" id="province" name="province" bs-dropdown="ddProvince">
+          {{patient.province?patient.province:'请选择'}} <span class="caret"></span></button>
+      </div>
+      <div class="form-group" ng-class="{'has-error':cityInvalid}">
+        <label class="control-label" for="city">城市</label>
+        <button type="button" class="btn btn-default btn-block" id="city" name="city" bs-dropdown="ddCity">
+          {{patient.city?patient.city:'请选择'}} <span class="caret"></span>
+        </button>
+      </div>
 
-    <div class="form-group" ng-class="{'has-error':baseForm.sickness.$dirty && baseForm.sickness.$invalid}">
-      <label class="control-label" for="sickness">介绍</label>
-      <textarea class="form-control" rows="3" id="sickness" name="sickness"
-                ng-model="patient.sickness" required></textarea>
-    </div>
-    <div class="form-group">
-      <label for="level">级别：</label><span id="level">{{patient.displayLevel}}</span>
-    </div>
-  </form>
-  <button type="button" class="btn btn-success btn-lg btn-block" ng-click="save(baseForm)">保存
-  </button>
+      <div class="form-group" ng-class="{'has-error':baseForm.sickness.$dirty && baseForm.sickness.$invalid}">
+        <label class="control-label" for="sickness">介绍</label>
+        <textarea class="form-control" rows="3" id="sickness" name="sickness"
+                  ng-model="patient.sickness" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="level">级别：</label><span id="level">{{patient.displayLevel}}</span>
+      </div>
+    </form>
+    <button type="button" class="btn btn-success btn-lg btn-block" ng-click="save(baseForm)">保存
+    </button>
+  </div>
 </div>
