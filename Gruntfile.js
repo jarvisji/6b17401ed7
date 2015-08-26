@@ -20,9 +20,9 @@ module.exports = function (grunt) {
       client: {
         expand: true,
         src: ['.bowerrc', 'bower.json', 'package.json',
-          'client/**/*.html', 'client/assets/image/**/*',
+          'client/**/*.html', 'client/assets/**/*', 'client/common/umeditor/**/*',
           'server/**',
-          '!client / vendor/**', '!client/assets/css/**'],
+          '!client/vendor/**'],
         dest: 'dist'
       }
     },
@@ -33,14 +33,17 @@ module.exports = function (grunt) {
         replacements: [{
           from: "nodeListenAddr: '0.0.0.0'",
           to: "nodeListenAddr: '127.0.0.1'"
+        }, {
+          from: "serverUrl: 'http://localhost:3001/'",
+          to: "serverUrl: 'http://www.utime.info/'"
         }]
       }
     },
     useminPrepare: {
-      html: 'dist/client/wxindex.html'
+      html: ['dist/client/wxindex.html', 'dist/client/admin/dashboard.html', 'dist/client/admin/login.html']
     },
     usemin: {
-      html: ['dist/client/wxindex.html']
+      html: ['dist/client/wxindex.html', 'dist/client/admin/dashboard.html', 'dist/client/admin/login.html']
     },
     concat: {
       dist: {
@@ -49,18 +52,31 @@ module.exports = function (grunt) {
           src: [
             'client/vendor/angular-cookies/angular-cookies.js',
             'client/vendor/angular-animate/angular-animate.js',
-            'client/vendor/angular-touch/angular-touch.js'
+            'client/vendor/angular-touch/angular-touch.js',
+            'client/vendor/angular-sanitize/angular-sanitize.js'
           ]
         }, {
           dest: '.tmp/concat/js/app.js',
           src: [
-            //'client/app/app.js',
             'client/wxappd/app.js',
-            'client/common/**/ *.js',
+            'client/common/service/**/*.js',
             'client/wxappd/**/*.js'
           ]
-        }
-        ]
+        }, {
+          dest: '.tmp/concat/js/adminApp.js',
+          src: [
+            'client/admin/admin.js',
+            'client/admin/shop/shop.js',
+            'client/admin/shop/order.js',
+            'client/admin/withdraw/withdraw.js',
+            'client/common/directive/ngThumb.js'
+          ]
+        }, {
+          dest: '.tmp/concat/js/adminLogin.js',
+          src: [
+            'client/admin/admin.js'
+          ]
+        }]
       }
     },
     uglify: {
@@ -71,6 +87,12 @@ module.exports = function (grunt) {
         }, {
           dest: 'dist/client/assets/js/app.min.js',
           src: ['.tmp/concat/js/app.js']
+        }, {
+          dest: 'dist/client/assets/js/adminApp.min.js',
+          src: ['.tmp/concat/js/adminApp.js']
+        }, {
+          dest: 'dist/client/assets/js/adminLogin.min.js',
+          src: ['.tmp/concat/js/adminLogin.js']
         }]
       }
     }
@@ -85,7 +107,8 @@ module.exports = function (grunt) {
     ,
     rev: {
       files: {
-        src: ['dist/client/assets/**/*.{js,css}']
+        src: ['dist/client/assets/**/*.{js}']
+        //src: ['dist/client/assets/**/*.{js,css}']
       }
     }
   })
@@ -102,8 +125,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-rev');
   grunt.loadNpmTasks('grunt-usemin');
 
-  grunt.registerTask('default', ['jshint', 'copy', 'replace:forAliyun', 'useminPrepare', 'concat:dist', 'uglify:dist', 'cssmin:dist', 'rev', 'usemin']);
-  grunt.registerTask('localhost', ['jshint', 'copy', 'replace:forLocalhost', 'useminPrepare', 'concat:dist', 'uglify:dist', 'cssmin:dist', 'rev', 'usemin']);
+  grunt.registerTask('default', [/*'jshint',*/ 'copy', 'replace:forAliyun', 'useminPrepare', 'concat:dist', 'uglify:dist', 'cssmin:dist', 'rev', 'usemin']);
+  grunt.registerTask('localhost', [/*'jshint',*/ 'copy', 'replace:forLocalhost', 'useminPrepare', 'concat:dist', 'uglify:dist', 'cssmin:dist', 'rev', 'usemin']);
 
-}
-;
+};

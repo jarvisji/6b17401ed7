@@ -13,11 +13,10 @@
   <!--<link href="http://cdn.bootcss.com/angular-motion/0.4.2/angular-motion.min.css" rel="stylesheet">-->
   <!--<link href="../vendor/bootstrap-additions/dist/bootstrap-additions.min.css" rel="stylesheet">-->
 
-  <!-- build:css assets/css/app.min.css -->
   <link href="../assets/css/components-rounded.css" rel="stylesheet">
   <link href="../assets/css/login.css" rel="stylesheet">
   <link href="../assets/css/styles.css" rel="stylesheet">
-  <!-- endbuild -->
+
 
   <script src="http://cdn.bootcss.com/jquery/2.1.4/jquery.min.js"></script>
   <script src="http://cdn.bootcss.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
@@ -27,13 +26,10 @@
   <script src="http://cdn.bootcss.com/angular-strap/2.2.4/angular-strap.tpl.min.js"></script>
   <script src="../vendor/angular-file-upload/dist/angular-file-upload.min.js"></script>
 
-  <!-- build:js assets/js/3rd.min.js -->
   <script src="../vendor/angular-cookies/angular-cookies.js"></script>
   <script src="../vendor/angular-animate/angular-animate.js"></script>
-  <!--<script src="../vendor/angular-sanitize/angular-sanitize.js"></script>-->
-  <!-- endbuild -->
 
-  <!-- build:js assets/js/app.min.js -->
+  <!-- build:js assets/js/adminLogin.min.js -->
   <script src="../admin/admin.js"></script>
   <!-- endbuild -->
 </head>
@@ -47,6 +43,7 @@
 <div class="content">
   <form class="login-form" novalidate="novalidate" style="display: block;">
     <h3 class="form-title">登录</h3>
+
     <div class="alert alert-danger display-hide">
       <button class="close" data-close="alert"></button>
 			<span>
@@ -55,39 +52,41 @@
     <div class="form-group">
       <!--ie8, ie9 does not support html5 placeholder, so we just show field title for that-->
       <label class="control-label visible-ie8 visible-ie9">用户名</label>
-      <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="用户名" name="username" ng-model="username">
+      <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="用户名"
+             name="username" ng-model="username">
     </div>
     <div class="form-group">
       <label class="control-label visible-ie8 visible-ie9">密码</label>
-      <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="密码" name="password" ng-model="password">
+      <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off"
+             placeholder="密码" name="password" ng-model="password">
     </div>
     <div class="form-actions">
       <button type="button" class="btn btn-success btn-block" ng-click="login()">登录</button>
       <!--<label class="rememberme check">-->
-        <!--<div class="checker"><span><input type="checkbox" name="remember" value="1"></span></div>Remember </label>-->
+      <!--<div class="checker"><span><input type="checkbox" name="remember" value="1"></span></div>Remember </label>-->
       <!--<a href="javascript:;" id="forget-password" class="forget-password">Forgot Password?</a>-->
     </div>
     <!--<div class="login-options">-->
-      <!--<h4>Or login with</h4>-->
-      <!--<ul class="social-icons">-->
-        <!--<li>-->
-          <!--<a class="social-icon-color facebook" data-original-title="facebook" href="javascript:;"></a>-->
-        <!--</li>-->
-        <!--<li>-->
-          <!--<a class="social-icon-color twitter" data-original-title="Twitter" href="javascript:;"></a>-->
-        <!--</li>-->
-        <!--<li>-->
-          <!--<a class="social-icon-color googleplus" data-original-title="Goole Plus" href="javascript:;"></a>-->
-        <!--</li>-->
-        <!--<li>-->
-          <!--<a class="social-icon-color linkedin" data-original-title="Linkedin" href="javascript:;"></a>-->
-        <!--</li>-->
-      <!--</ul>-->
+    <!--<h4>Or login with</h4>-->
+    <!--<ul class="social-icons">-->
+    <!--<li>-->
+    <!--<a class="social-icon-color facebook" data-original-title="facebook" href="javascript:;"></a>-->
+    <!--</li>-->
+    <!--<li>-->
+    <!--<a class="social-icon-color twitter" data-original-title="Twitter" href="javascript:;"></a>-->
+    <!--</li>-->
+    <!--<li>-->
+    <!--<a class="social-icon-color googleplus" data-original-title="Goole Plus" href="javascript:;"></a>-->
+    <!--</li>-->
+    <!--<li>-->
+    <!--<a class="social-icon-color linkedin" data-original-title="Linkedin" href="javascript:;"></a>-->
+    <!--</li>-->
+    <!--</ul>-->
     <!--</div>-->
     <!--<div class="create-account">-->
-      <!--<p>-->
-        <!--<a href="javascript:;" id="register-btn" class="uppercase">Create an account</a>-->
-      <!--</p>-->
+    <!--<p>-->
+    <!--<a href="javascript:;" id="register-btn" class="uppercase">Create an account</a>-->
+    <!--</p>-->
     <!--</div>-->
   </form>
 </div>
