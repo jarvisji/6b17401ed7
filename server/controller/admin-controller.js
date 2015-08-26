@@ -186,6 +186,7 @@ module.exports = function (app) {
       return;
     }
     var status = req.params.status;
+    // TODO: after wechat payment implemented, here should only list PAID orders
     var filter = {orderType: orderTypes.shop.type};
     if (status != undefined && status != 'all') {
       filter.status = status;
