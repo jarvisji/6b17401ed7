@@ -36,14 +36,14 @@ angular.module('ylbWxApp')
         .success(function (resp) {
           if (resp.count > 0) {
             // remove current user from search list.
-            if (currentUser.isPatient) {
-              for (var i = 0; i < resp.data.length; i++) {
-                if (resp.data[i]._id == currentUser.patient._id) {
-                  resp.data.splice(i, 1);
-                  break;
-                }
-              }
-            }
+            //if (currentUser.isPatient) {
+            //  for (var i = 0; i < resp.data.length; i++) {
+            //    if (resp.data[i]._id == currentUser.patient._id) {
+            //      resp.data.splice(i, 1);
+            //      break;
+            //    }
+            //  }
+            //}
 
             $rootScope.searchPatientParams = params;
             $rootScope.searchPatientResult = resp.data;

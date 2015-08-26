@@ -271,14 +271,15 @@ module.exports = function (app) {
               debug('updateOrderStatus(), order status is final, cannot change again.');
               return res.status(400).json(utils.jsonResult(new Error('order status is final')));
             }
-            //TODO: this should be invoke when wechat server callback.
-            if (newStatus == orderStatus.paid && order.serviceType == serviceTypes.jiahao.type) {
-              newStatus = orderStatus.confirmed;
-            }
           }
 
-          // for 'huizhen' orders, one doctor 'confirmed' will not update order status.
-          if (order.serviceType == serviceTypes.huizhen.type) {
+          /* --------------- deal with service type ------------------------------------ */
+          if (order.serviceType == serviceTypes.jiahao.type) {
+            if (newStatus == orderStatus.paid) {
+              order.status = orderStatus.confirmed;
+            }
+          } else if (order.serviceType == serviceTypes.huizhen.type) {
+            // for 'huizhen' orders, one doctor 'confirmed' will not update order status.
             debug('updateOrderStatus(), update status of "huizhen" order.');
             if (newStatus == orderStatus.confirmed) {
               // Only when all doctors 'confirmed', order status become 'confirmed'.

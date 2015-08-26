@@ -215,9 +215,18 @@ section {
   color: #96a5aa;
 }
 
-/**
- * General item list styles end
- * ------------------------------------------------ */
+
+/**------------------------------------------------
+ * Overwrite styles in bootstrap-additions.css.
+ */
+
+/*make sure alert always display on top. */
+.alert.bottom, .alert.bottom-left, .alert.bottom-right, .alert.top, .alert.top-left, .alert.top-right {
+  position: fixed;
+  z-index: 10500;
+  margin: 20px;
+}
+
 
 /**------------------------------------------------
  * for ui.bootstrap. http://angular-ui.github.io/bootstrap
@@ -227,9 +236,6 @@ section {
   cursor: pointer;
 }
 
-/**
- * ui.bootstrap end
- * ------------------------------------------------ */
 
 /**------------------------------------------------
  * Override default bootstrap style
