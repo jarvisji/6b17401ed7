@@ -38,6 +38,7 @@ angular.module('ylbWxApp')
               curCase.canDelete = true;
             }
             $rootScope.checkCommentDeletable(curCase.comments, currentUser);
+            $rootScope.fillLinkText(curCase);
           }
           commonUtils.date.convert2FriendlyDate(cases);
           $scope.cases = cases;
@@ -80,6 +81,7 @@ angular.module('ylbWxApp')
             var createdCase = resp.data;
             createdCase.canDelete = true;
             commonUtils.date.convert2FriendlyDate(createdCase);
+            $rootScope.fillLinkText(createdCase);
             $scope.cases.unshift(createdCase);
           }).error(function (resp, status) {
             $rootScope.alertError(null, resp, status);
@@ -329,6 +331,7 @@ angular.module('ylbWxApp')
       };
       var newLink = {
         linkType: resources.linkTypes.serviceHuizhen.value,
+        text: resources.linkTypes.serviceHuizhen.text,
         avatar: resources.defaultIcon.huizhen,
         title: '会诊订单（共' + doctorIds.length + '位医生）',
         target: {targetType: 'state', name: 'order-detail', params: {}},
@@ -361,7 +364,11 @@ angular.module('ylbWxApp')
       console.log('onLinkItemSelected(), ', item);
 
       var target;
-      var newLink = {linkType: linkType, avatar: item.avatar, title: item.name};
+      var newLink = {
+        linkType: linkType,
+        avatar: item.avatar,
+        title: item.name
+      };
 
       if (linkType == resources.linkTypes.patient.value) {
         target = {targetType: 'state', name: 'profile-patient', params: {openid: item.id}};
@@ -559,6 +566,18 @@ angular.module('ylbWxApp')
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
         });
+    };
+
+    /**
+     * Show detail page for creator.
+     * @param user
+     */
+    $scope.showDetails = function (user) {
+      if (user.role == resources.role.doctor) {
+        $state.go('profile', {openid: user.id});
+      } else {
+        $state.go('profile-patient', {openid: user.id});
+      }
     };
 
     //var handleUserDisplayData = function (users) {

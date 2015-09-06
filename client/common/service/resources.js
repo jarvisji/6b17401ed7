@@ -45,14 +45,14 @@ angular.module('ylbWxApp')
       cancelled: {value: 'cancelled', label: '已取消'}
     },
     linkTypes: {
-      image: {value: 'image', label: '图片', forPatient: true, forDoctor: true},
-      doctor: {value: 'doctor', label: '医生', forPatient: true, forDoctor: true},
-      patient: {value: 'patient', label: '患者', forPatient: true, forDoctor: true},
-      shop: {value: 'shop', label: '商城', forPatient: true, forDoctor: true},
-      medicalImaging: {value: 'medicalImaging', label: '影像', forPatient: false, forDoctor: true},
-      serviceJiahao: {value: 'serviceJiahao', label: '加号', forPatient: false, forDoctor: true},
-      serviceSuizhen: {value: 'serviceSuizhen', label: '随诊', forPatient: false, forDoctor: true},
-      serviceHuizhen: {value: 'serviceHuizhen', label: '会诊', forPatient: false, forDoctor: true}
+      image: {value: 'image', label: '图片', text: '分享了一幅图片', forPatient: true, forDoctor: true},
+      doctor: {value: 'doctor', label: '医生', text: '分享了一位医生', forPatient: true, forDoctor: true},
+      patient: {value: 'patient', label: '患者', text: '分享了一位患者', forPatient: true, forDoctor: true},
+      shop: {value: 'shop', label: '商城', text: '分享了一个商城商品', forPatient: true, forDoctor: true},
+      medicalImaging: {value: 'medicalImaging', text: '分享了一幅影像', label: '影像', forPatient: false, forDoctor: true},
+      serviceJiahao: {value: 'serviceJiahao', text: '生成了一个加号订单', label: '加号', forPatient: false, forDoctor: true},
+      serviceSuizhen: {value: 'serviceSuizhen', text: '生成了一个随诊订单', label: '随诊', forPatient: false, forDoctor: true},
+      serviceHuizhen: {value: 'serviceHuizhen', text: '生成了一个会诊订单', label: '会诊', forPatient: false, forDoctor: true}
     },
     defaultAvatar: '/assets/image/avatar-64.jpg',
     defaultIcon: {

@@ -41,66 +41,70 @@
       <div class="item" ng-repeat="case in cases">
         <div class="item-head">
           <div class="item-details">
-            <img class="item-pic" ng-src="{{case.creator.avatar}}">
+            <img class="item-pic" ng-src="{{case.creator.avatar}}" ng-click="showDetails(case.creator)">
             <span class="item-name primary-link">{{case.creator.name}}</span>
-            <span class="item-label">{{case.displayCreated}}</span>
+            <span class="item-label"><small>{{case.link.text}}</small></span>
           </div>
-            <span class="item-status">
-              <span class="pull-right">
-                <span ng-show="case.canDelete">
-                  <a href="" ng-click="deleteCase($index)">
-                    <small>删除</small>
-                  </a> |
-                </span>
-                <a href="" ng-click="showCommentInput($index)">
-                  <small>评论</small>
-                </a>
-              </span>
-
-              <!--<div class="btn-group btn-group-xs btn-group-solid">-->
-                <!--<button type="button" class="btn red"  ng-show="case.canDelete">删除</button>-->
-                <!--<button type="button" class="btn green">评论</button>-->
-              <!--</div>-->
-
-              <!--<span ng-show="case.canDelete">-->
-                <!--<a href="" class="btn btn-sm red-stripe" ng-click="deleteCase($index)">删除</a>-->
-              <!--</span>-->
-              <!--<a href="" class="btn btn-sm green-stripe" ng-click="showCommentInput($index)">评论</a>-->
-            </span>
+          <span class="item-status"></span>
         </div>
         <div class="item-body">
           {{case.content}}
-        </div>
-        <div class="space-10"></div>
-        <blockquote class="hero" style="margin-left:50px" ng-if="case.link">
-          <div class="general-item-list" ng-click="showLinkTarget(case.link)">
-            <div class="item">
-              <div class="item-head">
-                <div class="item-details">
-                  <!--<i class="fa fa-link"></i>-->
-                  <img class="item-pic" ng-src="{{case.link.avatar}}">
-                  <span class="item-name primary-link">{{case.link.title}}</span>
+
+          <div ng-if="case.link.linkType == 'image'">
+            <img ng-src="{{case.link.avatar}}" style="width:30%">
+          </div>
+
+
+          <div class="space-10"></div>
+          <div class="case-attachment" ng-if="case.link && case.link.linkType != 'image'">
+            <div class="general-item-list" ng-click="showLinkTarget(case.link)">
+              <div class="item">
+                <div class="item-head">
+                  <div class="item-details">
+                    <!--<i class="fa fa-link"></i>-->
+                    <img class="item-pic" ng-src="{{case.link.avatar}}">
+                    <span class="item-name primary-link">{{case.link.title}}</span>
+                  </div>
+                  <span class="item-status"></span>
                 </div>
-                <span class="item-status"></span>
               </div>
             </div>
           </div>
-        </blockquote>
+        </div>
 
 
-        <ul class="list-group" style="margin-left: 50px;">
-          <li class="list-group-item disabled" ng-repeat="comment in case.comments">
-            {{comment.creator.name}}：{{comment.comment}}
-            <a href="" ng-show="comment.canDelete" ng-click="deleteComment(case, $index)" class="pull-right">
-              <small>删除</small>
-            </a>
-          </li>
-        </ul>
-        <div class="input-group" ng-show="case.isShowCommentInput" style="margin-left: 50px;">
+        <div class="item-footer">
+          <div class="item-date">
+            <span class="item-label"><small>{{case.displayCreated}}</small></span>
+            <span ng-show="case.canDelete" style="margin-left: 10px">
+              <a href="" ng-click="deleteCase($index)">
+                <small>删除</small>
+              </a>
+            </span>
+          </div>
+            <span class="item-status">
+              <a href="" ng-click="showCommentInput($index)">
+                <small>评论</small>
+              </a>
+            </span>
+        </div>
+
+        <div class="item-comment" ng-if="case.comments.length > 0">
+          <span class="triangle"></span>
+          <ul class="list-group">
+            <li class="list-group-item disabled" ng-repeat="comment in case.comments">
+              {{comment.creator.name}}：{{comment.comment}}
+              <a href="" ng-show="comment.canDelete" ng-click="deleteComment(case, $index)" class="pull-right">
+                <small>删除</small>
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="item-comment input-group" ng-show="case.isShowCommentInput">
           <input type="text" class="form-control" placeholder="评论..." ng-model="newComment.comment">
-          <span class="input-group-btn">
-            <button class="btn btn-default" type="button" ng-click="createComment($index)">发布</button>
-          </span>
+            <span class="input-group-btn">
+              <button class="btn btn-default" type="button" ng-click="createComment($index)">发布</button>
+            </span>
         </div>
       </div>
     </div>
@@ -108,58 +112,5 @@
     <div ng-if="cases.length ==0">
       暂无病历
     </div>
-
-
-    <!--<div class="col-xs-12 media" ng-repeat="case in cases">-->
-    <!--<div class="media-left">-->
-    <!--<a href="#">-->
-    <!--<img class="media-object avatar-md" ng-src="{{case.creator.avatar}}">-->
-    <!--</a>-->
-    <!--</div>-->
-    <!--<div class="media-body">-->
-    <!--<h4 class="media-heading">{{case.creator.name}}</h4>-->
-    <!--{{case.content}}-->
-    <!--<div>-->
-    <!--<small>{{case.displayCreated}}</small>-->
-    <!--<span class="pull-right">-->
-    <!--<span ng-show="case.canDelete">-->
-    <!--<a href="" ng-click="deleteCase($index)">删除</a> |-->
-    <!--</span>-->
-    <!--<a href="" ng-click="showCommentInput($index)">评论</a>-->
-    <!--</span>-->
-    <!--</div>-->
-    <!--<p></p>-->
-
-    <!--<div class="general-item-list" ng-if="case.link" ng-click="showLinkTarget(case.link)">-->
-    <!--<div class="item">-->
-    <!--<div class="item-head">-->
-    <!--<div class="item-details">-->
-    <!--<img class="item-pic" ng-src="{{case.link.avatar}}">-->
-    <!--<span class="item-name">{{case.link.title}}</span>-->
-    <!--</div>-->
-    <!--<span class="item-status"></span>-->
-    <!--</div>-->
-    <!--</div>-->
-    <!--</div>-->
-
-    <!--<div class="input-group" ng-show="case.isShowCommentInput">-->
-    <!--<input type="text" class="form-control" placeholder="评论..." ng-model="newComment.comment">-->
-    <!--<span class="input-group-btn">-->
-    <!--<button class="btn btn-default" type="button" ng-click="createComment($index)">发布</button>-->
-    <!--</span>-->
-    <!--</div>-->
-
-    <!--<ul class="list-group">-->
-    <!--<li class="list-group-item disabled" ng-repeat="comment in case.comments">-->
-    <!--{{comment.creator.name}}：{{comment.comment}} <a href="" ng-show="comment.canDelete"-->
-    <!--ng-click="deleteComment(case, $index)"-->
-    <!--class="pull-right">删除</a>-->
-    <!--</li>-->
-    <!--</ul>-->
-    <!--</div>-->
-    <!--</div>-->
-    <!--<div class="row" ng-show="cases.length == 0">-->
-    <!--<h4 class="text-center">暂无病历</h4>-->
-    <!--</div>-->
   </div>
 </div>

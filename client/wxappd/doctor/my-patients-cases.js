@@ -21,6 +21,7 @@ angular.module('ylbWxApp')
               curCase.canDelete = true;
             }
             $rootScope.checkCommentDeletable(curCase.comments, currentUser);
+            $rootScope.fillLinkText(curCase);
           }
           commonUtils.date.convert2FriendlyDate(cases);
           if (isShowMore) {
@@ -99,7 +100,7 @@ angular.module('ylbWxApp')
     };
 
     /**
-     * Show detail page for creato.
+     * Show detail page for creator.
      * @param user
      */
     $scope.showDetails = function (user) {

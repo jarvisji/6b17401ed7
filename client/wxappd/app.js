@@ -535,6 +535,12 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       }
     };
 
+    $rootScope.fillLinkText = function (curCase) {
+      if (curCase.link) {
+        curCase.link.text = resources.linkTypes[curCase.link.linkType].text;
+      }
+    };
+
     /**
      * Show the links content of patient cases.
      * @param linkObj

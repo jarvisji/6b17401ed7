@@ -14,9 +14,8 @@
   <link href="vendor/bootstrap-additions/dist/bootstrap-additions.min.css" rel="stylesheet">
 
 
-  <link href="assets/css/components-rounded.css" rel="stylesheet">
-  <link href="assets/css/profile.css" rel="stylesheet">
-  <link href="assets/css/layout.css" rel="stylesheet">
+  <!--<link href="assets/css/components-rounded.css" rel="stylesheet">-->
+  <!--<link href="assets/css/layout.css" rel="stylesheet">-->
   <link href="assets/css/styles.css" rel="stylesheet">
 
 
@@ -124,12 +123,12 @@
 
   <!-- display on mobile -->
   <div class="row hidden-md hidden-lg">
-    <div class="col-xs-12">
+    <!--<div class="col-xs-12">-->
       <div ui-view class="page-content"></div>
-    </div>
+    <!--</div>-->
   </div>
 
-  <div class="row hidden-md hidden-lg" id="doctorMenu">
+  <div class="row hidden-md hidden-lg ylb-menu" id="doctorMenu">
     <div class="btn-group btn-group-justified navbar-fixed-bottom" role="group">
       <div class="btn-group" role="group">
         <button type="button" class="btn btn-lg btn-default" style="padding:1px;border-radius: 0;">
@@ -157,12 +156,12 @@
 
 <div class="container-fluid" ng-if="stateName!='entry' && currentUser.patient">
   <div class="row">
-    <div class="col-xs-12">
+    <!--<div class="col-xs-12">-->
       <div ui-view class="page-content"></div>
-    </div>
+    <!--</div>-->
   </div>
 
-  <div class="row" id="patientMenu">
+  <div class="row ylb-menu" id="patientMenu">
     <div class="btn-group btn-group-justified navbar-fixed-bottom" role="group">
       <div class="btn-group" role="group">
         <button type="button" class="btn btn-lg btn-default" style="padding:1px;border-radius: 0;">
