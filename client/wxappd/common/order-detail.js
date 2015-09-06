@@ -17,6 +17,7 @@ angular.module('ylbWxApp')
           commonUtils.date.convert2FriendlyDate(order.comments);
           $rootScope.handleDisplayBookingTime(order);
           handleUIFlags(order);
+          calculateServicePrice(order);
 
           if (!order.rank || !order.rank.stars) {
             order.rank = {};
@@ -68,6 +69,14 @@ angular.module('ylbWxApp')
             $rootScope.alertError(null, resp, status);
           });
       }
+    };
+
+    var calculateServicePrice = function (order) {
+      var sum = 0;
+      for (var i = 0; i < order.doctors.length; i++) {
+        sum += order.doctors[i].servicePrice;
+      }
+      order.servicePrice = sum;
     };
 
     var checkRankStars = function (stars) {

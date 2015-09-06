@@ -102,7 +102,7 @@ module.exports = function () {
 
   /**
    * There are some conditions or price:
-   * 1. For jiahao order, orderPrice = servicePrice;
+   * 1. For jiahao order, orderPrice = servicePrice * 1.1;
    * 2. For suizhen order, orderPrice = servicePrice * quantity * 1.1;
    * 3. For huizhen order, orderPrice = sum(servicePrice of doctors) * 1.1;
    * 4. For extracted order, orderPrice = extracted amount, servicePrice = undefined.
