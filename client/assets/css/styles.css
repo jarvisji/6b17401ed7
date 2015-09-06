@@ -908,11 +908,11 @@ Portlets
 Dashboard Stats 2
 ***/
 .dashboard-stat2 {
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  -ms-border-radius: 4px;
-  -o-border-radius: 4px;
-  border-radius: 4px;
+  /*-webkit-border-radius: 4px;*/
+  /*-moz-border-radius: 4px;*/
+  /*-ms-border-radius: 4px;*/
+  /*-o-border-radius: 4px;*/
+  border-radius: 0px;
   background: #fff;
   padding: 15px 15px 30px 15px;
   margin-bottom: 20px;

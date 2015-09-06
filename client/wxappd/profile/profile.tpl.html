@@ -179,11 +179,14 @@
   </div>
 
 
-  <div ng-if="currentUser.isPatient">
+  <div ng-if="!isSelf">
     <div class="dashboard-stat2">
       <div class="display">
         <div class="number">
-          <h3 class="font-green-sharp">{{jiahao.billingPrice}}
+          <h3 class="font-green-sharp" ng-if="currentUser.isDoctor">{{jiahao.price}}
+            <small class="font-green-sharp">元</small>
+          </h3>
+          <h3 class="font-green-sharp" ng-if="currentUser.isPatient">{{jiahao.billingPrice}}
             <small class="font-green-sharp">元</small>
           </h3>
           <small>加号</small>
@@ -192,7 +195,7 @@
           <i class="fa fa-plus" style="font-size: 140px;color:lightgoldenrodyellow;position: relative;top: 50px"></i>
         </div>
         <a href="" class="icon-btn pull-right" ng-click="showAddJiahaoModal()"
-           ng-disabled="!jiahao.price">
+           ng-disabled="!jiahao.price" ng-if="currentUser.isPatient">
           <i class="fa fa-check-square-o"></i>
 
           <div>购买</div>
@@ -209,7 +212,10 @@
     <div class="dashboard-stat2">
       <div class="display">
         <div class="number">
-          <h3 class="font-green-sharp">{{suizhen.billingPrice}}
+          <h3 class="font-green-sharp" ng-if="currentUser.isDoctor">{{suizhen.price}}
+            <small class="font-green-sharp">元</small>
+          </h3>
+          <h3 class="font-green-sharp" ng-if="currentUser.isPatient">{{suizhen.billingPrice}}
             <small class="font-green-sharp">元</small>
           </h3>
           <small>随诊</small>
@@ -219,7 +225,7 @@
              style="font-size: 120px;color:lightgoldenrodyellow; position: relative;top: 50px"></i>
         </div>
         <a href="" class="icon-btn pull-right" ng-click="showAddSuizhenModal()"
-           ng-disabled="!suizhen.price">
+           ng-disabled="!suizhen.price" ng-if="currentUser.isPatient">
           <i class="fa fa-check-square-o"></i>
 
           <div>购买</div>
@@ -236,7 +242,10 @@
     <div class="dashboard-stat2">
       <div class="display">
         <div class="number">
-          <h3 class="font-green-sharp">{{huizhen.billingPrice}}
+          <h3 class="font-green-sharp" ng-if="currentUser.isDoctor">{{huizhen.price}}
+            <small class="font-green-sharp">元</small>
+          </h3>
+          <h3 class="font-green-sharp" ng-if="currentUser.isPatient">{{huizhen.billingPrice}}
             <small class="font-green-sharp">元</small>
           </h3>
           <small>会诊</small>
@@ -245,7 +254,7 @@
           <i class="fa fa-users" style="font-size: 120px;color:lightgoldenrodyellow; position: relative;top: 50px"></i>
         </div>
         <a href="" class="icon-btn pull-right" ng-click="showAddHuizhenModal()"
-           ng-disabled="!huizhen.price">
+           ng-disabled="!huizhen.price" ng-if="currentUser.isPatient">
           <i class="fa fa-check-square-o"></i>
 
           <div>购买</div>
