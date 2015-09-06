@@ -1055,19 +1055,23 @@ li [class*=" icon-"].icon-large {
 }
 
 .fa-2x {
-  font-size: 2em;
+  font-size: 2em !important;
+  line-height: 2em !important;
 }
 
 .fa-3x {
-  font-size: 3em;
+  font-size: 3em !important;
+  line-height: 3em !important;
 }
 
 .fa-4x {
-  font-size: 4em;
+  font-size: 4em !important;
+  line-height: 4em !important;
 }
 
 .fa-5x {
-  font-size: 5em;
+  font-size: 5em !important;
+  line-height: 5em !important;
 }
 
 /**------------------------------------------------
