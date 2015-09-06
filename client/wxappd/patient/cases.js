@@ -225,6 +225,7 @@ angular.module('ylbWxApp')
         newOrder.referee = {
           id: currentUser.doctor._id,
           name: currentUser.doctor.name,
+          avatar: currentUser.doctor.avatar,
           effectDate: new Date()
         }
       }
@@ -280,6 +281,7 @@ angular.module('ylbWxApp')
         referee: {
           id: currentUser.doctor._id,
           name: currentUser.doctor.name,
+          avatar: currentUser.doctor.avatar,
           effectDate: new Date()
         }
       };
@@ -326,6 +328,7 @@ angular.module('ylbWxApp')
         referee: {
           id: currentUser.doctor._id,
           name: currentUser.doctor.name,
+          avatar: currentUser.doctor.avatar,
           effectDate: new Date()
         }
       };

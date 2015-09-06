@@ -22,7 +22,8 @@ angular.module('ylbAdmin', ['ui.router', 'ngCookies', 'ngAnimate', 'angularFileU
     return function (input) {
       var date = new Date(input);
       var year = 1900 + date.getYear();
-      return year + '-' + date.getMonth() + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+      var month = date.getMonth() + 1;
+      return year + '-' + month + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
     }
   })
   .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$http', '$alert', '$cookies', '$log', function ($scope, $rootScope, $state, $http, $alert, $cookies, $log) {

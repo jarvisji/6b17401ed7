@@ -144,11 +144,19 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
     });
     //$urlRouterProvider.otherwise('entry');
   }])
-  .filter('localeDate', function () {
+  .filter('localeDateTime', function () {
     return function (input) {
       var date = new Date(input);
       var year = 1900 + date.getYear();
-      return year + '-' + date.getMonth() + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+      var month = date.getMonth() + 1;
+      return year + '-' + month + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+    }
+  }).filter('localeDate', function () {
+    return function (input) {
+      var date = new Date(input);
+      var year = 1900 + date.getYear();
+      var month = date.getMonth() + 1;
+      return year + '-' + month + '-' + date.getDate();
     }
   })
   .controller('rootCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$location', '$cookies', '$log', '$timeout', '$alert', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $state, $stateParams, $http, $location, $cookies, $log, $timeout, $alert, resources, commonUtils) {

@@ -133,6 +133,7 @@ module.exports = function () {
     referee: {
       id: String,
       name: String,
+      avatar: String,
       effectDate: Date,
       income: {type: Number, default: 0}
     },

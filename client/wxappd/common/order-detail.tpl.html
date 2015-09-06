@@ -135,6 +135,29 @@
   </div>
 </div>
 
+<div class="portlet light" ng-show="order.referee.id">
+  <div class="portlet-title">
+    <div class="caption">
+      <span class="caption-subject font-blue-madison bold uppercase">推荐人</span>
+    </div>
+  </div>
+
+  <div class="portlet-body">
+    <div class="general-item-list">
+      <div class="item">
+        <div class="item-head">
+          <div class="item-details">
+            <img class="item-pic" ng-src="{{order.referee.avatar}}">
+            <span class="profile-usertitle-name">{{order.referee.name}}</span>
+            <span class="item-label"></span>
+          </div>
+          <span class="item-status">{{order.referee.effectDate|localeDate}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <div class="portlet light" ng-if="uiFlags.isShowRankInput">
   <div class="portlet-title">
@@ -161,13 +184,7 @@
     </div>
   </div>
 </div>
-<!--<section ng-if="uiFlags.isShowRankInput">-->
-<!--<div class="row">-->
-<!--<div class="col-xs-12">-->
-<!---->
-<!--</div>-->
-<!--</div>-->
-<!--</section>-->
+
 
 <div class="portlet light" ng-if="uiFlags.isShowRankResult">
   <div class="portlet-title">
@@ -191,13 +208,6 @@
     </div>
   </div>
 </div>
-<!--<section ng-if="uiFlags.isShowRankResult">-->
-<!--<div class="row">-->
-<!--<div class="col-xs-12">-->
-<!---->
-<!--</div>-->
-<!--</div>-->
-<!--</section>-->
 
 
 <div class="portlet light" ng-show="order">
@@ -234,29 +244,6 @@
       </div>
     </div>
   </div>
-
-  <!--<div class="row" ng-repeat="comment in order.comments | orderBy:'created'">-->
-  <!--<div class="col-xs-12 media">-->
-  <!--<div class="media-left">-->
-  <!--<a href="#">-->
-  <!--<img class="media-object avatar-md" ng-src="{{comment.creator.avatar}}">-->
-  <!--</a>-->
-  <!--</div>-->
-  <!--<div class="media-body">-->
-  <!--<h4 class="media-heading">{{comment.creator.name}}</h4>-->
-  <!--{{comment.comment}}-->
-  <!--<div>-->
-  <!--<small>{{comment.displayCreated}}</small>-->
-  <!--<span class="pull-right">-->
-  <!--<span ng-show="comment.canDelete">-->
-  <!--<a href="" ng-click="deleteComment($index)">删除</a>-->
-  <!--</span>-->
-  <!--</span>-->
-  <!--</div>-->
-  <!--</div>-->
-  <!--</div>-->
-  <!--<p>&nbsp;</p>-->
-  <!--</div>-->
 
 
   <hr>
