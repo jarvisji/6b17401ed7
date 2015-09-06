@@ -160,6 +160,25 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
         console.log('$stateChangeSuccess: from: %s, to: %s', fromState.name, toState.name);
         // avoid wxindex.html create too many 'ui-view' when on entry page.
         $rootScope.stateName = toState.name;
+
+        // change page title.
+        for (var sub in $scope.doctorMenu) {
+          var subMenu = $scope.doctorMenu[sub];
+          for (var idx in subMenu) {
+            if (toState.name == subMenu[idx].location) {
+              $rootScope.pageTitle = subMenu[idx].text;
+            }
+          }
+        }
+        for (var subp in $scope.patientMenu) {
+          var subMenup = $scope.patientMenu[subp];
+          for (var i in subMenup) {
+            if (toState.name == subMenup[i].location) {
+              $rootScope.pageTitle = subMenup[i].text;
+            }
+          }
+        }
+
         if (!fromState.name && toState.name != 'entry') {
           // when press 'f5' to refresh page, fromState.name will not be defined.
           onPageRefresh();
@@ -653,38 +672,48 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       sub1: [
         {
           "text": "搜索医生",
-          "href": "wxindex.html#/search/doctor"
+          "href": "wxindex.html#/search/doctor",
+          "location": "search-patient"
         }, {
           "text": "我的医生",
-          "href": "wxindex.html#/patient/doctors"
+          "href": "wxindex.html#/patient/doctors",
+          "location": "patient-my-doctors"
         }, {
           "text": "我的预约",
-          "href": "wxindex.html#/patient/orders"
+          "href": "wxindex.html#/patient/orders",
+          "location": "patient-orders"
         }],
       sub2: [
         {
           "text": "寻找病友",
-          "href": "wxindex.html#/search/patient"
+          "href": "wxindex.html#/search/patient",
+          "location": "search-patient"
         }, {
           "text": "我的病友",
-          "href": "wxindex.html#/patient/friends"
+          "href": "wxindex.html#/patient/friends",
+          "location": "patient-my-friends"
         }, {
           "text": "病友病历",
-          "href": "wxindex.html#/patient/friends/cases"
+          "href": "wxindex.html#/patient/friends/cases",
+          "location": "patient-friends-cases"
         }, {
           "text": "我的病历",
-          "href": "wxindex.html#/patient/cases/"
+          "href": "wxindex.html#/patient/cases/",
+          "location": "patient-cases"
         }],
       sub3: [
         {
           "text": "商城",
-          "href": "wxindex.html#/shop"
+          "href": "wxindex.html#/shop",
+          "location": "shop"
         }, {
           "text": "交易记录",
-          "href": "wxindex.html#/patient/orders/history"
+          "href": "wxindex.html#/patient/orders/history",
+          "location": "patient-orders-history"
         }, {
           "text": "个人设置",
-          "href": "wxindex.html#/profile/patient/"
+          "href": "wxindex.html#/profile/patient/",
+          "location": "profile-patient"
         }]
     };
   }
