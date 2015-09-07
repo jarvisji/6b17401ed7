@@ -49,7 +49,33 @@ angular.module('ylbWxApp')
       //  $scope.cases = $rootScope.dataCache.wxMyPatientsCasesCtrl;
       //} else {
       $scope.getPatientCases();
+      getFriends();
+      getPatients();
       //}
+    }
+
+    var friendIds = [];
+
+    function getFriends() {
+      $http.get('/api/doctors/' + currentUser.id + '/friends')
+        .success(function (resp) {
+          for (var i = 0; i < resp.data.length; i++) {
+            friendIds.push(resp.data[i]._id);
+          }
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    }
+
+    function getPatients() {
+      $http.get('/api/doctors/' + currentUser.id + '/patientRelations')
+        .success(function (resp) {
+          for (var i = 0; i < resp.data.length; i++) {
+            friendIds.push(resp.data[i].patient.id);
+          }
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
     }
 
     /** ---------------------------------------------------------------------------------------
@@ -70,8 +96,9 @@ angular.module('ylbWxApp')
         .success(function (resp) {
           // return data is the updated case.
           $rootScope.checkCommentDeletable(resp.data.comments, currentUser);
-          commonUtils.date.convert2FriendlyDate(resp.data);
-          $scope.cases[caseIndex] = resp.data;
+          //commonUtils.date.convert2FriendlyDate(resp.data);
+          //$scope.cases[caseIndex] = resp.data;
+          $scope.cases[caseIndex].comments.push(resp.data.comments[resp.data.comments.length - 1]);
           $scope.newComment = {};
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);
@@ -108,6 +135,16 @@ angular.module('ylbWxApp')
         $state.go('profile', {openid: user.id});
       } else {
         $state.go('profile-patient', {openid: user.id});
+      }
+    };
+
+    $scope.hideNonFriendCases = function () {
+      $scope.btnPressed = !$scope.btnPressed;
+      //console.log(friendIds);
+      if ($scope.btnPressed) {
+        $scope.cases = $rootScope.hideNonFriendCases($scope.cases, friendIds, currentUser.id);
+      } else {
+        $scope.cases = $rootScope.showNonFriendCases();
       }
     };
   }]);

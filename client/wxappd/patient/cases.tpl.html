@@ -3,6 +3,11 @@
     <div class="caption">
       <span class="caption-subject font-blue-madison bold uppercase">患者病历</span>
     </div>
+    <div class="actions">
+      <a ng-href="" class="btn btn-circle btn-sm" ng-class="{'default': !btnPressed, 'red': btnPressed}" ng-click="hideNonFriendCases()">
+        <i class="fa fa-user"></i> 只看好友
+      </a>
+    </div>
   </div>
 
   <div class="portlet-body">

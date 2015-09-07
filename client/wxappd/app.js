@@ -600,6 +600,65 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       return Math.ceil(Number.parseFloat((price * 1.1).toFixed(1)));
     };
 
+    /**
+     * Common method to filter patient cases by doctor friends.
+     * @type {Array}
+     */
+    var hiddenCases = [];
+    var displayCases = [];
+    var hiddenCommentCases = [];
+    $rootScope.hideNonFriendCases = function (cases, friendIds, currentUserId) {
+      hiddenCases = [];
+      displayCases = [];
+      hiddenCommentCases = [];
+      // filter cases
+      for (var i = 0; i < cases.length; i++) {
+        var curCase = cases[i];
+        if (friendIds.indexOf(curCase.creator.id) == -1 && curCase.creator.id != currentUserId) {
+          hiddenCases.push(curCase);
+        } else {
+          // filter comments
+          var hiddenComments = [];
+          var displayComments = [];
+          for (var j = 0; j < curCase.comments.length; j++) {
+            var comment = curCase.comments[j];
+            if (friendIds.indexOf(comment.creator.id) == -1 && comment.creator.id != currentUserId) {
+              hiddenComments.push(comment);
+            } else {
+              displayComments.push(comment);
+            }
+          }
+          if (hiddenComments.length > 0) {
+            hiddenCommentCases.push({'_id': curCase._id, comments: hiddenComments});
+            curCase.comments = displayComments;
+          }
+          displayCases.push(curCase);
+        }
+      }
+      return displayCases;
+    };
+
+    $rootScope.showNonFriendCases = function () {
+      var allCases = displayCases.concat(hiddenCases);
+      allCases.sort(function (c1, c2) {
+        return Date.parse(c2.created) - Date.parse(c1.created);
+      });
+
+      for (var h = 0; h < allCases.length; h++) {
+        for (var k = 0; k < hiddenCommentCases.length; k++) {
+          if (allCases[h]._id == hiddenCommentCases[k]._id) {
+            var newComments = allCases[h].comments.concat(hiddenCommentCases[k].comments);
+            newComments.sort(function (c1, c2) {
+              return Date.parse(c1.created) - Date.parse(c2.created);
+            });
+            allCases[h].comments = newComments;
+            break;
+          }
+        }
+      }
+      return allCases;
+    };
+
     var oStatus = resources.orderStatus;
     var finishStatus = [oStatus.finished.value, oStatus.expired.value, oStatus.cancelled.value];
     var warnStatus = [oStatus.init.value];

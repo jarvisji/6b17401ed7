@@ -52,6 +52,60 @@ angular.module('ylbWxApp')
     };
     getPatientCases();
 
+    if (currentUser.isPatient) {
+      getPatientFriends();
+      getPatientDoctors();
+    } else {
+      getDoctorFriends();
+      getDoctorPatients();
+    }
+
+    var friendIds = [];
+
+    function getDoctorFriends() {
+      $http.get('/api/doctors/' + currentUser.id + '/friends')
+        .success(function (resp) {
+          for (var i = 0; i < resp.data.length; i++) {
+            friendIds.push(resp.data[i]._id);
+          }
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    }
+
+    function getDoctorPatients() {
+      $http.get('/api/doctors/' + currentUser.id + '/patientRelations')
+        .success(function (resp) {
+          for (var i = 0; i < resp.data.length; i++) {
+            friendIds.push(resp.data[i].patient.id);
+          }
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    }
+
+    function getPatientFriends() {
+      $http.get('/api/patients/' + currentUser.id + '/friends')
+        .success(function (resp) {
+          for (var i = 0; i < resp.data.length; i++) {
+            friendIds.push(resp.data[i]._id);
+          }
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    }
+
+    function getPatientDoctors() {
+      $http.get('/api/patients/' + currentUser.id + '/doctors')
+        .success(function (resp) {
+          for (var i = 0; i < resp.data.length; i++) {
+            friendIds.push(resp.data[i]._id);
+          }
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    }
+
     var checkPostCasePrivilege = function () {
       $http.get('/api/patients/' + patientId + '/cases/postPrivilege')
         .success(function (resp) {
@@ -60,6 +114,16 @@ angular.module('ylbWxApp')
           if (status !== 403)
             $rootScope.alertError(null, resp, status);
         });
+    };
+
+    $scope.hideNonFriendCases = function () {
+      $scope.btnPressed = !$scope.btnPressed;
+      //console.log(friendIds);
+      if ($scope.btnPressed) {
+        $scope.cases = $rootScope.hideNonFriendCases($scope.cases, friendIds, currentUser.id);
+      } else {
+        $scope.cases = $rootScope.showNonFriendCases();
+      }
     };
 
 
@@ -144,7 +208,7 @@ angular.module('ylbWxApp')
           // return data is the updated case.
           $rootScope.checkCommentDeletable(resp.data.comments, currentUser);
           //commonUtils.date.convert2FriendlyDate(resp.data);
-          $scope.cases[caseIndex].comments = resp.data.comments;
+          $scope.cases[caseIndex].comments.push(resp.data.comments[resp.data.comments.length - 1]);
           $scope.newComment = {};
         }).error(function (resp, status) {
           $rootScope.alertError(null, resp, status);

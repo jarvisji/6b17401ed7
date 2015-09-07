@@ -601,7 +601,7 @@ module.exports = function (app, api) {
   };
 
   /**
-   * GET '/api/doctors/:id/patients'
+   * GET '/api/doctors/:id/patientRelations'
    * Get the patients those have relations with the given doctor.
    * Response: List of patients.
    * @param req

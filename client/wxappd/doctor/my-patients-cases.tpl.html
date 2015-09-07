@@ -4,6 +4,11 @@
       <span class="caption-subject font-blue-madison bold uppercase">随诊病历</span>
       <!--<span class="badge badge-danger">{{requests.length}}</span>-->
     </div>
+    <div class="actions">
+      <a ng-href="" class="btn btn-circle btn-sm" ng-class="{'default': !btnPressed, 'red': btnPressed}" ng-click="hideNonFriendCases()">
+        <i class="fa fa-user"></i> 只看好友
+      </a>
+    </div>
   </div>
   <div class="portlet-body">
     <div class="general-item-list" ng-show="cases.length > 0">

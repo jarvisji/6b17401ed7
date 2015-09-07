@@ -64,6 +64,73 @@ section {
   height: 128px !important;
 }
 
+.btn-circle {
+  border-radius: 25px !important;
+}
+
+/* Button */
+.btn.default {
+  color: #333333;
+  background-color: #E5E5E5;
+}
+.btn.default:hover, .btn.default:focus, .btn.default:active, .btn.default.active {
+  color: #333333;
+  background-color: lightgray;
+}
+.open .btn.default.dropdown-toggle {
+  color: #333333;
+  background-color: lightgray;
+}
+.btn.default:active, .btn.default.active {
+  background-image: none;
+  background-color: #c6c6c6;
+}
+.btn.default:active:hover, .btn.default.active:hover {
+  background-color: #cccccc;
+}
+.open .btn.default.dropdown-toggle {
+  background-image: none;
+}
+.btn.default.disabled, .btn.default.disabled:hover, .btn.default.disabled:focus, .btn.default.disabled:active, .btn.default.disabled.active, .btn.default[disabled], .btn.default[disabled]:hover, .btn.default[disabled]:focus, .btn.default[disabled]:active, .btn.default[disabled].active, fieldset[disabled] .btn.default, fieldset[disabled] .btn.default:hover, fieldset[disabled] .btn.default:focus, fieldset[disabled] .btn.default:active, fieldset[disabled] .btn.default.active {
+  background-color: #E5E5E5;
+}
+.btn.default .badge {
+  color: #E5E5E5;
+  background-color: #333333;
+}
+
+
+.red.btn {
+  color: #FFFFFF;
+  background-color: #cb5a5e;
+}
+.red.btn:hover, .red.btn:focus, .red.btn:active, .red.btn.active {
+  color: #FFFFFF;
+  background-color: #c23f44;
+}
+.open .red.btn.dropdown-toggle {
+  color: #FFFFFF;
+  background-color: #c23f44;
+}
+.red.btn:active, .red.btn.active {
+  background-image: none;
+  background-color: #b0383c;
+}
+.red.btn:active:hover, .red.btn.active:hover {
+  background-color: #b83a3e;
+}
+.open .red.btn.dropdown-toggle {
+  background-image: none;
+}
+.red.btn.disabled, .red.btn.disabled:hover, .red.btn.disabled:focus, .red.btn.disabled:active, .red.btn.disabled.active, .red.btn[disabled], .red.btn[disabled]:hover, .red.btn[disabled]:focus, .red.btn[disabled]:active, .red.btn[disabled].active, fieldset[disabled] .red.btn, fieldset[disabled] .red.btn:hover, fieldset[disabled] .red.btn:focus, fieldset[disabled] .red.btn:active, fieldset[disabled] .red.btn.active {
+  background-color: #cb5a5e;
+}
+.red.btn .badge {
+  color: #cb5a5e;
+  background-color: #FFFFFF;
+}
+
+
 .font-blue-madison {
   color: #578ebe !important;
 }
