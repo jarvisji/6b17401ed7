@@ -18,7 +18,7 @@
               <div class="item-details">
                 <!--<img class="item-pic">-->
                 <span class="item-name">日期：{{item.date|date: 'yyyy-MM-dd'}}</span>
-                <span class="item-label">价格：{{serviceStock.price}} 元</span>
+                <span class="item-label">价格：{{currentUser.isPatient ? serviceStock.billingPrice : serviceStock.price}} 元</span>
               </div>
               <span class="item-status">剩余数量：{{item.stock}}</span>
             </div>
@@ -34,7 +34,8 @@
               <div class="item-details">
                 <!--<img class="item-pic">-->
                 <span class="item-name">日期：{{item.date|date: 'yyyy-MM-dd'}}</span>
-                <span class="item-label">价格：{{serviceStock.price}} 元</span>
+                <span
+                  class="item-label">价格：{{currentUser.isPatient ? serviceStock.billingPrice : serviceStock.price}} 元</span>
               </div>
               <span class="item-status">剩余数量：{{item.stock}}</span>
             </div>

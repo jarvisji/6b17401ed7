@@ -22,7 +22,8 @@
                 <span class="item-name">{{doctor.name}}</span>
                 <span class="item-label">{{doctor.hospital}}</span>
               </div>
-              <span class="item-status">会诊价格：{{doctor.servicePrice ? doctor.servicePrice : '未设置'}}</span>
+              <span class="item-status" ng-if="currentUser.isPatient">会诊价格：{{doctor.servicePrice ? doctor.servicePrice : '未设置'}}</span>
+              <span class="item-status" ng-if="currentUser.isDoctor">会诊价格：{{doctor.price ? doctor.price : '未设置'}}</span>
             </div>
           </div>
         </div>

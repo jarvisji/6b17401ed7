@@ -584,7 +584,8 @@ module.exports = function (app, api) {
           debug('getServiceStock(), createdStockData for next week: %o', createdStockData);
           _retStock.jiahao.nextWeek = createdStockData;
         }
-        _retStock.jiahao.price = _serviceDef.billingPrice;
+        _retStock.jiahao.price = _serviceDef.price;
+        _retStock.jiahao.billingPrice = _serviceDef.billingPrice;
         debug('getServiceStock(), done.');
         res.json(utils.jsonResult(_retStock));
       }).then(null, function (err) {

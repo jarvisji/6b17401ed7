@@ -182,9 +182,9 @@ angular.module('ylbWxApp')
      * PUT '/api/doctors/:id' will overwrite services, so need put data for all services even only changed one.
      */
     var updateService = function () {
-      $scope.jiahao.billingPrice = $scope.jiahao.price.toFixed(2);
-      $scope.huizhen.billingPrice = ($scope.huizhen.price * 1.1).toFixed(2);
-      $scope.suizhen.billingPrice = ($scope.suizhen.price * 1.1).toFixed(2);
+      $scope.jiahao.billingPrice = $rootScope.calculatePlatformPrice($scope.jiahao.price);
+      $scope.huizhen.billingPrice = $rootScope.calculatePlatformPrice($scope.huizhen.price);
+      $scope.suizhen.billingPrice = $rootScope.calculatePlatformPrice($scope.suizhen.price);
       var servicesData = [$scope.jiahao, $scope.huizhen, $scope.suizhen];
 
       $http.put('/api/doctors/' + $scope.doctor._id, {services: servicesData})
@@ -237,7 +237,7 @@ angular.module('ylbWxApp')
         serviceType: resources.doctorServices.jiahao.type,
         doctorId: $scope.doctor._id,
         patientId: currentUser.patient._id,
-        price: $scope.serviceStock.price,
+        price: $scope.serviceStock.billingPrice,
         quantity: 1,
         bookingTime: item.date
       };
@@ -274,7 +274,7 @@ angular.module('ylbWxApp')
         serviceType: resources.doctorServices.suizhen.type,
         doctorId: $scope.doctor._id,
         patientId: currentUser.patient._id,
-        price: $scope.modalData.price,
+        price: $scope.suizhen.billingPrice,
         quantity: $scope.modalData.quantity
       };
       $http.post('/api/orders', newOrder)

@@ -3,7 +3,7 @@
  */
 angular.module('ylbWxApp')
   .controller('wxPatientCasesCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$location', '$http', '$timeout', '$modal', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $state, $stateParams, $location, $http, $timeout, $modal, resources, commonUtils) {
-    var currentUser = $rootScope.checkUserVerified();
+    var currentUser = $scope.currentUser = $rootScope.checkUserVerified();
     var patientId = $stateParams.id ? $stateParams.id : currentUser.isPatient ? currentUser.patient._id : undefined;
     if (!patientId) {
       $rootScope.alertError('', '输入错误，无法显示患者病历。');
@@ -217,7 +217,7 @@ angular.module('ylbWxApp')
         serviceType: resources.doctorServices.jiahao.type,
         doctorId: item.doctorId,
         patientId: patientId,
-        price: $scope.serviceStock.price,
+        price: $scope.serviceStock.billingPrice,
         quantity: 1,
         bookingTime: item.date
       };
@@ -256,7 +256,7 @@ angular.module('ylbWxApp')
             $rootScope.alertWarn('', '医生没有设置随诊服务价格。', '', 1);
             $scope.newCase.link = undefined;
           } else {
-            $scope.modalData = {price: suizhen.billingPrice, quantity: 1};
+            $scope.modalData = {price: suizhen.price, quantity: 1};
             $scope.suizhen = suizhen;
             $scope.suizhenDoctor = resp.data;
             addSuizhenModal.$promise.then(addSuizhenModal.show);
@@ -276,7 +276,7 @@ angular.module('ylbWxApp')
         serviceType: resources.doctorServices.suizhen.type,
         doctorId: $scope.suizhenDoctor._id,
         patientId: patientId,
-        price: $scope.modalData.price,
+        price: $scope.suizhen.billingPrice,
         quantity: $scope.modalData.quantity,
         referee: {
           id: currentUser.doctor._id,
@@ -323,7 +323,7 @@ angular.module('ylbWxApp')
         serviceType: resources.doctorServices.huizhen.type,
         doctorId: doctorIds,
         patientId: patientId,
-        price: $scope.modalData.orderPrice,
+        price: $rootScope.calculatePlatformPrice($scope.modalData.orderPrice), // orderPrice is original price.
         quantity: 1,
         referee: {
           id: currentUser.doctor._id,
@@ -352,9 +352,9 @@ angular.module('ylbWxApp')
     $scope.huizhenDoctorChanges = function (idx) {
       var doctor = $scope.modalData.huizhenDoctors[idx];
       if (doctor.isSelected) {
-        $scope.modalData.orderPrice += doctor.servicePrice;
+        $scope.modalData.orderPrice += doctor.price;
       } else {
-        $scope.modalData.orderPrice -= doctor.servicePrice;
+        $scope.modalData.orderPrice -= doctor.price;
       }
     };
 
@@ -551,6 +551,7 @@ angular.module('ylbWxApp')
               var doctor = modalData.huizhenDoctors[idx];
               var huizhenService = $rootScope.getDoctorServiceByType(doctor, resources.doctorServices.huizhen.type);
               doctor.servicePrice = huizhenService.billingPrice;
+              doctor.price = huizhenService.price;
             }
             // init order price;
             modalData.orderPrice = 0;

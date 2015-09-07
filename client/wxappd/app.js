@@ -591,6 +591,15 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       }
     };
 
+    /**
+     * Platform plus 10% on original price, and the price always be integer.
+     * @param price
+     */
+    $rootScope.calculatePlatformPrice = function (price) {
+      // 200 * 1.1 = 220.00000000000003
+      return Math.ceil(Number.parseFloat((price * 1.1).toFixed(1)));
+    };
+
     var oStatus = resources.orderStatus;
     var finishStatus = [oStatus.finished.value, oStatus.expired.value, oStatus.cancelled.value];
     var warnStatus = [oStatus.init.value];
