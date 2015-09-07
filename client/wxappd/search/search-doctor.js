@@ -43,6 +43,9 @@ angular.module('ylbWxApp')
         if ($scope.search.name) {
           filter.name = '*' + $scope.search.name + '*';
         }
+        if ($scope.search.introduction) {
+          filter.introduction = '*' + $scope.search.introduction + '*';
+        }
         filter.level = {'$gt': 2}; // search result will only include 'real' doctors.
       }
 
