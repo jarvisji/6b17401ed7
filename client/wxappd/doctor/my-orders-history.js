@@ -10,6 +10,8 @@ angular.module('ylbWxApp')
     var getHistoryOrders = function () {
       $http.get('/api/doctors/' + currentUser.id + '/orders/history')
         .success(function (resp) {
+          var myRefereeOrders = [];
+          var myOrders = [];
           for (var i = 0; i < resp.data.length; i++) {
             var order = resp.data[i];
             order.displayType = resources.doctorServices[order.serviceType].label;
@@ -27,9 +29,13 @@ angular.module('ylbWxApp')
             }
             if (order.referee && order.referee.id && order.referee.id == currentUser.id) {
               order.refereeIncome = order.referee.income;
+              myRefereeOrders.push(angular.copy(order));
+            } else {
+              myOrders.push(angular.copy(order));
             }
           }
-          $scope.orders = resp.data;
+          $scope.orders = myOrders;
+          $scope.refereeOrders = myRefereeOrders;
         }).error(function (resp, status) {
           if (status == 403) {
             $rootScope.alertError('', '没有权限');
@@ -83,7 +89,7 @@ angular.module('ylbWxApp')
     };
     if (currentUser.isDoctor) {
       getHistoryOrders();
-      getShopOrders();
+      //getShopOrders();
       getWithdrawOrders();
       getSummary();
     }

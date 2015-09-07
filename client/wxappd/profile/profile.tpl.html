@@ -122,11 +122,11 @@
       <form role="form">
         <div class="input-group">
           <span class="input-group-btn">
-            <button class="btn green" type="button">加号</button>
+            <button class="btn green" type="button" disabled>加号</button>
 					</span>
           <input type="number" class="form-control text-right" placeholder="0" ng-model="jiahao.price">
           <span class="input-group-btn">
-					  <button class="btn" type="button">元/次</button>
+					  <button class="btn" type="button" disabled>元/次</button>
 					</span>
         </div>
         <p></p>
@@ -136,11 +136,11 @@
           <div class="panel-body">
             <div class="input-group" ng-repeat-start="(day, number) in jiahao.weekQuantity">
 						  <span class="input-group-btn">
-							  <button class="btn green-haze" type="button">{{days[day]}}</button>
+							  <button class="btn green-haze" type="button" disabled>{{days[day]}}</button>
 							</span>
               <input type="number" class="form-control text-right" placeholder="0" ng-model="jiahao.weekQuantity[day]">
 							<span class="input-group-btn">
-							  <button class="btn" type="button">个</button>
+							  <button class="btn" type="button" disabled>个</button>
 							</span>
             </div>
             <p ng-repeat-end></p>
@@ -149,22 +149,22 @@
 
         <div class="input-group">
 					<span class="input-group-btn">
-					  <button class="btn green" type="button">随诊</button>
+					  <button class="btn green" type="button" disabled>随诊</button>
 					</span>
           <input type="number" class="form-control text-right" placeholder="0" ng-model="suizhen.price">
 					<span class="input-group-btn">
-					  <button class="btn" type="button">元/月</button>
+					  <button class="btn" type="button" disabled>元/月</button>
 					</span>
         </div>
         <p></p>
 
         <div class="input-group">
           <span class="input-group-btn">
-					  <button class="btn green" type="button">会诊</button>
+					  <button class="btn green" type="button" disabled>会诊</button>
 					</span>
           <input type="number" class="form-control text-right" placeholder="0" placeholder="0" ng-model="huizhen.price">
 					<span class="input-group-btn">
-					  <button class="btn" type="button">元/次</button>
+					  <button class="btn" type="button" disabled>元/次</button>
 					</span>
         </div>
         <p></p>
