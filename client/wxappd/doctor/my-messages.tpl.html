@@ -1,0 +1,29 @@
+<div class="portlet light">
+  <div class="portlet-title tabbable-line">
+    <div class="caption">
+      <span class="caption-subject font-blue-madison bold uppercase">{{pageTitle}}</span>
+    </div>
+  </div>
+  <div class="portlet-body">
+    <span ng-show="groups.length == 0">没有留言</span>
+
+    <div class="general-item-list" ng-if="groups.length>0">
+      <div class="item" ng-repeat="group in groups">
+        <div class="item-head" style="position: relative">
+          <div class="item-details" style="width: 100%" ng-click="showDetails(group.user.id)">
+            <div class="item-pic-container">
+              <img class="item-pic" ng-src="{{group.user.avatar}}">
+              <span class="badge badge-danger" style="position: absolute; top: -5px; right: 5px;"
+                    ng-show="group.unread > 0">{{group.unread}}</span>
+            </div>
+            <span class="item-name primary-link" style="position: absolute;">{{group.user.name}}</span>
+            <span class="item-label" style="position: absolute; bottom: 0">{{group.lastMessage}}</span>
+          </div>
+          <span class="item-status" style="position: absolute; top: 0; right: 0;">{{group.lastTime|localeDate}}</span>
+        </div>
+        <div class="item-body">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -25,6 +25,10 @@ angular.module('ylbWxApp')
       jiwang: {value: 2},
       suizhen: {value: 3}
     },
+    messageStatus: {
+      unread: {value: 'unread', label: '未读'},
+      read: {value: 'read', label: '已读'}
+    },
     doctorServices: {
       jiahao: {type: 'jiahao', label: "加号"},
       huizhen: {type: 'huizhen', label: "会诊"},

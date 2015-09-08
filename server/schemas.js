@@ -78,6 +78,28 @@ module.exports = function () {
   doctorFriendSchema.index({from: 1, to: 1, status: 1, created: -1});
 
 
+  var messageSchema = new Schema({
+    from: {
+      id: String,
+      name: String,
+      avatar: String,
+      openid: String,
+      role: String // doctor, patient
+    },
+    to: {
+      id: String // to user id
+    },
+    status: {type: String, default: 'unread'}, // unread, read, failed, etc
+    message: String,
+    created: {type: Date, default: Date.now},
+    lastModified: {type: Date, default: Date.now}
+  });
+  messageSchema.pre('update', function () {
+    this.update({}, {$set: {lastModified: new Date()}});
+  });
+  messageSchema.index({'from.id': 1, 'to.id': 1, status: 1, created: -1});
+
+
   var serviceStockSchema = new Schema({
     doctorId: {type: String, index: true},
     serviceId: String,
@@ -344,7 +366,8 @@ module.exports = function () {
     doctorPatientRelationSchema: doctorPatientRelationSchema,
     wechatOAuthSchema: wechatOAuthSchema,
     adminUserSchema: adminUserSchema,
-    shopItemSchema: shopItemSchema
+    shopItemSchema: shopItemSchema,
+    messageSchema: messageSchema
   };
 }
 ;

@@ -1,0 +1,47 @@
+<div class="portlet light" style="background-color: transparent;">
+  <!--<div class="portlet-title tabbable-line">-->
+  <!--<div class="caption">-->
+  <!--<span class="caption-subject font-blue-madison bold uppercase">{{pageTitle}}</span>-->
+  <!--</div>-->
+  <!--</div>-->
+  <div class="portlet-body">
+    <span ng-show="messages.length == 0">没有留言</span>
+
+    <div class="" ng-if="messages.length>0">
+      <div class="message" ng-repeat="message in messages">
+        <div class="row">
+          <div class="col-xs-6 col-xs-offset-3">
+          <span class="label label-default center-block" style="background-color:rgba(119, 119, 119, 0.3)">
+            {{message.created|localeDateTime}}
+          </span>
+          </div>
+        </div>
+
+        <div class="space-10"></div>
+        <div class="row" ng-if="!message.isSendBySelf">
+          <div class="col-xs-10">
+            <img class="avatar-sm" style="vertical-align: top" ng-src="{{message.from.avatar}}">
+            <span class="message-content-left">{{message.message}}</span>
+            <span class="triangle"></span>
+          </div>
+        </div>
+        <div class="row" ng-if="message.isSendBySelf">
+          <div class="col-xs-10 col-xs-offset-2">
+            <img class="avatar-sm pull-right" ng-src="{{message.from.avatar}}">
+            <span class="message-content-right pull-right">{{message.message}}</span>
+            <span class="triangle"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<form>
+  <div class="input-group" style="position: fixed; bottom: 46px">
+    <input type="text" class="form-control" placeholder="留言..." ng-model="newMessage.message">
+    <span class="input-group-btn">
+      <button class="btn btn-default" type="button" ng-click="createMessage()">发布</button>
+    </span>
+  </div>
+</form>

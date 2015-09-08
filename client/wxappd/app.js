@@ -97,6 +97,16 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       templateUrl: 'wxappd/doctor/my-friends.tpl.html',
       controller: 'wxDoctorFriendsCtrl'
     });
+    $stateProvider.state('doctor-message-groups', {
+      url: '/doctor/messages/groups',
+      templateUrl: 'wxappd/doctor/my-messages.tpl.html',
+      controller: 'wxDoctorMessagesCtrl'
+    });
+    $stateProvider.state('doctor-messages-user', {
+      url: '/doctor/messages/:userId',
+      templateUrl: 'wxappd/doctor/my-messages-user.tpl.html',
+      controller: 'wxDoctorMessagesUserCtrl'
+    });
     $stateProvider.state('doctor-my-patients', {
       url: '/doctor/patients',
       templateUrl: 'wxappd/doctor/my-patients.tpl.html',
@@ -728,6 +738,10 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           "text": "我的医友",
           "href": "wxindex.html#/doctor/friends",
           "location": "doctor-my-friends"
+        }, {
+          "text": "医友留言",
+          "href": "wxindex.html#/doctor/messages/groups",
+          "location": "doctor-message-groups"
         }],
       sub3: [
         {

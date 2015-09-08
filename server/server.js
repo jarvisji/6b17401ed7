@@ -215,6 +215,28 @@ var registerRoutes = function () {
    * @Response: {data: true/false}
    */
   app.get('/api/relations/doctor/:doctorId/patient/:patientId', patientCtrl.getRelation);
+
+  /* -- Message APIs ------------------------------------------------------------------------------*/
+  /**
+   * POST 'api/messages'
+   * @Data: {'to': 'string', 'message': 'string'}
+   * Only create message when they are friends.
+   */
+  app.post('/api/messages', doctorCtrl.createMessage);
+  app.delete('/api/messages/:id', doctorCtrl.deleteMessage);
+  /**
+   * Get message groups of current user, results are group by relative users.
+   * return: [{user: 'object', lastTime: 'date', unread: 'int'}
+   */
+  app.get('/api/messages/groups', doctorCtrl.getMessageGroups);
+  /**
+   * Get messages between current user and group user.
+   * return: array of messages.
+   */
+  app.get('/api/messages/group/:userId', doctorCtrl.getGroupMessagesByUser);
+  app.get('/api/messages/current', doctorCtrl.getUserMessages);
+  app.put('/api/messages/:id/read', doctorCtrl.updateMessageReadStatus);
+
 };
 
 var startServer = function () {

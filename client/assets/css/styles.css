@@ -54,6 +54,66 @@ section {
   margin-top: 10px;
 }
 
+.message {
+  margin-bottom: 40px;
+}
+
+.message-content-left {
+  /*border: 1px gray solid;*/
+  display: inline-block;
+  border-radius: 4px;
+  width: 80%;
+  position: relative;
+  left: -2px;
+  top: 10px;
+  padding: 10px;
+  background-color: #FFFFFF;
+}
+
+.message-content-left + .triangle {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-right: 10px solid #FFFFFF;
+  border-bottom: 5px solid transparent;
+  position: absolute;
+  left: 62px;
+  top: 15px;
+}
+
+.message-content-right {
+  /*border: 1px gray solid;*/
+  border-radius: 4px;
+  width: 80%;
+  position: relative;
+  right: 10px;
+  top: 10px;
+  padding: 10px;
+  background-color: lawngreen;
+}
+
+.message-content-right + .triangle {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-left: 10px solid lawngreen;
+  border-bottom: 5px solid transparent;
+  position: absolute;
+  right: 72px;
+  top: 15px;
+}
+
+.avatar-sm {
+  width: 45px !important;
+  height: 45px !important;
+  margin-right: 10px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+  border-radius: 4px;
+}
+
 .avatar-md {
   width: 64px !important;
   height: 64px !important;
@@ -62,6 +122,68 @@ section {
 .avatar-lg {
   width: 128px !important;
   height: 128px !important;
+}
+
+/***
+Custom Bootstrap Badges
+***/
+.badge {
+  font-size: 11px !important;
+  font-weight: 300;
+  text-align: center;
+  height: 18px;
+  padding: 3px 6px 3px 6px;
+  -webkit-border-radius: 12px !important;
+  -moz-border-radius: 12px !important;
+  border-radius: 12px !important;
+  text-shadow: none !important;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.badge.badge-roundless {
+  -webkit-border-radius: 0 !important;
+  -moz-border-radius: 0 !important;
+  border-radius: 0 !important;
+}
+
+.badge.badge-empty {
+  display: inline-block;
+  padding: 0;
+  min-width: 8px;
+  height: 8px;
+  width: 8px;
+}
+
+/* Badge variants */
+.badge-default {
+  background-color: #c6c6c6;
+  background-image: none;
+}
+
+.badge-primary {
+  background-color: #428bca;
+  background-image: none;
+}
+
+.badge-info {
+  background-color: #89C4F4;
+  background-image: none;
+}
+
+.badge-success {
+  background-color: #45B6AF;
+  background-image: none;
+}
+
+.badge-danger {
+  background-color: #F3565D;
+  background-image: none;
+}
+
+.badge-warning {
+  background-color: #dfba49;
+  background-image: none;
 }
 
 .btn-circle {
@@ -73,63 +195,75 @@ section {
   color: #333333;
   background-color: #E5E5E5;
 }
+
 .btn.default:hover, .btn.default:focus, .btn.default:active, .btn.default.active {
   color: #333333;
   background-color: lightgray;
 }
+
 .open .btn.default.dropdown-toggle {
   color: #333333;
   background-color: lightgray;
 }
+
 .btn.default:active, .btn.default.active {
   background-image: none;
   background-color: #c6c6c6;
 }
+
 .btn.default:active:hover, .btn.default.active:hover {
   background-color: #cccccc;
 }
+
 .open .btn.default.dropdown-toggle {
   background-image: none;
 }
+
 .btn.default.disabled, .btn.default.disabled:hover, .btn.default.disabled:focus, .btn.default.disabled:active, .btn.default.disabled.active, .btn.default[disabled], .btn.default[disabled]:hover, .btn.default[disabled]:focus, .btn.default[disabled]:active, .btn.default[disabled].active, fieldset[disabled] .btn.default, fieldset[disabled] .btn.default:hover, fieldset[disabled] .btn.default:focus, fieldset[disabled] .btn.default:active, fieldset[disabled] .btn.default.active {
   background-color: #E5E5E5;
 }
+
 .btn.default .badge {
   color: #E5E5E5;
   background-color: #333333;
 }
 
-
 .red.btn {
   color: #FFFFFF;
   background-color: #cb5a5e;
 }
+
 .red.btn:hover, .red.btn:focus, .red.btn:active, .red.btn.active {
   color: #FFFFFF;
   background-color: #c23f44;
 }
+
 .open .red.btn.dropdown-toggle {
   color: #FFFFFF;
   background-color: #c23f44;
 }
+
 .red.btn:active, .red.btn.active {
   background-image: none;
   background-color: #b0383c;
 }
+
 .red.btn:active:hover, .red.btn.active:hover {
   background-color: #b83a3e;
 }
+
 .open .red.btn.dropdown-toggle {
   background-image: none;
 }
+
 .red.btn.disabled, .red.btn.disabled:hover, .red.btn.disabled:focus, .red.btn.disabled:active, .red.btn.disabled.active, .red.btn[disabled], .red.btn[disabled]:hover, .red.btn[disabled]:focus, .red.btn[disabled]:active, .red.btn[disabled].active, fieldset[disabled] .red.btn, fieldset[disabled] .red.btn:hover, fieldset[disabled] .red.btn:focus, fieldset[disabled] .red.btn:active, fieldset[disabled] .red.btn.active {
   background-color: #cb5a5e;
 }
+
 .red.btn .badge {
   color: #cb5a5e;
   background-color: #FFFFFF;
 }
-
 
 .font-blue-madison {
   color: #578ebe !important;

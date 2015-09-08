@@ -16,9 +16,11 @@ module.exports = function (app, api) {
   var CaseHistory = app.models.CaseHistory;
   var ServiceOrder = app.models.ServiceOrder;
   var Order = app.models.Order;
+  var Message = app.models.Message;
   var excludeFields = app.models.doctorExcludeFields;
   var orderStatus = app.consts.orderStatus;
   var orderTypes = app.consts.orderTypes;
+  var messageStatus = app.consts.messageStatus;
 
   var login = function (req, res) {
     var loginUser = req.body;
@@ -794,6 +796,187 @@ module.exports = function (app, api) {
   };
 
   /**
+   * POST 'api/messages'
+   * @Data: {'to': 'string', 'message': 'string'}
+   * Only create message when they(from, to) are friends.
+   */
+  var createMessage = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var message = req.body;
+
+    debug('createMessage(), receive request to create message: %o', message);
+
+    if (!message || !message.to || !message.message) {
+      return res.status(400).json(utils.jsonResult(new Error('invalid data')));
+    } else {
+      message.to = {id: message.to};
+      var toUserId = message.to.id;
+    }
+
+    var currentUserId;
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        message.from = {id: user.id, name: user.name, avatar: user.avatar, openid: user.wechat.openid};
+        currentUserId = user.id;
+        return DoctorFriend.find({
+          '$or': [{from: currentUserId, to: toUserId}, {from: toUserId, to: currentUserId}],
+          status: 'accepted'
+        }).exec();
+      }).then(function (friends) {
+        if (friends.length == 0) {
+          throw new Error('No privilege');
+        }
+        return Message.create(message);
+      }).then(function (createdMessage) {
+        res.json(utils.jsonResult(createdMessage));
+      }).then(null, function (err) {
+        utils.handleError(err, 'createMessage()', debug, res);
+      });
+  };
+  /**
+   * delete '/api/messages/:id'
+   * Only can delete message that created by self (from.id equals current user id).
+   */
+  var deleteMessage = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var messageId = req.params.id;
+
+    debug('deleteMessage(), receive request to delete message: %s', messageId);
+
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        return Message.findOne({_id: messageId, 'from.id': user.id}).exec();
+      }).then(function (message) {
+        if (!message) {
+          debug('deleteMessage(), user openid: %s has no privilege to delete message: %s', openid, messageId);
+          throw new Error('No privilege');
+        }
+        debug('deleteMessage(), deleted.');
+        message.remove();
+        res.json(utils.jsonResult('success'));
+      }).then(null, function (err) {
+        utils.handleError(err, 'deleteMessage()', debug, res);
+      });
+  };
+
+  /**
+   * get '/api/messages/current'
+   */
+  var getUserMessages = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        debug('getUserMessages(), receive request to get messages of userId: %s', user.id);
+        return Message.find({$or: [{'to.id': user.id}, {'from.id': user.id}]}).sort({created: -1}).exec();
+      }).then(function (messages) {
+        debug('getUserMessages(), find %d message.', messages.length);
+        res.json(utils.jsonResult(messages));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getUserMessages()', debug, res);
+      });
+  };
+
+  /**
+   * get '/api/messages/groups'
+   * Get message groups of current user, results are group by relative users.
+   * return: [{user: 'object', lastTime: 'date', unread: 'int'}
+   */
+  var getMessageGroups = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+
+    var currentUserId;
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        currentUserId = user.id;
+        debug('getMessageGroups(), receive request to get message groups of userId: %s', user.id);
+        return Message.find({$or: [{'to.id': user.id}, {'from.id': user.id}]}).sort({created: -1}).exec();
+      }).then(function (messages) {
+        debug('getMessageGroups(), find %d message.', messages.length);
+        var groups = [];
+        var userIdsInGroup = [];
+        for (var i = 0; i < messages.length; i++) {
+          var relUser;
+          if (messages[i].from.id == currentUserId) {
+            relUser = messages[i].to;
+          } else {
+            relUser = messages[i].from;
+          }
+          var groupIdx = userIdsInGroup.indexOf(relUser.id);
+          if (groupIdx == -1) {
+            groups.push({user: relUser, unread: 0, lastMessage: messages[i].message, lastTime: messages[i].created});
+            userIdsInGroup.push(relUser.id);
+            groupIdx = userIdsInGroup.length - 1;
+          }
+          if (messages[i].status == messageStatus.unread) {
+            groups[groupIdx].unread++;
+          }
+        }
+        res.json(utils.jsonResult(groups));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getMessageGroups()', debug, res);
+      });
+  };
+  /**
+   * get '/api/messages/group/:userId'
+   * Get messages between current user and group user.
+   * return: array of messages.
+   */
+  var getGroupMessagesByUser = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var relUserId = req.params.userId;
+
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        debug('getGroupMessagesByUser(), receive request to get messages of userId: %s and relUserId: %s', user.id, relUserId);
+        return Message.find({
+          $or: [
+            {'from.id': relUserId, 'to.id': user.id},
+            {'from.id': user.id, 'to.id': relUserId}]
+        }).sort({created: 1}).exec();
+      }).then(function (messages) {
+        debug('getGroupMessagesByUser(), find %d messages.', messages.length);
+        res.json(utils.jsonResult(messages));
+      }).then(null, function (err) {
+        utils.handleError(err, 'getGroupMessagesByUser()', debug, res);
+      });
+  };
+
+  /**
+   * PUT '/api/messages/:id/read'
+   * Only can update status of messages send to me (to.id equals current user id).
+   */
+  var updateMessageReadStatus = function (req, res) {
+    var openid = req.query.openid; // operator
+    var role = req.query.role; // operator
+    var messageId = req.params.id;
+
+    debug('updateMessageReadStatus(), receive request to update messages read status: %s', messageId);
+
+    var currentUserId;
+    utils.getUserByOpenid(openid, role)
+      .then(function (user) {
+        currentUserId = user.id;
+        return Message.findById(messageId).exec();
+      }).then(function (message) {
+        if (!message) {
+          throw new Error('Not found');
+        } else if (message.to.id != currentUserId) {
+          throw new Error('No privilege');
+        }
+        message.update({status: messageStatus.read}).exec();
+        res.json(utils.jsonResult('success'));
+      }).then(null, function (err) {
+        utils.handleError(err, 'updateMessageReadStatus()', debug, res);
+      });
+  };
+
+  /**
    * Remove some data not tend to expose to user.
    * @param doctor
    */
@@ -823,7 +1006,13 @@ module.exports = function (app, api) {
     getPatientRelations: getPatientRelations,
     getPatientsCases: getPatientsCases,
     getDoctorOrders: getDoctorOrders,
-    getDoctorOrdersSummary: getDoctorOrdersSummary
+    getDoctorOrdersSummary: getDoctorOrdersSummary,
+    createMessage: createMessage,
+    deleteMessage: deleteMessage,
+    getUserMessages: getUserMessages,
+    updateMessageReadStatus: updateMessageReadStatus,
+    getMessageGroups: getMessageGroups,
+    getGroupMessagesByUser: getGroupMessagesByUser
   };
 };
 

@@ -46,5 +46,9 @@ module.exports = {
     putong: {value: 1},
     jiwang: {value: 2},
     suizhen: {value: 3}
+  },
+  messageStatus: {
+    unread: 'unread',
+    read: 'read'
   }
 };
