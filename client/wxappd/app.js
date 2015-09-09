@@ -18,7 +18,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
       controller: 'entryCtrl'
     });
     $stateProvider.state('profile', {
-      url: '/profile/doctor/:openid',
+      url: '/profile/doctor/:openid?referee',
       templateUrl: 'wxappd/profile/profile.tpl.html',
       controller: 'wxProfileCtrl'
     });
@@ -173,7 +173,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
     // some page will cache data to avoid retrieve new data when click 'back' of browser.
     $rootScope.dataCache = {};
 
-    if (window.outerWidth >= 768) {
+    if (window.outerWidth >= 992) {
       $rootScope.isPc = true;
     }
 

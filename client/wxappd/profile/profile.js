@@ -8,8 +8,31 @@ angular.module('ylbWxApp')
     var currentUser = $scope.currentUser = $rootScope.checkUserVerified();
     var snapshot = {}; // snapshot data to compare changes.
     var openid = $stateParams.openid ? $stateParams.openid : currentUser.openid;
+    var refereeId = $stateParams.referee;
+    var referee; // only have data when refereeId is not undefined.
 
-    var loadDoctorData = function () {
+    if (openid) {
+      $scope.isSelf = openid == currentUser.openid;
+      if (commonUtils.isObjectId(openid)) {
+        $scope.isSelf = openid == currentUser.id;
+      }
+      loadDoctorData();
+    }
+    if (refereeId) {
+      loadReferee();
+    }
+
+
+    function loadReferee() {
+      $http.get('/api/doctors/' + refereeId)
+        .success(function (res) {
+          referee = res.data;
+        }).error(function (err) {
+          $rootScope.alertError(null, err, status);
+        });
+    }
+
+    function loadDoctorData() {
       var filter = {filter: {'wechat.openid': openid}};
       if (commonUtils.isObjectId(openid)) {
         filter = {filter: {'_id': openid}};
@@ -28,13 +51,7 @@ angular.module('ylbWxApp')
           $rootScope.alertError(null, err, status);
         });
     };
-    if (openid) {
-      $scope.isSelf = openid == currentUser.openid;
-      if (commonUtils.isObjectId(openid)) {
-        $scope.isSelf = openid == currentUser.id;
-      }
-      loadDoctorData();
-    }
+
 
     var loadDoctorFriendRelationship = function () {
       if (currentUser.isDoctor) {
@@ -246,6 +263,14 @@ angular.module('ylbWxApp')
         quantity: 1,
         bookingTime: item.date
       };
+      if (refereeId) {
+        newOrder.referee = {
+          id: referee._id,
+          name: referee.name,
+          avatar: referee.avatar,
+          effectDate: new Date()
+        };
+      }
       $http.post('/api/orders', newOrder)
         .success(function (resp) {
           addJiahaoModal.$promise.then(addJiahaoModal.hide);
@@ -282,6 +307,14 @@ angular.module('ylbWxApp')
         price: $scope.suizhen.billingPrice,
         quantity: $scope.modalData.quantity
       };
+      if (refereeId) {
+        newOrder.referee = {
+          id: referee._id,
+          name: referee.name,
+          avatar: referee.avatar,
+          effectDate: new Date()
+        };
+      }
       $http.post('/api/orders', newOrder)
         .success(function (resp) {
           addSuizhenModal.$promise.then(addSuizhenModal.hide);
@@ -363,6 +396,14 @@ angular.module('ylbWxApp')
         price: $scope.modalData.orderPrice,
         quantity: 1
       };
+      if (refereeId) {
+        newOrder.referee = {
+          id: referee._id,
+          name: referee.name,
+          avatar: referee.avatar,
+          effectDate: new Date()
+        };
+      }
       $http.post('/api/orders', newOrder)
         .success(function (resp) {
           addSuizhenModal.$promise.then(addHuizhenModal.hide);

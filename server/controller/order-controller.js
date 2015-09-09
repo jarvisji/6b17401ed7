@@ -277,6 +277,7 @@ module.exports = function (app) {
           if (order.serviceType == serviceTypes.jiahao.type) {
             if (newStatus == orderStatus.paid) {
               order.status = orderStatus.confirmed;
+              calculateDoctorIncome(order);
             }
           } else if (order.serviceType == serviceTypes.huizhen.type) {
             // for 'huizhen' orders, one doctor 'confirmed' will not update order status.
@@ -365,18 +366,18 @@ module.exports = function (app) {
           if (refereeId != doctor.id) {
             // 推荐人不是医生自己，医生得80%，累加订单服务金额，最后推荐人得20%，
             totalServicePrice += servicePrice;
-            doctor.income = (servicePrice * 0.8).toFixed(2);
+            doctor.income = Math.round(servicePrice * 0.8);
           } else {
             // 推荐人是医生自己，不计算推荐所得，医生得100%。
-            doctor.income = servicePrice.toFixed(2);
+            doctor.income = servicePrice;
           }
         } else {
           // 无推荐人，每个医生得100%
-          doctor.income = servicePrice.toFixed(2);
+          doctor.income = servicePrice;
         }
       }
       if (refereeId) {
-        order.referee.income = (totalServicePrice * 0.2).toFixed(2);
+        order.referee.income = Math.round(totalServicePrice * 0.2);
       }
     };
 

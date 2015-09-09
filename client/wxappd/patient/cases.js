@@ -441,7 +441,7 @@ angular.module('ylbWxApp')
         target = {targetType: 'state', name: 'profile-patient', params: {openid: item.id}};
       }
       if (linkType == resources.linkTypes.doctor.value) {
-        target = {targetType: 'state', name: 'profile', params: {openid: item.id}};
+        target = {targetType: 'state', name: 'profile', params: {openid: item.id, referee: currentUser.id}};
       }
       if (linkType == resources.linkTypes.shop.value) {
         newLink.avatar = item.picUrl;
