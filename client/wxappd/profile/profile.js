@@ -4,7 +4,7 @@
  * Created by Ting on 2015/7/11.
  */
 angular.module('ylbWxApp')
-  .controller('wxProfileCtrl', ['$scope', '$rootScope', '$stateParams', '$http', '$alert', '$modal', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $stateParams, $http, $alert, $modal, resources, commonUtils) {
+  .controller('wxProfileCtrl', ['$scope', '$rootScope', '$state', '$stateParams', '$http', '$alert', '$modal', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $state, $stateParams, $http, $alert, $modal, resources, commonUtils) {
     var currentUser = $scope.currentUser = $rootScope.checkUserVerified();
     var snapshot = {}; // snapshot data to compare changes.
     var openid = $stateParams.openid ? $stateParams.openid : currentUser.openid;
@@ -133,6 +133,11 @@ angular.module('ylbWxApp')
         // edit
       }
       $scope.editingService = !$scope.editingService;
+    };
+
+    $scope.sendMessage = function () {
+      var profileDoctorId = $scope.doctor._id;
+      $state.go('doctor-messages-user', {userId: profileDoctorId});
     };
 
     /**

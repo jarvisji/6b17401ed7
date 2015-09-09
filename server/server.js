@@ -235,7 +235,7 @@ var registerRoutes = function () {
    */
   app.get('/api/messages/group/:userId', doctorCtrl.getGroupMessagesByUser);
   app.get('/api/messages/current', doctorCtrl.getUserMessages);
-  app.put('/api/messages/:id/read', doctorCtrl.updateMessageReadStatus);
+  app.put('/api/messages/group/:userId', doctorCtrl.updateMessageReadStatus);
 
 };
 

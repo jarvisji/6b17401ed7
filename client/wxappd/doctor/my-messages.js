@@ -43,9 +43,10 @@ angular.module('ylbWxApp')
       $state.go('doctor-messages-user', {userId: relUserId});
     };
   }])
-  .controller('wxDoctorMessagesUserCtrl', ['$scope', '$rootScope', '$http', '$stateParams', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $stateParams, resources, commonUtils) {
+  .controller('wxDoctorMessagesUserCtrl', ['$scope', '$rootScope', '$http', '$stateParams', '$timeout', 'ylb.resources', 'ylb.commonUtils', function ($scope, $rootScope, $http, $stateParams, $timeout, resources, commonUtils) {
     var currentUser = $rootScope.checkUserVerified();
     var userId = $stateParams.userId;
+    var timer;
     $scope.newMessage = {to: userId};
 
     getMessages();
@@ -53,19 +54,36 @@ angular.module('ylbWxApp')
     function getMessages() {
       $http.get('/api/messages/group/' + userId)
         .success(function (res) {
+          var hasUnreadMessages = false;
           for (var i = 0; i < res.data.length; i++) {
             var message = res.data[i];
             if (message.from.id == currentUser.id) {
               message.isSendBySelf = true;
             }
+            if (message.status == resources.messageStatus.unread.value && !hasUnreadMessages) {
+              hasUnreadMessages = true;
+            }
           }
           $scope.messages = res.data;
+
+          if (hasUnreadMessages) {
+            timer = $timeout(changeMessagesStatus2Read, 3000);
+          }
+
         }).error(function (err) {
           $rootScope.alertError(null, err, status);
         });
     }
 
-    $scope.createMessage = function() {
+
+    function changeMessagesStatus2Read() {
+      $http.put('/api/messages/group/' + userId)
+        .error(function (err) {
+          $rootScope.alertError(null, err, status);
+        });
+    }
+
+    $scope.createMessage = function () {
       console.log($scope.newMessage);
       if ($scope.newMessage.message) {
         $http.post('/api/messages', $scope.newMessage)
@@ -79,5 +97,9 @@ angular.module('ylbWxApp')
       }
     };
 
+    $scope.$on("$destroy", function (event) {
+        $timeout.cancel(timer);
+      }
+    );
 
   }]);

@@ -912,7 +912,7 @@ module.exports = function (app, api) {
             userIdsInGroup.push(relUser.id);
             groupIdx = userIdsInGroup.length - 1;
           }
-          if (messages[i].status == messageStatus.unread) {
+          if (messages[i].status == messageStatus.unread && messages[i].from.id != currentUserId) {
             groups[groupIdx].unread++;
           }
         }
@@ -948,28 +948,26 @@ module.exports = function (app, api) {
   };
 
   /**
-   * PUT '/api/messages/:id/read'
+   * PUT '/api/messages/group/:userId'
    * Only can update status of messages send to me (to.id equals current user id).
    */
   var updateMessageReadStatus = function (req, res) {
     var openid = req.query.openid; // operator
     var role = req.query.role; // operator
-    var messageId = req.params.id;
+    var relUserId = req.params.userId;
 
-    debug('updateMessageReadStatus(), receive request to update messages read status: %s', messageId);
+    debug('updateMessageReadStatus(), receive request to update all unread messages to read status with userId: %s', relUserId);
 
     var currentUserId;
     utils.getUserByOpenid(openid, role)
       .then(function (user) {
         currentUserId = user.id;
-        return Message.findById(messageId).exec();
+        return Message.update({
+          'from.id': relUserId,
+          'to.id': currentUserId,
+          status: messageStatus.unread
+        }, {status: messageStatus.read}, {multi: true}).exec();
       }).then(function (message) {
-        if (!message) {
-          throw new Error('Not found');
-        } else if (message.to.id != currentUserId) {
-          throw new Error('No privilege');
-        }
-        message.update({status: messageStatus.read}).exec();
         res.json(utils.jsonResult('success'));
       }).then(null, function (err) {
         utils.handleError(err, 'updateMessageReadStatus()', debug, res);

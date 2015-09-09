@@ -65,7 +65,7 @@ section {
   width: 80%;
   position: relative;
   left: -2px;
-  top: 10px;
+  top: 0;
   padding: 10px;
   background-color: #FFFFFF;
 }
@@ -87,7 +87,7 @@ section {
   width: 80%;
   position: relative;
   right: 10px;
-  top: 10px;
+  top: 0;
   padding: 10px;
   background-color: lawngreen;
 }

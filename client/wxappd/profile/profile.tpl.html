@@ -18,9 +18,10 @@
         <button type="button" class="btn btn-primary btn-circle btn-lg" ng-if="currentUser.isPatient && !isFollowed"
                 ng-click="showAddFriendModal('doctor')">加为好友
         </button>
-        <!--<button type="button" class="btn btn-danger btn-circle btn-lg" ng-show="currentUser.isPatient && isFollowed"-->
-        <!--ng-click="unfollowDoctor()">取消关注-->
-        <!--</button>-->
+        <button type="button" class="btn btn-success btn-circle btn-lg"
+                ng-if="friendStatus.status=='accepted'" ng-click="sendMessage()">发消息
+        </button>
+
         <button type="button" class="btn btn-success btn-circle btn-lg"
                 ng-if="currentUser.isDoctor && !friendStatus" ng-click="showAddFriendModal()">加为好友
         </button>
