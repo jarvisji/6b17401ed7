@@ -42,13 +42,16 @@ var registerModels = function () {
 
 var registerRoutes = function () {
   debug('Register routes...');
-  var api = new wechatApi(conf.wechat.appid, conf.wechat.appsecret);
+  // 有两个公众号，分别对应医生端和患者端，因此wechatApi也有两个实例。
+  // 除了和粉丝有关的接口调用，使用apip，其它公共资源，如图片等都用医生端的api实例。
+  var api = new wechatApi(conf.wechat.appid, conf.wechat.appsecret); // api for doctor public account
+  var apip = new wechatApi(conf.wechatp.appid, conf.wechatp.appsecret); // api for patient public account
   var wxproxyDoctor = require('./middleware/wxproxy-doctor')(app, api);
-  var wxproxyPatient = require('./middleware/wxproxy-patient')(app, api);
+  var wxproxyPatient = require('./middleware/wxproxy-patient')(app, apip);
   var doctorCtrl = require('./controller/doctor-controller')(app, api);
   var patientCtrl = require('./controller/patient-controller')(app, api);
   var orderCtrl = require('./controller/order-controller')(app);
-  var wechatCtrl = require('./controller/wechat-controller')(app, api);
+  var wechatCtrl = require('./controller/wechat-controller')(app, api, apip);
   var adminCtrl = require('./controller/admin-controller')(app);
 
   app.post('/admin/login', adminCtrl.login);
@@ -78,6 +81,9 @@ var registerRoutes = function () {
 
   app.use(wechatOAuth);
   /* -- The following APIs need 'Authorization' header--------------------------------------------------------*/
+  app.get('/wechat/qrcode/doctor/:openid', wechatCtrl.getQrCode);
+
+
   app.post('/api/doctors', doctorCtrl.createDoctor);
   app.get('/api/doctors', doctorCtrl.findDoctors);
   app.get('/api/doctors/:id', doctorCtrl.getDoctor);

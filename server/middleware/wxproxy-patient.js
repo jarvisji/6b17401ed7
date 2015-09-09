@@ -27,7 +27,11 @@ module.exports = function (app, api) {
           }, function (err, raw) {
             if (err) return debug('Subscribe: Update patient error: ', err);
             debug('Subscribe: Update patient success: ', raw);
-            res.reply(resources.get('event.subscribe.welcome'));
+            if (message.EventKey) {
+              handleSubscribeMessageKey(message, res);
+            } else {
+              res.reply(resources.get('event.subscribe.welcome'));
+            }
           });
         } else {
           debug('Subscribe: Patient not exist, create.');
@@ -41,7 +45,11 @@ module.exports = function (app, api) {
             }, function (err, raw) {
               if (err) return debug('Subscribe: Save patient error: ', err);
               debug('Subscribe: Save patient success: ', raw);
-              res.reply(resources.get('event.subscribe.welcome'));
+              if (message.EventKey) {
+                handleSubscribeMessageKey(message, res);
+              } else {
+                res.reply(resources.get('event.subscribe.welcome'));
+              }
             });
           });
         }
@@ -58,7 +66,24 @@ module.exports = function (app, api) {
     });
   };
 
-  return wechat(conf.wechat, function (req, res, next) {
+  var handleSubscribeMessageKey = function (message, res) {
+    if (message.EventKey) {
+      // for scan QR code of doctor.
+      // EventKey: 'qrscene_profile-oWTqJs8SEbDON98vMor20rnXh9UQ',
+      // Refer to app.js, 'profile' is state name, corresponding url is '/profile/doctor/:openid'.
+      var doctorQrScenePrefix = 'qrscene_profile-';
+      if (message.EventKey.indexOf(doctorQrScenePrefix) == 0) {
+        var doctorOpenId = message.EventKey.substr(doctorQrScenePrefix.length, message.EventKey.length);
+        var profileUrl = '/profile/doctor/' + doctorOpenId;
+        var profilePage = conf.serverUrl + conf.wxIndexPageUrl + profileUrl;
+        debug('handleSubscribeMessageKey(), user subscribe via scan QR code of doctor openid: %s', doctorOpenId);
+        debug('handleSubscribeMessageKey(), redirecting to profile page: %s', profilePage);
+        res.redirect(profilePage);
+      }
+    }
+  };
+
+  return wechat(conf.wechatp, function (req, res, next) {
       var message = req.weixin;
       debug(req.url);
       debug('Receive wechat message: ', message);
@@ -76,6 +101,18 @@ module.exports = function (app, api) {
         }
         debug('Redirecting to: %s', url);
         res.redirect(url);
+      } else if (message.MsgType == 'event' && message.Event == 'SCAN') {
+        // User scan QR code of doctor, and he already subscribed the PATIENT public account.
+        // EventKey: 'profile-oWTqJs8SEbDON98vMor20rnXh9UQ',
+        var doctorQrScenePrefix = 'profile-';
+        if (message.EventKey.indexOf(doctorQrScenePrefix) == 0) {
+          var doctorOpenId = message.EventKey.substr(doctorQrScenePrefix.length, message.EventKey.length);
+          var profileUrl = '/profile/doctor/' + doctorOpenId;
+          var profilePage = conf.serverUrl + conf.wxIndexPageUrl + profileUrl;
+          debug('handleScanEvent, user (already subscribed) scan QR code of doctor openid: %s', doctorOpenId);
+          debug('handleScanEvent, redirecting to profile page: %s', profilePage);
+          res.redirect(profilePage);
+        }
       }
     }
   );

@@ -5,7 +5,7 @@ var request = require('request');
 var utils = require('../middleware/utils');
 var debug = require('debug')('ylb.wechatCtrl');
 
-module.exports = function (app, api, oauth) {
+module.exports = function (app, api, apip, oauth) {
   var authUtils = require('../utils/auth-utils')(app);
   var excludeFields = app.models.doctorExcludeFields;
   var patientExcludeFields = app.models.patientExcludeFields;
@@ -20,6 +20,29 @@ module.exports = function (app, api, oauth) {
           res.json(result);
         }
       });
+    },
+    /**
+     * GET '/wechat/qrcode/doctor/:openid'
+     * Get QR code for doctor. Notice, we want user scan the QR code to follow PATIENT public account, so we use 'apip'.
+     * @param req
+     * @param res
+     */
+    getQrCode: function (req, res) {
+      var stateName = 'profile';
+      var stateParam = req.params.openid;
+      var senseId = stateName + '-' + stateParam;
+      debug('getQrCode(), receive request to get QR code for openid: %s', stateParam);
+      apip.createLimitQRCode(senseId, function (err, data) {
+        if (err) {
+          return utils.handleError(err, 'getQrCode()', debug, res);
+        }
+        // return data:
+        // { ticket: 'gQH88DoAAAAAAAAAASxodHRwOi8vd2VpeGluLnFxLmNvbS9xL0NVZzMtQWZtR1E1Z0J1b3ZKbUNkAAIE0NzvVQMEAAAAAA==',
+        //  url: 'http://weixin.qq.com/q/CUg3-AfmGQ5gBuovJmCd' }
+        var ticket = data.ticket;
+        var qrCodeUrl = apip.showQRCodeURL(ticket);
+        res.json(utils.jsonResult({qrCodeUrl: qrCodeUrl}));
+      })
     },
     getJsSdkConfig: function (req, res) {
       var param = {

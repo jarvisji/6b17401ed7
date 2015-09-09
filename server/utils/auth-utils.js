@@ -30,7 +30,11 @@ module.exports = function (app) {
   };
   if (!this.oauth) {
     this.oauth = new OAuth(conf.wechat.appid, conf.wechat.appsecret, getToken, saveToken);
-    debug('Initialized wechat-oauth middleware.');
+    debug('Initialized wechat-oauth middleware for doctor.');
+  }
+  if (!this.oauthp) {
+    this.oauthp = new OAuth(conf.wechatp.appid, conf.wechatp.appsecret, getToken, saveToken);
+    debug('Initialized wechat-oauth middleware for patient.');
   }
 
   return {

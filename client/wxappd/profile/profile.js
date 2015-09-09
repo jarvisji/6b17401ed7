@@ -497,5 +497,13 @@ angular.module('ylbWxApp')
           $rootScope.alertError(null, resp, status);
         });
     };
+    $scope.showQrCode = function () {
+      $http.get('/wechat/qrcode/doctor/' + $scope.doctor.wechat.openid)
+        .success(function (resp) {
+          window.location.href = resp.data.qrCodeUrl;
+        }).error(function (resp, status) {
+          $rootScope.alertError(null, resp, status);
+        });
+    };
 
   }]);
