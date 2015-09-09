@@ -1131,12 +1131,8 @@ Portlets
   /* display space on top for desktop view */
   .page-content {
     margin: 20px 0;
+    overflow: hidden;
   }
-}
-
-/* Page Content */
-.page-content {
-  overflow: hidden;
 }
 
 .page-content .page-content-fixed-header {
