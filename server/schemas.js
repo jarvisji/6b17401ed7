@@ -21,6 +21,7 @@ module.exports = function () {
 
 
   var doctorSchema = new Schema({
+    isNurse: {type: Boolean, default: false},
     name: String,
     number: {type: Number, index: true, unique: true},
     level: {type: String, default: 1}, // 1-normal, 2-regular, 3-real

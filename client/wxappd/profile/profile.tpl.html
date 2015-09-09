@@ -48,7 +48,8 @@
   <div class="portlet light">
     <div class="portlet-title">
       <div class="caption">
-        <span class="caption-subject font-blue-madison bold uppercase">医生信息</span>
+        <span class="caption-subject font-blue-madison bold uppercase" ng-show="doctor.isNurse">护士信息</span>
+        <span class="caption-subject font-blue-madison bold uppercase" ng-show="!doctor.isNurse">医生信息</span>
       </div>
       <div class="actions" ng-if="isSelf">
         <a ui-sref="profile-edit({ openid: doctor.wechat.openid })" class="btn btn-circle btn-icon-only btn-default">
@@ -88,7 +89,7 @@
   </div>
 
 
-  <div class="portlet light" ng-if="isSelf">
+  <div class="portlet light" ng-if="isSelf && !doctor.isNurse">
     <div class="portlet-title">
       <div class="caption">
         <span class="caption-subject font-blue-madison bold uppercase">服务价格</span>
@@ -180,7 +181,7 @@
   </div>
 
 
-  <div ng-if="!isSelf">
+  <div ng-if="!isSelf && !doctor.isNurse">
     <div class="dashboard-stat2">
       <div class="display">
         <div class="number">

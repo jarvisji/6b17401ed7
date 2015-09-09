@@ -324,6 +324,7 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
           verifiedData.id = verifiedData.patient._id;
         } else {
           verifiedData.id = verifiedData.doctor._id;
+          verifiedData.isNurse = verifiedData.doctor.isNurse;
         }
         return verifiedData;
       }

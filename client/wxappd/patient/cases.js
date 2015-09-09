@@ -586,7 +586,9 @@ angular.module('ylbWxApp')
       if (linkType == resources.linkTypes.serviceJiahao.value) {
         modalData.title = '选择加号服务';
         _getDoctorFriends(function (resp) {
-          resp.data.unshift(currentUser.doctor);
+          if (!currentUser.isNurse) {
+            resp.data.unshift(currentUser.doctor);
+          }
           modalData.data = $rootScope.generateDoctorDisplayData(resp.data);
           $scope.modalData = modalData;
           showAddLinkModal();
@@ -595,7 +597,9 @@ angular.module('ylbWxApp')
       if (linkType == resources.linkTypes.serviceSuizhen.value) {
         modalData.title = '选择随诊服务';
         _getDoctorFriends(function (resp) {
-          resp.data.unshift(currentUser.doctor);
+          if (!currentUser.isNurse) {
+            resp.data.unshift(currentUser.doctor);
+          }
           modalData.data = $rootScope.generateDoctorDisplayData(resp.data);
           $scope.modalData = modalData;
           showAddLinkModal();
@@ -608,7 +612,9 @@ angular.module('ylbWxApp')
           // so user may open the dialog again to modify selections.
           // if user click 'cancel' button, will clean '$scope.modalData.huizhenDoctors', and refresh all doctors data.
           _getDoctorFriends(function (resp) {
-            resp.data.unshift(angular.copy(currentUser.doctor));
+            if (!currentUser.isNurse) {
+              resp.data.unshift(angular.copy(currentUser.doctor));
+            }
             modalData.huizhenDoctors = $rootScope.generateDoctorDisplayData(resp.data);
             // get huizhen service price.
             for (var idx in modalData.huizhenDoctors) {
