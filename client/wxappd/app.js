@@ -173,6 +173,10 @@ angular.module('ylbWxApp', ['ui.router', 'ngCookies', 'ngAnimate', 'ngTouch', 'n
     // some page will cache data to avoid retrieve new data when click 'back' of browser.
     $rootScope.dataCache = {};
 
+    if (window.outerWidth >= 768) {
+      $rootScope.isPc = true;
+    }
+
     $rootScope.$on('$stateChangeSuccess',
       function (event, toState, toParams, fromState, fromParams) {
         console.log('$stateChangeSuccess: from: %s, to: %s', fromState.name, toState.name);
