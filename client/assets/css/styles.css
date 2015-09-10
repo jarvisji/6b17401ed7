@@ -62,7 +62,7 @@ section {
   /*border: 1px gray solid;*/
   display: inline-block;
   border-radius: 4px;
-  width: 80%;
+  width: 74%;
   position: relative;
   left: -2px;
   top: 0;
@@ -84,7 +84,7 @@ section {
 .message-content-right {
   /*border: 1px gray solid;*/
   border-radius: 4px;
-  width: 80%;
+  width: 74%;
   position: relative;
   right: 10px;
   top: 0;
