@@ -29,10 +29,9 @@ module.exports = function (app, api) {
           }, function (err, raw) {
             if (err) return debug('Subscribe: Update patient error: ', err);
             debug('Subscribe: Update patient success: ', raw);
+            res.reply(resources.get('event.subscribe.welcome'));
             if (message.EventKey) {
               handleSubscribeMessageKey(message, res);
-            } else {
-              res.reply(resources.get('event.subscribe.welcome'));
             }
           });
         } else {
@@ -47,10 +46,9 @@ module.exports = function (app, api) {
             }, function (err, raw) {
               if (err) return debug('Subscribe: Save patient error: ', err);
               debug('Subscribe: Save patient success: ', raw);
+              res.reply(resources.get('event.subscribe.welcome'));
               if (message.EventKey) {
                 handleSubscribeMessageKey(message, res);
-              } else {
-                res.reply(resources.get('event.subscribe.welcome'));
               }
             });
           });
