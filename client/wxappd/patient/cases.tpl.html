@@ -56,7 +56,7 @@
           {{case.content}}
 
           <div ng-if="case.link.linkType == 'image'">
-            <img ng-src="{{case.link.avatar}}" style="width:30%">
+            <img ng-src="{{case.link.avatar}}" style="width:30%" ng-click="showLinkTarget(case.link)">
           </div>
 
 
