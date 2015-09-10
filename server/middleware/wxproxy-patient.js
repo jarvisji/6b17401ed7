@@ -20,37 +20,45 @@ module.exports = function (app, api) {
     debug('Patient subscribe');
     api.getUser(message.FromUserName, function (err, result) {
       if (err) return debug('Subscribe: Get wechat user error: ', err);
-      Patient.find({"wechat.openid": result.openid}, function (err, patient) {
-        if (err) return debug('Subscribe: Find patient in db error: ', err);
-        if (patient.length && patient.length > 0) {
-          debug('Subscribe: Patient exist, update.');
-          Patient.update({"wechat.openid": result.openid}, {
-            wechat: result
-          }, function (err, raw) {
-            if (err) return debug('Subscribe: Update patient error: ', err);
-            debug('Subscribe: Update patient success: ', raw);
-            res.reply(resources.get('event.subscribe.welcome'));
-            if (message.EventKey) {
-              handleSubscribeMessageKey(message, res);
-            }
-          });
+      Doctor.find({'wechat.openid': result.openid}, function (err, doctor) {
+        if (err) return debug('Subscribe: check is user already registered as doctor error: %o', err);
+        if (doctor) {
+          debug('openid: %s already registered as doctor, cannot register as patient again.', result.openid);
+          res.reply(resources.get('event.subscribe.exist.doctor'));
         } else {
-          debug('Subscribe: Patient not exist, create.');
-          Patient.find({}, 'number').limit(1).sort({'number': -1}).exec(function (err, maxNumberPatient) {
-            if (err) return debug('Get patient max number error: ', err);
-            console.log('maxNumberPatient:', maxNumberPatient);
-            Patient.create({
-              mobile: 'openid_' + result.openid,
-              number: maxNumberPatient.length > 0 ? maxNumberPatient[0].number + 10000 : 10001,
-              wechat: result
-            }, function (err, raw) {
-              if (err) return debug('Subscribe: Save patient error: ', err);
-              debug('Subscribe: Save patient success: ', raw);
-              res.reply(resources.get('event.subscribe.welcome'));
-              if (message.EventKey) {
-                handleSubscribeMessageKey(message, res);
-              }
-            });
+          Patient.find({"wechat.openid": result.openid}, function (err, patient) {
+            if (err) return debug('Subscribe: Find patient in db error: %o', err);
+            if (patient.length && patient.length > 0) {
+              debug('Subscribe: Patient exist, update.');
+              Patient.update({"wechat.openid": result.openid}, {
+                wechat: result
+              }, function (err, raw) {
+                if (err) return debug('Subscribe: Update patient error: ', err);
+                debug('Subscribe: Update patient success: ', raw);
+                res.reply(resources.get('event.subscribe.welcome'));
+                if (message.EventKey) {
+                  handleSubscribeMessageKey(message, res);
+                }
+              });
+            } else {
+              debug('Subscribe: Patient not exist, create.');
+              Patient.find({}, 'number').limit(1).sort({'number': -1}).exec(function (err, maxNumberPatient) {
+                if (err) return debug('Get patient max number error: ', err);
+                console.log('maxNumberPatient:', maxNumberPatient);
+                Patient.create({
+                  mobile: 'openid_' + result.openid,
+                  number: maxNumberPatient.length > 0 ? maxNumberPatient[0].number + 10000 : 10001,
+                  wechat: result
+                }, function (err, raw) {
+                  if (err) return debug('Subscribe: Save patient error: ', err);
+                  debug('Subscribe: Save patient success: ', raw);
+                  res.reply(resources.get('event.subscribe.welcome'));
+                  if (message.EventKey) {
+                    handleSubscribeMessageKey(message, res);
+                  }
+                });
+              });
+            }
           });
         }
       });
