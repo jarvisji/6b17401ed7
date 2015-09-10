@@ -4,10 +4,12 @@
 var wechat = require('wechat');
 var debug = require('debug')('ylb.wechat.patient');
 var resources = require('../resources')();
+var utils = require('../middleware/utils');
 var conf = require('../conf');
 
 module.exports = function (app, api) {
   var Patient = app.models.Patient;
+  var Doctor = app.models.Doctor;
 
   /**
    * Get wechat account information and create patient account if not exist.
@@ -66,19 +68,52 @@ module.exports = function (app, api) {
     });
   };
 
+  /**
+   * 获得用户扫码时间推送后，回复医生的图文信息
+   * @param doctorOpenId
+   * @param res
+   */
+  var sendDoctorNews = function (doctorOpenId, toOpenId, res) {
+    debug('sendDoctorNews(), find doctor by openid: %s', doctorOpenId);
+    Doctor.findOne({'wechat.openid': doctorOpenId}, function (err, doctor) {
+      if (err) {
+        debug('sendDoctorNews(), find doctor error: %o', err);
+        return res.reply('');
+      }
+      if (!doctor) {
+        debug('sendDoctorNews(), doctor not found: %s', doctorOpenId);
+        return res.reply('');
+      }
+      var profileUrl = '/profile/doctor/' + doctorOpenId;
+      var profilePage = conf.serverUrl + conf.wxIndexPageUrl + profileUrl;
+      var articles = [
+        {
+          "title": doctor.name,
+          "description": doctor.title + '  ' + doctor.department + '  ' + doctor.hospital,
+          "url": profilePage,
+          "picurl": doctor.avatar
+        }];
+      api.sendNews(toOpenId, articles, function (err, data) {
+        if (err) {
+          debug('sendNews error: %o', err);
+        } else {
+          debug('sendNews success');
+        }
+      });
+    });
+  };
+
   var handleSubscribeMessageKey = function (message, res) {
     if (message.EventKey) {
+      debug('user scan QR code, senceStr: %s', message.EventKey);
       // for scan QR code of doctor.
       // EventKey: 'qrscene_profile-oWTqJs8SEbDON98vMor20rnXh9UQ',
       // Refer to app.js, 'profile' is state name, corresponding url is '/profile/doctor/:openid'.
       var doctorQrScenePrefix = 'qrscene_profile-';
       if (message.EventKey.indexOf(doctorQrScenePrefix) == 0) {
         var doctorOpenId = message.EventKey.substr(doctorQrScenePrefix.length, message.EventKey.length);
-        var profileUrl = '/profile/doctor/' + doctorOpenId;
-        var profilePage = conf.serverUrl + conf.wxIndexPageUrl + profileUrl;
         debug('handleSubscribeMessageKey(), user subscribe via scan QR code of doctor openid: %s', doctorOpenId);
-        debug('handleSubscribeMessageKey(), redirecting to profile page: %s', profilePage);
-        res.redirect(profilePage);
+        sendDoctorNews(doctorOpenId, message.FromUserName, res);
       }
     }
   };
@@ -94,24 +129,22 @@ module.exports = function (app, api) {
       } else if (message.MsgType == 'event' && message.Event == 'VIEW') {
         // Patient click menu which points to a url.
         // Windows client will not trigger this event.
-        var url = message.EventKey;
-        if (url.indexOf('openid=') > 0) {
-          // target url need append openid as parameter.
-          url.replace('openid=', 'openid=' + message.FromUserName);
-        }
-        debug('Redirecting to: %s', url);
-        res.redirect(url);
+        //var url = message.EventKey;
+        //if (url.indexOf('openid=') > 0) {
+        //  // target url need append openid as parameter.
+        //  url.replace('openid=', 'openid=' + message.FromUserName);
+        //}
+        //debug('Redirecting to: %s', url);
+        //res.redirect(url);
       } else if (message.MsgType == 'event' && message.Event == 'SCAN') {
         // User scan QR code of doctor, and he already subscribed the PATIENT public account.
         // EventKey: 'profile-oWTqJs8SEbDON98vMor20rnXh9UQ',
+        debug('user scan QR code, senceStr: %s', message.EventKey);
         var doctorQrScenePrefix = 'profile-';
         if (message.EventKey.indexOf(doctorQrScenePrefix) == 0) {
           var doctorOpenId = message.EventKey.substr(doctorQrScenePrefix.length, message.EventKey.length);
-          var profileUrl = '/profile/doctor/' + doctorOpenId;
-          var profilePage = conf.serverUrl + conf.wxIndexPageUrl + profileUrl;
           debug('handleScanEvent, user (already subscribed) scan QR code of doctor openid: %s', doctorOpenId);
-          debug('handleScanEvent, redirecting to profile page: %s', profilePage);
-          res.redirect(profilePage);
+          sendDoctorNews(doctorOpenId, message.FromUserName, res);
         }
       }
     }

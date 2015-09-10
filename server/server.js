@@ -71,7 +71,7 @@ var registerRoutes = function () {
   app.put('/admin/orders/:id/status/reject', adminCtrl.setOrderDecline);
 
   // TODO: add authentication for following APIs.
-  app.use('/wxproxy', wxproxyDoctor); // TODO: delete this.
+  app.use('/wxproxy', wxproxyPatient); // TODO: delete this.
   app.use('/wxproxy-doctor', wxproxyDoctor);
   app.use('/wxproxy-patient', wxproxyPatient);
 
