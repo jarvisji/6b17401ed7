@@ -76,9 +76,9 @@ module.exports = function (app, api) {
         //debug('Redirecting to: %s', url);
         //res.redirect(url);
 
-        res.reply('success'); // do nothing currently.
+        res.reply(); // do nothing currently.
       } else {
-        res.reply('success'); // do nothing for other events.
+        res.reply(); // do nothing for other events.
       }
     }
   );

@@ -137,9 +137,9 @@ module.exports = function (app, api) {
         //debug('Redirecting to: %s', url);
         //res.redirect(url);
 
-        res.reply('success'); // do nothing currently.
+        res.reply(); // do nothing currently.
       } else if (message.MsgType == 'event' && message.Event == 'SCAN') {
-        res.reply('success'); // response to wechat server at once, then deal with doctor info.
+        res.reply(); // response to wechat server at once, then deal with doctor info.
         // User scan QR code of doctor, and he already subscribed the PATIENT public account.
         // EventKey: 'profile-oWTqJs8SEbDON98vMor20rnXh9UQ',
         debug('user scan QR code, senceStr: %s', message.EventKey);
@@ -150,7 +150,7 @@ module.exports = function (app, api) {
           sendDoctorNews(doctorOpenId, message.FromUserName, res);
         }
       } else {
-        res.reply('success'); // do nothing for other events.
+        res.reply(); // do nothing for other events.
       }
     }
   );
