@@ -68,13 +68,17 @@ module.exports = function (app, api) {
       } else if (message.MsgType == 'event' && message.Event == 'VIEW') {
         // Doctor click menu which points to a url.
         // Windows client will not trigger this event.
-        var url = message.EventKey;
-        if (url.indexOf('openid=') > 0) {
-          // target url need append openid as parameter.
-          url.replace('openid=', 'openid=' + message.FromUserName);
-        }
-        debug('Redirecting to: %s', url);
-        res.redirect(url);
+        //var url = message.EventKey;
+        //if (url.indexOf('openid=') > 0) {
+        //  // target url need append openid as parameter.
+        //  url.replace('openid=', 'openid=' + message.FromUserName);
+        //}
+        //debug('Redirecting to: %s', url);
+        //res.redirect(url);
+
+        res.reply('success'); // do nothing currently.
+      } else {
+        res.reply('success'); // do nothing for other events.
       }
     }
   );
