@@ -96,8 +96,7 @@ module.exports = function (app, api, apip, oauth) {
           };
           if (doctor) {
             retData.doctor = doctor;
-          }
-          if (patient) {
+          } else if (patient) {
             retData.patient = patient;
           }
           res.json(utils.jsonResult(retData));
