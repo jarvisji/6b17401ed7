@@ -84,12 +84,16 @@ module.exports = function (app, api) {
       }
       var profileUrl = '/profile/doctor/' + doctorOpenId;
       var profilePage = conf.serverUrl + conf.wxIndexPageUrl + profileUrl;
+      var picUrl = doctor.avatar;
+      if (picUrl.indexOf('http://') != 0) {
+        picUrl = conf.serverUrl + picUrl;
+      }
       var articles = [
         {
           "title": doctor.name,
           "description": doctor.title + '  ' + doctor.department + '  ' + doctor.hospital,
           "url": profilePage,
-          "picurl": doctor.avatar
+          "picurl": picUrl
         }];
       api.sendNews(toOpenId, articles, function (err, data) {
         if (err) {
