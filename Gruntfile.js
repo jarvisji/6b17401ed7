@@ -15,7 +15,14 @@ module.exports = function (grunt) {
       files: ['<%= jshint.files %>'],
       tasks: ['jshint']
     },
-    clean: ['dist', '.tmp'],
+    clean: {
+      before: {
+        src: ['dist', '.tmp']
+      },
+      after: {
+        src: ['.tmp']
+      }
+    },
     copy: {
       client: {
         expand: true,
@@ -125,7 +132,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-rev');
   grunt.loadNpmTasks('grunt-usemin');
 
-  grunt.registerTask('default', [/*'jshint',*/ 'copy', 'replace:forAliyun', 'useminPrepare', 'concat:dist', 'uglify:dist', 'cssmin:dist', 'rev', 'usemin']);
-  grunt.registerTask('localhost', [/*'jshint',*/ 'copy', 'replace:forLocalhost', 'useminPrepare', 'concat:dist', 'uglify:dist', 'cssmin:dist', 'rev', 'usemin']);
+  grunt.registerTask('default', [/*'jshint',*/ 'clean:before', 'copy', 'replace:forAliyun', 'useminPrepare', 'concat:dist', 'uglify:dist', 'cssmin:dist', 'rev', 'usemin', 'clean:after']);
+  grunt.registerTask('localhost', [/*'jshint',*/ 'clean:before', 'copy', 'replace:forLocalhost', 'useminPrepare', 'concat:dist', 'uglify:dist', 'cssmin:dist', 'rev', 'usemin', 'clean:after']);
 
 };
