@@ -22,13 +22,13 @@ module.exports = function (app, api) {
       if (err) return debug('Subscribe: Get wechat user error: ', err);
       Doctor.find({'wechat.openid': result.openid}, function (err, doctor) {
         if (err) return debug('Subscribe: check is user already registered as doctor error: %o', err);
-        if (doctor) {
+        if (doctor && doctor.length > 0) {
           debug('openid: %s already registered as doctor, cannot register as patient again.', result.openid);
           res.reply(resources.get('event.subscribe.exist.doctor'));
         } else {
           Patient.find({"wechat.openid": result.openid}, function (err, patient) {
             if (err) return debug('Subscribe: Find patient in db error: %o', err);
-            if (patient.length && patient.length > 0) {
+            if (patient && patient.length > 0) {
               debug('Subscribe: Patient exist, update.');
               Patient.update({"wechat.openid": result.openid}, {
                 wechat: result
