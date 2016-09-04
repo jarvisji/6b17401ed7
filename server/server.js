@@ -248,7 +248,7 @@ var registerRoutes = function () {
 var startServer = function () {
 // start the server if `$ node server.js`
   if (require.main === module) {
-    var server = app.listen('3001', conf.nodeListenAddr, function () {
+    var server = app.listen('3002', conf.nodeListenAddr, function () {
       var host = server.address().address;
       var port = server.address().port;
       debug('Server listening at: http://%s:%s', host, port);
